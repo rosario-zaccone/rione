@@ -1,6 +1,10 @@
 # Compiled class file
 *.class
 
+# Hidden files and directories, except this ignore file
+.*
+!.gitignore
+
 # Log file
 *.log
 
@@ -22,3 +26,8 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Local Codex instructions and skills
+AGENTS.md
+.agents/
+.agents/**
