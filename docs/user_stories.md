@@ -1,6 +1,6 @@
 # User Stories
-**Version:** v0.2.0  
-**Last Updated:** 2026-06-08
+**Version:** v0.2.2  
+**Last Updated:** 2026-06-11
 
 This document collects user stories.
 
@@ -36,37 +36,73 @@ This document collects user stories.
 **I want** to search for neighbours and see their profile information  
 **So that** I can find people in my neighbourhood and decide who to connect with
 
-### US-005 - Add Neighbour
+### US-005 - Send Neighbour Request
 
 **As a** registered user  
-**I want** to add a neighbour to my contacts  
-**So that** I can keep track of people I know in my neighbourhood
+**I want** to send a neighbour request to another user  
+**So that** we can become connected once they accept
 
-### US-009 - Remove Neighbour
+### US-006 - Respond to Neighbour Request
+
+**As a** registered user  
+**I want** to accept or decline a neighbour request  
+**So that** I can decide whether to connect with another user
+
+### US-007 - Remove Neighbour
 
 **As a** registered user  
 **I want** to remove a neighbour from my contacts  
 **So that** I can keep my neighbourhood contacts relevant and up to date
 
-### US-006 - Block Neighbour
+### US-008 - Block Neighbour
 
 **As a** registered user  
 **I want** to block a neighbour  
 **So that** they can no longer contact me or see my private activity
 
-### US-007 - Create Post
+### US-009 - Create Post
 
 **As a** registered user  
 **I want** to create posts about warnings, requests for help, events, or discussions  
 **So that** I can inform and interact with my neighbours
 
-### US-008 - React to Post
+### US-010 - React to Post
 
 **As a** registered user  
-**I want** to react to and comment on posts  
+**I want** to react to posts  
 **So that** I can share my opinion and feedback
 
-### US-010 - Receive Notifications
+### US-011 - Update Reaction
+
+**As a** registered user  
+**I want** to update my reaction to a post  
+**So that** I can change my feedback when my opinion changes
+
+### US-012 - Remove Reaction
+
+**As a** registered user  
+**I want** to remove my reaction from a post  
+**So that** I can withdraw feedback I no longer want to share
+
+### US-013 - Add Comment
+
+**As a** registered user  
+**I want** to add comments to posts  
+**So that** I can contribute to discussions with my neighbours
+
+### US-014 - Update Comment
+
+**As a** registered user  
+**I want** to update my comments  
+**So that** I can correct mistakes or clarify what I wrote
+
+### US-015 - Remove Comment
+
+**As a** registered user  
+**I want** to remove my comments  
+**So that** I can delete contributions I no longer want to keep visible
+
+### US-016 - Receive Notifications
 
 **As a** registered user  
 **I want** to receive notifications  
