@@ -6,6 +6,7 @@ target/
 # Hidden files and directories, except this ignore file
 .*
 !.gitignore
+!.dockerignore
 !.github/
 !.github/**
 !.mvn/
@@ -37,3 +38,6 @@ replay_pid*
 AGENTS.md
 .agents/
 .agents/**
+.codex/
+.codex/**
+.env

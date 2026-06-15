@@ -1,0 +1,38 @@
+services:
+  user-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rione-users
+      POSTGRES_USER: ${USER_SERVICE_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${USER_SERVICE_DB_PASSWORD:-banana}
+    volumes:
+      - user_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/user-service
+    restart: unless-stopped
+    depends_on:
+      user-postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      USER_SERVICE_DB_HOST: user-postgres
+      USER_SERVICE_DB_PORT: 5432
+      USER_SERVICE_DB_NAME: rione-users
+      USER_SERVICE_DB_USERNAME: ${USER_SERVICE_DB_USERNAME:-postgres}
+      USER_SERVICE_DB_PASSWORD: ${USER_SERVICE_DB_PASSWORD:-banana}
+    ports:
+      - "8081:8080"
+
+volumes:
+  user_postgres_data:
