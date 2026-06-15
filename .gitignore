@@ -1,9 +1,15 @@
 # Compiled class file
 *.class
+target/
+**/target/
 
 # Hidden files and directories, except this ignore file
 .*
 !.gitignore
+!.github/
+!.github/**
+!.mvn/
+!.mvn/**
 
 # Log file
 *.log
