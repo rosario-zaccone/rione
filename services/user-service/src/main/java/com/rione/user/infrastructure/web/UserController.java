@@ -20,7 +20,7 @@ import com.rione.user.application.port.in.UserService.LogInCommand;
 import com.rione.user.application.port.in.UserService.SearchNeighboursQuery;
 import com.rione.user.application.port.in.UserService.SignUpCommand;
 import com.rione.user.application.port.in.UserService.UpdateProfileCommand;
-import com.rione.user.application.port.in.UserService.UserView;
+import com.rione.user.application.port.in.UserService.UserResponse;
 import com.rione.user.application.service.UserApplicationException;
 import com.rione.user.domain.model.DomainException;
 
@@ -35,32 +35,32 @@ public class UserController {
 	}
 
 	@PostMapping
-	ResponseEntity<UserView> signUp(@RequestBody SignUpRequest request) {
-		UserView user = userService.signUp(new SignUpCommand(request.name(), request.surname(), request.username(),
+	ResponseEntity<UserResponse> signUp(@RequestBody SignUpRequest request) {
+		UserResponse user = userService.signUp(new SignUpCommand(request.name(), request.surname(), request.username(),
 				request.mail(), request.password(), request.neighborhoodId(), request.neighborhoodName(), request.city(),
 				request.country(), request.birthDate(), request.bio()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(user);
 	}
 
 	@PostMapping("/login")
-	UserView logIn(@RequestBody LogInRequest request) {
+	UserResponse logIn(@RequestBody LogInRequest request) {
 		return userService.logIn(new LogInCommand(request.mail(), request.password()));
 	}
 
 	@GetMapping("/{userId}")
-	UserView getUser(@PathVariable Long userId) {
+	UserResponse getUser(@PathVariable Long userId) {
 		return userService.getUser(userId);
 	}
 
 	@PutMapping("/{userId}/profile")
-	UserView updateProfile(@PathVariable Long userId, @RequestBody UpdateProfileRequest request) {
+	UserResponse updateProfile(@PathVariable Long userId, @RequestBody UpdateProfileRequest request) {
 		return userService.updateProfile(new UpdateProfileCommand(userId, request.name(), request.surname(),
 				request.username(), request.neighborhoodId(), request.neighborhoodName(), request.city(),
 				request.country(), request.birthDate(), request.bio()));
 	}
 
 	@GetMapping("/neighbours")
-	List<UserView> searchNeighbours(@RequestParam Long requesterId, @RequestParam(required = false) String query,
+	List<UserResponse> searchNeighbours(@RequestParam Long requesterId, @RequestParam(required = false) String query,
 			@RequestParam(required = false) Long neighborhoodId) {
 		return userService.searchNeighbours(new SearchNeighboursQuery(requesterId, query, neighborhoodId));
 	}

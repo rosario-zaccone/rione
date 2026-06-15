@@ -5,15 +5,15 @@ import java.util.List;
 
 public interface UserService {
 
-	UserView signUp(SignUpCommand command);
+	UserResponse signUp(SignUpCommand command);
 
-	UserView logIn(LogInCommand command);
+	UserResponse logIn(LogInCommand command);
 
-	UserView updateProfile(UpdateProfileCommand command);
+	UserResponse updateProfile(UpdateProfileCommand command);
 
-	UserView getUser(Long userId);
+	UserResponse getUser(Long userId);
 
-	List<UserView> searchNeighbours(SearchNeighboursQuery query);
+	List<UserResponse> searchNeighbours(SearchNeighboursQuery query);
 
 	record SignUpCommand(String name, String surname, String username, String mail, String password,
 			Long neighborhoodId, String neighborhoodName, String city, String country, LocalDateTime birthDate,
@@ -30,7 +30,7 @@ public interface UserService {
 	record SearchNeighboursQuery(Long requesterId, String query, Long neighborhoodId) {
 	}
 
-	record UserView(Long id, String name, String surname, String username, String mail, Long neighborhoodId,
+	record UserResponse(Long id, String name, String surname, String username, String mail, Long neighborhoodId,
 			String neighborhoodName, String city, String country, LocalDateTime birthDate, String bio,
 			boolean admin) {
 	}

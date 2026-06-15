@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserView signUp(SignUpCommand command) {
+	public UserResponse signUp(SignUpCommand command) {
 		Mail mail = new Mail(command.mail());
 		Username username = new Username(command.username());
 		if (userRepository.existsByMail(mail)) {
@@ -36,47 +36,50 @@ public class UserServiceImpl implements UserService {
 		if (userRepository.existsByUsername(username)) {
 			throw new UserApplicationException("Username is already registered");
 		}
-		User user = User.register(userRepository.nextIdentity(), fullName(command.name(), command.surname()), username,
-				mail, neighborhood(command.neighborhoodId(), command.neighborhoodName(), command.city(), command.country()),
+		User user = User.register(userRepository.nextIdentity(), new FullName(command.name(), command.surname()),
+				username, mail,
+				new Neighborhood(new NeighborhoodId(command.neighborhoodId()), command.neighborhoodName(),
+						new Location(command.city(), command.country())),
 				command.birthDate(), new Biography(command.bio()), passwordHasher.hash(command.password()));
-		return toView(userRepository.save(user));
+		return toResponse(userRepository.save(user));
 	}
 
 	@Override
-	public UserView logIn(LogInCommand command) {
+	public UserResponse logIn(LogInCommand command) {
 		User user = userRepository.findByMail(new Mail(command.mail()))
 			.orElseThrow(() -> new UserApplicationException("Invalid mail or password"));
 		if (!passwordHasher.matches(command.password(), user.passwordHash())) {
 			throw new UserApplicationException("Invalid mail or password");
 		}
-		return toView(user);
+		return toResponse(user);
 	}
 
 	@Override
-	public UserView updateProfile(UpdateProfileCommand command) {
+	public UserResponse updateProfile(UpdateProfileCommand command) {
 		User user = findExisting(new UserId(command.userId()));
 		Username username = new Username(command.username());
 		if (!user.username().equals(username) && userRepository.existsByUsername(username)) {
 			throw new UserApplicationException("Username is already registered");
 		}
-		user.updateProfile(fullName(command.name(), command.surname()), username,
-				neighborhood(command.neighborhoodId(), command.neighborhoodName(), command.city(), command.country()),
+		user.updateProfile(new FullName(command.name(), command.surname()), username,
+				new Neighborhood(new NeighborhoodId(command.neighborhoodId()), command.neighborhoodName(),
+						new Location(command.city(), command.country())),
 				command.birthDate(), new Biography(command.bio()));
-		return toView(userRepository.save(user));
+		return toResponse(userRepository.save(user));
 	}
 
 	@Override
-	public UserView getUser(Long userId) {
-		return toView(findExisting(new UserId(userId)));
+	public UserResponse getUser(Long userId) {
+		return toResponse(findExisting(new UserId(userId)));
 	}
 
 	@Override
-	public List<UserView> searchNeighbours(SearchNeighboursQuery query) {
+	public List<UserResponse> searchNeighbours(SearchNeighboursQuery query) {
 		User requester = findExisting(new UserId(query.requesterId()));
 		return userRepository.search(query.query(), query.neighborhoodId()).stream()
 			.filter(user -> !user.id().equals(requester.id()))
 			.sorted(Comparator.comparing(user -> user.fullName().displayName()))
-			.map(this::toView)
+			.map(this::toResponse)
 			.toList();
 	}
 
@@ -84,16 +87,8 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findById(userId).orElseThrow(() -> new UserApplicationException("User not found"));
 	}
 
-	private static FullName fullName(String name, String surname) {
-		return new FullName(name, surname);
-	}
-
-	private static Neighborhood neighborhood(Long id, String name, String city, String country) {
-		return new Neighborhood(new NeighborhoodId(id), name, new Location(city, country));
-	}
-
-	private UserView toView(User user) {
-		return new UserView(user.id().value(), user.fullName().name(), user.fullName().surname(),
+	private UserResponse toResponse(User user) {
+		return new UserResponse(user.id().value(), user.fullName().name(), user.fullName().surname(),
 				user.username().value(), user.mail().mail(), user.neighborhood().id().value(), user.neighborhood().name(),
 				user.neighborhood().location().city(), user.neighborhood().location().country(), user.birthDate(),
 				user.bio().info(), user.isAdmin());

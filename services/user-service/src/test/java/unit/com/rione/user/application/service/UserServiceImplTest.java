@@ -16,7 +16,7 @@ import com.rione.user.application.port.in.UserService.LogInCommand;
 import com.rione.user.application.port.in.UserService.SearchNeighboursQuery;
 import com.rione.user.application.port.in.UserService.SignUpCommand;
 import com.rione.user.application.port.in.UserService.UpdateProfileCommand;
-import com.rione.user.application.port.in.UserService.UserView;
+import com.rione.user.application.port.in.UserService.UserResponse;
 import com.rione.user.application.port.out.UserRepository;
 import com.rione.user.domain.model.Mail;
 import com.rione.user.domain.model.User;
@@ -30,9 +30,9 @@ class UserServiceImplTest {
 
 	@Test
 	void signsUpAndLogsInUser() {
-		UserView user = signUp("ada", "ada@rione.test");
+		UserResponse user = signUp("ada", "ada@rione.test");
 
-		UserView loggedIn = userService.logIn(new LogInCommand("ada@rione.test", "password123"));
+		UserResponse loggedIn = userService.logIn(new LogInCommand("ada@rione.test", "password123"));
 
 		assertEquals(user.id(), loggedIn.id());
 	}
@@ -46,10 +46,10 @@ class UserServiceImplTest {
 
 	@Test
 	void excludesRequesterFromNeighbourSearch() {
-		UserView ada = signUp("ada", "ada@rione.test");
-		UserView grace = signUp("grace", "grace@rione.test");
+		UserResponse ada = signUp("ada", "ada@rione.test");
+		UserResponse grace = signUp("grace", "grace@rione.test");
 
-		List<UserView> neighbours = userService.searchNeighbours(new SearchNeighboursQuery(ada.id(), "", 1L));
+		List<UserResponse> neighbours = userService.searchNeighbours(new SearchNeighboursQuery(ada.id(), "", 1L));
 
 		assertEquals(1, neighbours.size());
 		assertEquals(grace.id(), neighbours.getFirst().id());
@@ -57,9 +57,9 @@ class UserServiceImplTest {
 
 	@Test
 	void updatesProfileInformation() {
-		UserView ada = signUp("ada", "ada@rione.test");
+		UserResponse ada = signUp("ada", "ada@rione.test");
 
-		UserView updated = userService.updateProfile(new UpdateProfileCommand(ada.id(), "Ada", "Byron", "ada.byron",
+		UserResponse updated = userService.updateProfile(new UpdateProfileCommand(ada.id(), "Ada", "Byron", "ada.byron",
 				2L, "San Donato", "Bologna", "Italy", LocalDateTime.of(1991, 2, 3, 0, 0), "updated"));
 
 		assertEquals("Byron", updated.surname());
@@ -69,7 +69,7 @@ class UserServiceImplTest {
 		assertEquals(LocalDateTime.of(1991, 2, 3, 0, 0), updated.birthDate());
 	}
 
-	private UserView signUp(String username, String mail) {
+	private UserResponse signUp(String username, String mail) {
 		return userService.signUp(new SignUpCommand("Ada", "Lovelace", username, mail, "password123", 1L, "Centro",
 				"Bologna", "Italy", LocalDateTime.of(1990, 1, 1, 0, 0), "hello"));
 	}
