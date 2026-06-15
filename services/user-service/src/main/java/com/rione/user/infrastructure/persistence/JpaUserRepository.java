@@ -1,8 +1,6 @@
 package com.rione.user.infrastructure.persistence;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -76,12 +74,5 @@ class JpaUserRepository implements UserRepository {
 	@Transactional(readOnly = true)
 	public boolean existsByUsername(Username username) {
 		return repository.existsByUsername(username.value());
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<User> search(String query, Long neighborhoodId) {
-		String normalizedQuery = query == null ? "" : query.toLowerCase(Locale.ROOT).trim();
-		return repository.search(normalizedQuery, neighborhoodId).stream().map(mapper::toDomain).toList();
 	}
 }

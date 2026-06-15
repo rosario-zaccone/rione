@@ -1,6 +1,5 @@
 package com.rione.user.application.port.out;
 
-import java.util.List;
 import java.util.Optional;
 
 import com.rione.user.domain.model.Mail;
@@ -21,6 +20,4 @@ public interface UserRepository {
 	boolean existsByMail(Mail mail);
 
 	boolean existsByUsername(Username username);
-
-	List<User> search(String query, Long neighborhoodId);
 }

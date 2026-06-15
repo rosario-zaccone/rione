@@ -1,8 +1,6 @@
 package com.rione.user.infrastructure.web;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,12 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rione.user.application.port.in.UserService;
 import com.rione.user.application.port.in.UserService.LogInCommand;
-import com.rione.user.application.port.in.UserService.SearchNeighboursQuery;
 import com.rione.user.application.port.in.UserService.SignUpCommand;
 import com.rione.user.application.port.in.UserService.UpdateProfileCommand;
 import com.rione.user.application.port.in.UserService.UserResponse;
@@ -57,12 +53,6 @@ public class UserController {
 		return userService.updateProfile(new UpdateProfileCommand(userId, request.name(), request.surname(),
 				request.username(), request.neighborhoodId(), request.neighborhoodName(), request.city(),
 				request.country(), request.birthDate(), request.bio()));
-	}
-
-	@GetMapping("/neighbours")
-	List<UserResponse> searchNeighbours(@RequestParam Long requesterId, @RequestParam(required = false) String query,
-			@RequestParam(required = false) Long neighborhoodId) {
-		return userService.searchNeighbours(new SearchNeighboursQuery(requesterId, query, neighborhoodId));
 	}
 
 	@ExceptionHandler({ DomainException.class, UserApplicationException.class })

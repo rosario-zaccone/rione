@@ -1,8 +1,5 @@
 package com.rione.user.application.service;
 
-import java.util.Comparator;
-import java.util.List;
-
 import com.rione.user.application.port.in.UserService;
 import com.rione.user.application.port.out.PasswordHasher;
 import com.rione.user.application.port.out.UserRepository;
@@ -71,16 +68,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserResponse getUser(Long userId) {
 		return toResponse(findExisting(new UserId(userId)));
-	}
-
-	@Override
-	public List<UserResponse> searchNeighbours(SearchNeighboursQuery query) {
-		User requester = findExisting(new UserId(query.requesterId()));
-		return userRepository.search(query.query(), query.neighborhoodId()).stream()
-			.filter(user -> !user.id().equals(requester.id()))
-			.sorted(Comparator.comparing(user -> user.fullName().displayName()))
-			.map(this::toResponse)
-			.toList();
 	}
 
 	private User findExisting(UserId userId) {

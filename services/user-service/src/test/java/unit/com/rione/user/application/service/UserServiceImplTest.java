@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import com.rione.user.application.port.in.UserService;
 import com.rione.user.application.port.in.UserService.LogInCommand;
-import com.rione.user.application.port.in.UserService.SearchNeighboursQuery;
 import com.rione.user.application.port.in.UserService.SignUpCommand;
 import com.rione.user.application.port.in.UserService.UpdateProfileCommand;
 import com.rione.user.application.port.in.UserService.UserResponse;
@@ -42,17 +41,6 @@ class UserServiceImplTest {
 		signUp("ada", "ada@rione.test");
 
 		assertThrows(UserApplicationException.class, () -> signUp("ada2", "ada@rione.test"));
-	}
-
-	@Test
-	void excludesRequesterFromNeighbourSearch() {
-		UserResponse ada = signUp("ada", "ada@rione.test");
-		UserResponse grace = signUp("grace", "grace@rione.test");
-
-		List<UserResponse> neighbours = userService.searchNeighbours(new SearchNeighboursQuery(ada.id(), "", 1L));
-
-		assertEquals(1, neighbours.size());
-		assertEquals(grace.id(), neighbours.getFirst().id());
 	}
 
 	@Test
@@ -111,11 +99,5 @@ class UserServiceImplTest {
 			return users.stream().anyMatch(user -> user.username().equals(username));
 		}
 
-		@Override
-		public List<User> search(String query, Long neighborhoodId) {
-			return users.stream()
-				.filter(user -> neighborhoodId == null || user.neighborhood().id().value().equals(neighborhoodId))
-				.toList();
-		}
 	}
 }
