@@ -6,6 +6,7 @@ ARG SERVICE_PATH
 
 COPY .mvn .mvn
 COPY mvnw pom.xml ./
+COPY common common
 COPY services services
 
 RUN ./mvnw -B -pl "${SERVICE_PATH}" -am package -DskipTests

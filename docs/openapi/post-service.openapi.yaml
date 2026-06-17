@@ -1,0 +1,10 @@
+openapi: 3.0.3
+x-last-modified: 2026-06-17
+info:
+  title: Rione Post Service API
+  version: v0.1.0
+  description: The post service currently exposes no public business HTTP endpoints.
+servers:
+  - url: http://localhost:8080
+    description: Service container port
+paths: {}

@@ -34,6 +34,33 @@ services:
     ports:
       - "8081:8080"
 
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/api-gateway
+    restart: unless-stopped
+    depends_on:
+      - user-service
+      - social-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      RIONE_GATEWAY_ROUTES_USER_SERVICE_URI: http://user-service:8080
+      RIONE_GATEWAY_ROUTES_SOCIAL_SERVICE_URI: http://social-service:8080
+    ports:
+      - "8080:8080"
+
+  social-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/social-service
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: unless-stopped

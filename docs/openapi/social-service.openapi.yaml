@@ -1,0 +1,273 @@
+openapi: 3.0.3
+x-last-modified: 2026-06-17
+info:
+  title: Rione Social Service API
+  version: v0.1.0
+  description: Neighbor request, neighborship, and blocking endpoints.
+servers:
+  - url: http://localhost:8082
+    description: Local Docker Compose port
+  - url: http://localhost:8080
+    description: Service container port
+tags:
+  - name: Neighbor Requests
+    description: Neighbor request lifecycle operations
+  - name: Neighborships
+    description: Established neighbor relationships
+  - name: Blocks
+    description: User blocking operations
+paths:
+  /neighbor-requests:
+    post:
+      tags:
+        - Neighbor Requests
+      operationId: sendNeighborRequest
+      summary: Send a neighbor request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendNeighborRequestRequest'
+      responses:
+        '201':
+          description: Neighbor request created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NeighborRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /neighbor-requests/{requestId}/acceptance:
+    post:
+      tags:
+        - Neighbor Requests
+      operationId: acceptNeighborRequest
+      summary: Accept a neighbor request
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Neighbor request accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NeighborRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /neighbor-requests/{requestId}/rejection:
+    post:
+      tags:
+        - Neighbor Requests
+      operationId: rejectNeighborRequest
+      summary: Reject a neighbor request
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Neighbor request rejected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NeighborRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /neighbor-requests/{requestId}:
+    get:
+      tags:
+        - Neighbor Requests
+      operationId: getNeighborRequest
+      summary: Get a neighbor request
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Neighbor request found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NeighborRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /neighborships:
+    get:
+      tags:
+        - Neighborships
+      operationId: getNeighborships
+      summary: List neighborships by follower
+      parameters:
+        - name: followerId
+          in: query
+          required: true
+          description: Identifier of the follower user.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Neighborships for the follower.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NeighborshipResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /blocks:
+    post:
+      tags:
+        - Blocks
+      operationId: blockUser
+      summary: Block a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockUserRequest'
+      responses:
+        '201':
+          description: Block created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+components:
+  parameters:
+    RequestId:
+      name: requestId
+      in: path
+      required: true
+      description: Neighbor request identifier.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+  responses:
+    BadRequest:
+      description: Invalid request or rejected domain/application rule.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    SendNeighborRequestRequest:
+      type: object
+      required:
+        - senderId
+        - receiverId
+      properties:
+        senderId:
+          type: integer
+          format: int64
+          example: 1
+        receiverId:
+          type: integer
+          format: int64
+          example: 2
+    BlockUserRequest:
+      type: object
+      required:
+        - blockerId
+        - blockedId
+      properties:
+        blockerId:
+          type: integer
+          format: int64
+          example: 1
+        blockedId:
+          type: integer
+          format: int64
+          example: 2
+    NeighborRequestResponse:
+      type: object
+      required:
+        - id
+        - senderId
+        - receiverId
+        - date
+        - status
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 100
+        senderId:
+          type: integer
+          format: int64
+          example: 1
+        receiverId:
+          type: integer
+          format: int64
+          example: 2
+        date:
+          type: string
+          format: date-time
+          example: "2026-06-17T10:15:30"
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - REJECTED
+          example: PENDING
+    NeighborshipResponse:
+      type: object
+      required:
+        - id
+        - followerId
+        - followedId
+        - date
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 50
+        followerId:
+          type: integer
+          format: int64
+          example: 1
+        followedId:
+          type: integer
+          format: int64
+          example: 2
+        date:
+          type: string
+          format: date-time
+          example: "2026-06-17T10:15:30"
+    BlockResponse:
+      type: object
+      required:
+        - id
+        - blockerId
+        - blockedId
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 30
+        blockerId:
+          type: integer
+          format: int64
+          example: 1
+        blockedId:
+          type: integer
+          format: int64
+          example: 2
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - timestamp
+      properties:
+        message:
+          type: string
+          example: Invalid request.
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-06-17T10:15:30"

@@ -32,7 +32,7 @@ class HexagonalArchitectureTest {
 	void domainDoesNotDependOnFrameworksOrOuterLayers() {
 		classes().that().resideInAPackage("..domain..")
 			.should().onlyDependOnClassesThat()
-			.resideInAnyPackage("java..", "com.rione.user.domain..")
+			.resideInAnyPackage("java..", "com.rione.common.domain..", "com.rione.user.domain..")
 			.check(classes);
 	}
 
@@ -40,7 +40,8 @@ class HexagonalArchitectureTest {
 	void applicationDoesNotDependOnInfrastructure() {
 		classes().that().resideInAPackage("..application..")
 			.should().onlyDependOnClassesThat()
-			.resideInAnyPackage("java..", "com.rione.user.application..", "com.rione.user.domain..")
+			.resideInAnyPackage("java..", "com.rione.common.application..", "com.rione.user.application..",
+					"com.rione.user.domain..")
 			.check(classes);
 	}
 

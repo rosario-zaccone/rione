@@ -36,7 +36,7 @@ class UserControllerIT extends PostgresIntegrationSupport {
 				  "city": "Bologna",
 				  "country": "Italy",
 				  "birthDate": "1990-01-01T00:00:00",
-				  "bio": "hello"
+				  "bio": "Local neighbor profile bio"
 				}
 				"""))
 			.build();

@@ -1,5 +1,7 @@
 package com.rione.user.domain.model;
 
+import com.rione.common.domain.DDDValueObject;
+
 import java.util.Locale;
 import java.util.regex.Pattern;
 

@@ -10,11 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.rione.user.PostgresIntegrationSupport;
 import com.rione.user.application.port.out.UserRepository;
 import com.rione.user.domain.model.Biography;
+import com.rione.user.domain.model.BirthDate;
 import com.rione.user.domain.model.FullName;
 import com.rione.user.domain.model.Location;
 import com.rione.user.domain.model.Mail;
 import com.rione.user.domain.model.Neighborhood;
 import com.rione.user.domain.model.NeighborhoodId;
+import com.rione.user.domain.model.Password;
 import com.rione.user.domain.model.User;
 import com.rione.user.domain.model.Username;
 
@@ -38,6 +40,7 @@ class JpaUserRepositoryIT extends PostgresIntegrationSupport {
 	private User user(String username, String mail) {
 		return User.register(userRepository.nextIdentity(), new FullName("Ada", "Lovelace"), new Username(username),
 				new Mail(mail), new Neighborhood(new NeighborhoodId(1L), "Centro", new Location("Bologna", "Italy")),
-				LocalDateTime.of(1990, 1, 1, 0, 0), new Biography("hello"), "hash");
+				new BirthDate(LocalDateTime.of(1990, 1, 1, 0, 0)),
+				new Biography("Local neighbor profile bio"), new Password("hash"));
 	}
 }

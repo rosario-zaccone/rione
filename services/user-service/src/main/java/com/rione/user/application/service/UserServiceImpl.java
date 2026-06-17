@@ -4,11 +4,13 @@ import com.rione.user.application.port.in.UserService;
 import com.rione.user.application.port.out.PasswordHasher;
 import com.rione.user.application.port.out.UserRepository;
 import com.rione.user.domain.model.Biography;
+import com.rione.user.domain.model.BirthDate;
 import com.rione.user.domain.model.FullName;
 import com.rione.user.domain.model.Location;
 import com.rione.user.domain.model.Mail;
 import com.rione.user.domain.model.Neighborhood;
 import com.rione.user.domain.model.NeighborhoodId;
+import com.rione.user.domain.model.Password;
 import com.rione.user.domain.model.User;
 import com.rione.user.domain.model.UserId;
 import com.rione.user.domain.model.Username;
@@ -37,7 +39,8 @@ public class UserServiceImpl implements UserService {
 				username, mail,
 				new Neighborhood(new NeighborhoodId(command.neighborhoodId()), command.neighborhoodName(),
 						new Location(command.city(), command.country())),
-				command.birthDate(), new Biography(command.bio()), passwordHasher.hash(command.password()));
+				new BirthDate(command.birthDate()), new Biography(command.bio()),
+				new Password(passwordHasher.hash(command.password())));
 		return toResponse(userRepository.save(user));
 	}
 
@@ -45,7 +48,7 @@ public class UserServiceImpl implements UserService {
 	public UserResponse logIn(LogInCommand command) {
 		User user = userRepository.findByMail(new Mail(command.mail()))
 			.orElseThrow(() -> new UserApplicationException("Invalid mail or password"));
-		if (!passwordHasher.matches(command.password(), user.passwordHash())) {
+		if (!passwordHasher.matches(command.password(), user.password().hash())) {
 			throw new UserApplicationException("Invalid mail or password");
 		}
 		return toResponse(user);
@@ -61,7 +64,7 @@ public class UserServiceImpl implements UserService {
 		user.updateProfile(new FullName(command.name(), command.surname()), username,
 				new Neighborhood(new NeighborhoodId(command.neighborhoodId()), command.neighborhoodName(),
 						new Location(command.city(), command.country())),
-				command.birthDate(), new Biography(command.bio()));
+				new BirthDate(command.birthDate()), new Biography(command.bio()));
 		return toResponse(userRepository.save(user));
 	}
 
@@ -77,7 +80,7 @@ public class UserServiceImpl implements UserService {
 	private UserResponse toResponse(User user) {
 		return new UserResponse(user.id().value(), user.fullName().name(), user.fullName().surname(),
 				user.username().value(), user.mail().mail(), user.neighborhood().id().value(), user.neighborhood().name(),
-				user.neighborhood().location().city(), user.neighborhood().location().country(), user.birthDate(),
+				user.neighborhood().location().city(), user.neighborhood().location().country(), user.birthDate().value(),
 				user.bio().info(), user.isAdmin());
 	}
 }

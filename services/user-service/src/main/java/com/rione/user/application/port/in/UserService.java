@@ -1,6 +1,10 @@
 package com.rione.user.application.port.in;
 
 import java.time.LocalDateTime;
+
+import com.rione.common.application.InPort;
+
+@InPort
 public interface UserService {
 
 	UserResponse signUp(SignUpCommand command);

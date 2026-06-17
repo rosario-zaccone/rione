@@ -1,11 +1,13 @@
 package com.rione.user.infrastructure.persistence;
 
 import com.rione.user.domain.model.Biography;
+import com.rione.user.domain.model.BirthDate;
 import com.rione.user.domain.model.FullName;
 import com.rione.user.domain.model.Location;
 import com.rione.user.domain.model.Mail;
 import com.rione.user.domain.model.Neighborhood;
 import com.rione.user.domain.model.NeighborhoodId;
+import com.rione.user.domain.model.Password;
 import com.rione.user.domain.model.User;
 import com.rione.user.domain.model.UserId;
 import com.rione.user.domain.model.Username;
@@ -23,9 +25,9 @@ class UserPersistenceMapper {
 		entity.setNeighborhoodName(user.neighborhood().name());
 		entity.setCity(user.neighborhood().location().city());
 		entity.setCountry(user.neighborhood().location().country());
-		entity.setBirthDate(user.birthDate());
+		entity.setBirthDate(user.birthDate().value());
 		entity.setBio(user.bio().info());
-		entity.setPasswordHash(user.passwordHash());
+		entity.setPasswordHash(user.password().hash());
 		entity.setAdmin(user.isAdmin());
 		return entity;
 	}
@@ -35,7 +37,8 @@ class UserPersistenceMapper {
 				new Username(entity.getUsername()), new Mail(entity.getMail()),
 				new Neighborhood(new NeighborhoodId(entity.getNeighborhoodId()), entity.getNeighborhoodName(),
 						new Location(entity.getCity(), entity.getCountry())),
-				entity.getBirthDate(), new Biography(entity.getBio()), entity.getPasswordHash(), entity.isAdmin());
+				new BirthDate(entity.getBirthDate()), new Biography(entity.getBio()),
+				new Password(entity.getPasswordHash()), entity.isAdmin());
 		return user;
 	}
 }

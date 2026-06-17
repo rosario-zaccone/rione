@@ -1,4 +1,4 @@
-package com.rione.user.domain.model;
+package com.rione.common.domain;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,5 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-public @interface DDDAggregateRoot {
+public @interface DDDValueObject {
 }

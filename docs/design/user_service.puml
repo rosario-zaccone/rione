@@ -1,6 +1,6 @@
 @startuml
 
-' Version: 1.0.0
+' Version: 1.0.1
 ' Last modified: 2026-06-15
 ' Initial version
 
@@ -12,9 +12,7 @@ class User <<aggregate root>> {
   - passwordHash: String
   - isAdmin: Bool
   --
-  + block(user: User)
-  + unblock(user: User)
-  + updateBio(bio: Biography)
+  + updateProfile(user: User)
 }
 
 class Neighborhood <<aggregate root>> {

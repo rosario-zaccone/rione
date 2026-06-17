@@ -15,12 +15,12 @@ class UserTest {
 
 		user.updateProfile(new FullName("Grace", "Hopper"), new Username("grace"),
 				new Neighborhood(new NeighborhoodId(2L), "San Donato", new Location("Bologna", "Italy")),
-				LocalDateTime.of(1991, 2, 3, 0, 0), new Biography("updated"));
+				new BirthDate(LocalDateTime.of(1991, 2, 3, 0, 0)), new Biography("Updated profile biography"));
 
 		assertEquals("Grace", user.fullName().name());
 		assertEquals("grace", user.username().value());
 		assertEquals(2L, user.neighborhood().id().value());
-		assertEquals("updated", user.bio().info());
+		assertEquals("Updated profile biography", user.bio().info());
 	}
 
 	@Test
@@ -32,6 +32,7 @@ class UserTest {
 		return User.register(new UserId(id), new FullName("Ada", "Lovelace"), new Username("ada" + id),
 				new Mail("ada" + id + "@rione.test"),
 				new Neighborhood(new NeighborhoodId(1L), "Centro", new Location("Bologna", "Italy")),
-				LocalDateTime.of(1990, 1, 1, 0, 0), new Biography(""), "hash");
+				new BirthDate(LocalDateTime.of(1990, 1, 1, 0, 0)), new Biography("Local neighbor profile bio"),
+				new Password("hash"));
 	}
 }

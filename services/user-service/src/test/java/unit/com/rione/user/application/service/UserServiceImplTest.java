@@ -46,20 +46,21 @@ class UserServiceImplTest {
 	@Test
 	void updatesProfileInformation() {
 		UserResponse ada = signUp("ada", "ada@rione.test");
+		String updatedBio = "Updated profile biography";
 
 		UserResponse updated = userService.updateProfile(new UpdateProfileCommand(ada.id(), "Ada", "Byron", "ada.byron",
-				2L, "San Donato", "Bologna", "Italy", LocalDateTime.of(1991, 2, 3, 0, 0), "updated"));
+				2L, "San Donato", "Bologna", "Italy", LocalDateTime.of(1991, 2, 3, 0, 0), updatedBio));
 
 		assertEquals("Byron", updated.surname());
 		assertEquals("ada.byron", updated.username());
 		assertEquals(2L, updated.neighborhoodId());
-		assertEquals("updated", updated.bio());
+		assertEquals(updatedBio, updated.bio());
 		assertEquals(LocalDateTime.of(1991, 2, 3, 0, 0), updated.birthDate());
 	}
 
 	private UserResponse signUp(String username, String mail) {
 		return userService.signUp(new SignUpCommand("Ada", "Lovelace", username, mail, "password123", 1L, "Centro",
-				"Bologna", "Italy", LocalDateTime.of(1990, 1, 1, 0, 0), "hello"));
+				"Bologna", "Italy", LocalDateTime.of(1990, 1, 1, 0, 0), "Local neighbor profile bio"));
 	}
 
 	private static class FakeUserRepository implements UserRepository {

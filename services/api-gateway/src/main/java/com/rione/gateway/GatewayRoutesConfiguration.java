@@ -1,0 +1,36 @@
+package com.rione.gateway;
+
+import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
+import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
+import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
+import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.stripPrefix;
+import static org.springframework.web.servlet.function.RequestPredicates.path;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.ServerResponse;
+
+@Configuration
+class GatewayRoutesConfiguration {
+
+	@Bean
+	RouterFunction<ServerResponse> userServiceRoute(
+			@Value("${rione.gateway.routes.user-service-uri:http://localhost:8081}") String userServiceUri) {
+		return route("user-service")
+			.route(path("/users/**"), http())
+			.before(uri(userServiceUri))
+			.build();
+	}
+
+	@Bean
+	RouterFunction<ServerResponse> socialServiceRoute(
+			@Value("${rione.gateway.routes.social-service-uri:http://localhost:8082}") String socialServiceUri) {
+		return route("social-service")
+			.route(path("/social/**"), http())
+			.before(stripPrefix(1))
+			.before(uri(socialServiceUri))
+			.build();
+	}
+}
