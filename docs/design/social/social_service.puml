@@ -1,0 +1,89 @@
+@startuml
+
+' Version: 1.0.3
+' Last modified: 2026-06-19
+' Social domain references users by identifier only
+
+skinparam classAttributeIconSize 0
+
+interface DomainId {
+  + value(): Long
+  + validate(name: String)
+}
+
+class Block <<aggregate root>> {
+  - id: BlockId
+  - blocker: UserId
+  - blocked: UserId
+  --
+  + create(blocker: UserId, blocked: UserId)
+  + restore(id: BlockId, blocker: UserId, blocked: UserId)
+}
+
+class NeighborRequest <<aggregate root>> {
+  - id: NeighborRequestId
+  - sender: UserId
+  - receiver: UserId
+  - date: LocalDateTime
+  - status: RequestStatus
+  --
+  + create(sender: UserId, receiver: UserId, date: LocalDateTime)
+  + restore(id: NeighborRequestId, sender: UserId, receiver: UserId, date: LocalDateTime, status: RequestStatus)
+  + accept()
+  + reject()
+  + involves(userId: UserId): bool
+  + counterpartOf(userId: UserId): UserId
+}
+
+class Neighborship <<aggregate root>> {
+  - id: NeighborshipId
+  - follower: UserId
+  - followed: UserId
+  - date: LocalDateTime
+  --
+  + create(follower: UserId, followed: UserId, date: LocalDateTime)
+  + restore(id: NeighborshipId, follower: UserId, followed: UserId, date: LocalDateTime)
+  + involves(userId: UserId): bool
+}
+
+class BlockId <<value object>> {
+  - value: Long
+}
+
+class NeighborRequestId <<value object>> {
+  - value: Long
+}
+
+class NeighborshipId <<value object>> {
+  - value: Long
+}
+
+class UserId <<value object>> {
+  - value: Long
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+Block "1" --> "1" BlockId : id
+Block "*" --> "1" UserId : blocker
+Block "*" --> "1" UserId : blocked
+
+NeighborRequest "1" --> "1" NeighborRequestId : id
+NeighborRequest "*" --> "1" UserId : sender
+NeighborRequest "*" --> "1" UserId : receiver
+NeighborRequest "*" --> "1" RequestStatus : status
+
+Neighborship "1" --> "1" NeighborshipId : id
+Neighborship "*" --> "1" UserId : follower
+Neighborship "*" --> "1" UserId : followed
+
+BlockId ..|> DomainId
+NeighborRequestId ..|> DomainId
+NeighborshipId ..|> DomainId
+UserId ..|> DomainId
+
+@enduml

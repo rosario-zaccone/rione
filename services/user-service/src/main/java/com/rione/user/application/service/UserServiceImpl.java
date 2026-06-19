@@ -1,20 +1,21 @@
 package com.rione.user.application.service;
 
+import org.springframework.stereotype.Service;
+
 import com.rione.user.application.port.in.UserService;
 import com.rione.user.application.port.out.PasswordHasher;
 import com.rione.user.application.port.out.UserRepository;
 import com.rione.user.domain.model.Biography;
 import com.rione.user.domain.model.BirthDate;
 import com.rione.user.domain.model.FullName;
-import com.rione.user.domain.model.Location;
 import com.rione.user.domain.model.Mail;
-import com.rione.user.domain.model.Neighborhood;
 import com.rione.user.domain.model.NeighborhoodId;
 import com.rione.user.domain.model.Password;
 import com.rione.user.domain.model.User;
 import com.rione.user.domain.model.UserId;
 import com.rione.user.domain.model.Username;
 
+@Service
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
@@ -35,11 +36,8 @@ public class UserServiceImpl implements UserService {
 		if (userRepository.existsByUsername(username)) {
 			throw new UserApplicationException("Username is already registered");
 		}
-		User user = User.register(userRepository.nextIdentity(), new FullName(command.name(), command.surname()),
-				username, mail,
-				new Neighborhood(new NeighborhoodId(command.neighborhoodId()), command.neighborhoodName(),
-						new Location(command.city(), command.country())),
-				new BirthDate(command.birthDate()), new Biography(command.bio()),
+		User user = User.register(new FullName(command.name(), command.surname()), username, mail,
+				new NeighborhoodId(command.neighborhoodId()), new BirthDate(command.birthDate()), new Biography(command.bio()),
 				new Password(passwordHasher.hash(command.password())));
 		return toResponse(userRepository.save(user));
 	}
@@ -62,9 +60,8 @@ public class UserServiceImpl implements UserService {
 			throw new UserApplicationException("Username is already registered");
 		}
 		user.updateProfile(new FullName(command.name(), command.surname()), username,
-				new Neighborhood(new NeighborhoodId(command.neighborhoodId()), command.neighborhoodName(),
-						new Location(command.city(), command.country())),
-				new BirthDate(command.birthDate()), new Biography(command.bio()));
+				new NeighborhoodId(command.neighborhoodId()), new BirthDate(command.birthDate()),
+				new Biography(command.bio()));
 		return toResponse(userRepository.save(user));
 	}
 
@@ -79,8 +76,7 @@ public class UserServiceImpl implements UserService {
 
 	private UserResponse toResponse(User user) {
 		return new UserResponse(user.id().value(), user.fullName().name(), user.fullName().surname(),
-				user.username().value(), user.mail().mail(), user.neighborhood().id().value(), user.neighborhood().name(),
-				user.neighborhood().location().city(), user.neighborhood().location().country(), user.birthDate().value(),
+				user.username().value(), user.mail().mail(), user.neighborhoodId().value(), user.birthDate().value(),
 				user.bio().info(), user.isAdmin());
 	}
 }

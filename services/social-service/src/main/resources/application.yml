@@ -1,5 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${SOCIAL_SERVICE_DB_HOST:localhost}:${SOCIAL_SERVICE_DB_PORT:5433}/${SOCIAL_SERVICE_DB_NAME:rione-social}
+    username: ${SOCIAL_SERVICE_DB_USERNAME:postgres}
+    password: ${SOCIAL_SERVICE_DB_PASSWORD:banana}
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
 management:
   endpoints:
     web:
       exposure:
         include: health,metrics
+
+rione:
+  clients:
+    user-service:
+      base-url: ${USER_SERVICE_BASE_URL:http://localhost:8081}

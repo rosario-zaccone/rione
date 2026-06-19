@@ -41,3 +41,10 @@ AGENTS.md
 .codex/
 .codex/**
 .env
+state
+services/examples/
+
+# Frontend
+frontend/
+node_modules/
+dist/

@@ -1,13 +1,12 @@
 package com.rione.social.domain.model;
 
 import com.rione.common.domain.DDDValueObject;
+import com.rione.common.domain.DomainId;
 
 @DDDValueObject
-public record NeighborshipId(Long value) {
+public record NeighborshipId(Long value) implements DomainId {
 
 	public NeighborshipId {
-		if (value == null || value <= 0) {
-			throw new DomainException("Neighborship id must be positive");
-		}
+		DomainId.validate(value, "Neighborship id");
 	}
 }

@@ -8,9 +8,9 @@ import com.rione.social.domain.model.UserId;
 @OutPort
 public interface BlockRepository {
 
-	BlockId nextIdentity();
-
 	Block save(Block block);
 
 	boolean existsBetween(UserId blocker, UserId blocked);
+
+	void deleteBetween(UserId blocker, UserId blocked);
 }

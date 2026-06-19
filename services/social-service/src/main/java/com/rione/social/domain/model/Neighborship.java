@@ -22,7 +22,11 @@ public class Neighborship {
 		this.date = date == null ? LocalDateTime.now() : date;
 	}
 
-	public static Neighborship create(NeighborshipId id, UserId follower, UserId followed, LocalDateTime date) {
+	public static Neighborship create(UserId follower, UserId followed, LocalDateTime date) {
+		return new Neighborship(null, follower, followed, date);
+	}
+
+	public static Neighborship restore(NeighborshipId id, UserId follower, UserId followed, LocalDateTime date) {
 		return new Neighborship(id, follower, followed, date);
 	}
 
@@ -40,5 +44,9 @@ public class Neighborship {
 
 	public LocalDateTime date() {
 		return date;
+	}
+
+	public boolean involves(UserId userId) {
+		return follower.equals(userId) || followed.equals(userId);
 	}
 }

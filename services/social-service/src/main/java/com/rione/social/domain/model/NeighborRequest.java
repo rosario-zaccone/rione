@@ -25,8 +25,8 @@ public class NeighborRequest {
 		this.status = status == null ? RequestStatus.PENDING : status;
 	}
 
-	public static NeighborRequest create(NeighborRequestId id, UserId sender, UserId receiver, LocalDateTime date) {
-		return new NeighborRequest(id, sender, receiver, date, RequestStatus.PENDING);
+	public static NeighborRequest create(UserId sender, UserId receiver, LocalDateTime date) {
+		return new NeighborRequest(null, sender, receiver, date, RequestStatus.PENDING);
 	}
 
 	public static NeighborRequest restore(NeighborRequestId id, UserId sender, UserId receiver, LocalDateTime date,
@@ -68,5 +68,19 @@ public class NeighborRequest {
 
 	public RequestStatus status() {
 		return status;
+	}
+
+	public boolean involves(UserId userId) {
+		return sender.equals(userId) || receiver.equals(userId);
+	}
+
+	public UserId counterpartOf(UserId userId) {
+		if (sender.equals(userId)) {
+			return receiver;
+		}
+		if (receiver.equals(userId)) {
+			return sender;
+		}
+		throw new DomainException("Neighbor request does not involve user");
 	}
 }

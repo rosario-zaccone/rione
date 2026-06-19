@@ -10,11 +10,11 @@ import com.rione.social.domain.model.UserId;
 @OutPort
 public interface NeighborshipRepository {
 
-	NeighborshipId nextIdentity();
-
 	Neighborship save(Neighborship neighborship);
 
 	List<Neighborship> findByFollower(UserId follower);
+
+	List<Neighborship> findByParticipant(UserId userId);
 
 	boolean exists(UserId follower, UserId followed);
 

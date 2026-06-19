@@ -34,6 +34,21 @@ services:
     ports:
       - "8081:8080"
 
+  social-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rione-social
+      POSTGRES_USER: ${SOCIAL_SERVICE_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${SOCIAL_SERVICE_DB_PASSWORD:-banana}
+    volumes:
+      - social_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api-gateway:
     build:
       context: .
@@ -58,6 +73,19 @@ services:
       args:
         SERVICE_PATH: services/social-service
     restart: unless-stopped
+    depends_on:
+      user-service:
+        condition: service_started
+      social-postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      USER_SERVICE_BASE_URL: http://user-service:8080
+      SOCIAL_SERVICE_DB_HOST: social-postgres
+      SOCIAL_SERVICE_DB_PORT: 5432
+      SOCIAL_SERVICE_DB_NAME: rione-social
+      SOCIAL_SERVICE_DB_USERNAME: ${SOCIAL_SERVICE_DB_USERNAME:-postgres}
+      SOCIAL_SERVICE_DB_PASSWORD: ${SOCIAL_SERVICE_DB_PASSWORD:-banana}
     ports:
       - "8082:8080"
 
@@ -77,4 +105,5 @@ services:
 
 volumes:
   user_postgres_data:
+  social_postgres_data:
   pgadmin_data:

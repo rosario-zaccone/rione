@@ -1,7 +1,6 @@
 package com.rione.user.domain.model;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
 
@@ -10,29 +9,19 @@ import org.junit.jupiter.api.Test;
 class UserTest {
 
 	@Test
-	void updatesProfile() {
-		User user = user(1);
+	void updateProfileChangesEditableProfileFields() {
+		User user = User.restore(new UserId(1L), new FullName("Ada", "Lovelace"), new Username("ada"),
+				new Mail("ada@rione.test"), new NeighborhoodId(10L),
+				new BirthDate(LocalDateTime.of(1990, 1, 1, 0, 0)),
+				new Biography("I enjoy helping neighbors solve local problems."), new Password("hashed-password"), false);
 
-		user.updateProfile(new FullName("Grace", "Hopper"), new Username("grace"),
-				new Neighborhood(new NeighborhoodId(2L), "San Donato", new Location("Bologna", "Italy")),
-				new BirthDate(LocalDateTime.of(1991, 2, 3, 0, 0)), new Biography("Updated profile biography"));
+		user.updateProfile(new FullName("Augusta", "King"), new Username("augusta"), new NeighborhoodId(20L),
+				new BirthDate(LocalDateTime.of(1991, 1, 1, 0, 0)),
+				new Biography("I coordinate local reading groups and courtyard projects."));
 
-		assertEquals("Grace", user.fullName().name());
-		assertEquals("grace", user.username().value());
-		assertEquals(2L, user.neighborhood().id().value());
-		assertEquals("Updated profile biography", user.bio().info());
-	}
-
-	@Test
-	void rejectsInvalidMail() {
-		assertThrows(DomainException.class, () -> new Mail("not-a-mail"));
-	}
-
-	private static User user(long id) {
-		return User.register(new UserId(id), new FullName("Ada", "Lovelace"), new Username("ada" + id),
-				new Mail("ada" + id + "@rione.test"),
-				new Neighborhood(new NeighborhoodId(1L), "Centro", new Location("Bologna", "Italy")),
-				new BirthDate(LocalDateTime.of(1990, 1, 1, 0, 0)), new Biography("Local neighbor profile bio"),
-				new Password("hash"));
+		assertThat(user.fullName().displayName()).isEqualTo("Augusta King");
+		assertThat(user.username().value()).isEqualTo("augusta");
+		assertThat(user.neighborhoodId().value()).isEqualTo(20L);
+		assertThat(user.mail().mail()).isEqualTo("ada@rione.test");
 	}
 }

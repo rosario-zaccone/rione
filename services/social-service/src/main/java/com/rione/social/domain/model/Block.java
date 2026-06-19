@@ -18,7 +18,11 @@ public class Block {
 		this.blocked = blocked;
 	}
 
-	public static Block create(BlockId id, UserId blocker, UserId blocked) {
+	public static Block create(UserId blocker, UserId blocked) {
+		return new Block(null, blocker, blocked);
+	}
+
+	public static Block restore(BlockId id, UserId blocker, UserId blocked) {
 		return new Block(id, blocker, blocked);
 	}
 

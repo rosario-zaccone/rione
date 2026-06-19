@@ -9,6 +9,8 @@ import static org.springframework.web.servlet.function.RequestPredicates.path;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -16,6 +18,18 @@ import org.springframework.web.servlet.function.ServerResponse;
 class GatewayRoutesConfiguration {
 
 	@Bean
+	@Order(Ordered.HIGHEST_PRECEDENCE)
+	RouterFunction<ServerResponse> userServiceOpenApiRoute(
+			@Value("${rione.gateway.routes.user-service-uri:http://localhost:8081}") String userServiceUri) {
+		return route("user-service-openapi")
+			.route(path("/users/v3/api-docs"), http())
+			.before(stripPrefix(1))
+			.before(uri(userServiceUri))
+			.build();
+	}
+
+	@Bean
+	@Order(Ordered.LOWEST_PRECEDENCE)
 	RouterFunction<ServerResponse> userServiceRoute(
 			@Value("${rione.gateway.routes.user-service-uri:http://localhost:8081}") String userServiceUri) {
 		return route("user-service")

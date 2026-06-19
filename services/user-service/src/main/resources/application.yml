@@ -5,7 +5,7 @@ spring:
     password: ${USER_SERVICE_DB_PASSWORD:rione_password}
   sql:
     init:
-      mode: always
+      mode: never
   jpa:
     hibernate:
       ddl-auto: update

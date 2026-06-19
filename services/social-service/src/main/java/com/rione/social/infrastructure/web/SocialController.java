@@ -1,11 +1,9 @@
 package com.rione.social.infrastructure.web;
 
-import java.time.LocalDateTime;
+import java.net.URI;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,13 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rione.social.application.port.in.SocialService;
-import com.rione.social.application.port.in.SocialService.BlockUserCommand;
-import com.rione.social.application.port.in.SocialService.BlockResponse;
-import com.rione.social.application.port.in.SocialService.NeighborRequestResponse;
-import com.rione.social.application.port.in.SocialService.NeighborshipResponse;
-import com.rione.social.application.port.in.SocialService.SendNeighborRequestCommand;
-import com.rione.social.application.service.SocialApplicationException;
-import com.rione.social.domain.model.DomainException;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping
@@ -34,52 +29,62 @@ class SocialController {
 	}
 
 	@PostMapping("/neighbor-requests")
-	ResponseEntity<NeighborRequestResponse> sendNeighborRequest(@RequestBody SendNeighborRequestRequest request) {
-		NeighborRequestResponse response = socialService
-			.sendNeighborRequest(new SendNeighborRequestCommand(request.senderId(), request.receiverId()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	ResponseEntity<SocialService.NeighborRequestResponse> sendNeighborRequest(
+			@Valid @RequestBody SendNeighborRequestRequest request) {
+		SocialService.NeighborRequestResponse response = socialService
+			.sendNeighborRequest(new SocialService.SendNeighborRequestCommand(request.senderId(), request.receiverId()));
+		return ResponseEntity.created(URI.create("/neighbor-requests/" + response.id())).body(response);
 	}
 
 	@PostMapping("/neighbor-requests/{requestId}/acceptance")
-	NeighborRequestResponse acceptNeighborRequest(@PathVariable Long requestId) {
+	SocialService.NeighborRequestResponse acceptNeighborRequest(@PathVariable @Positive Long requestId) {
 		return socialService.acceptNeighborRequest(requestId);
 	}
 
 	@PostMapping("/neighbor-requests/{requestId}/rejection")
-	NeighborRequestResponse rejectNeighborRequest(@PathVariable Long requestId) {
+	SocialService.NeighborRequestResponse rejectNeighborRequest(@PathVariable @Positive Long requestId) {
 		return socialService.rejectNeighborRequest(requestId);
 	}
 
 	@GetMapping("/neighbor-requests/{requestId}")
-	NeighborRequestResponse getNeighborRequest(@PathVariable Long requestId) {
+	SocialService.NeighborRequestResponse getNeighborRequest(@PathVariable @Positive Long requestId) {
 		return socialService.getNeighborRequest(requestId);
 	}
 
 	@GetMapping("/neighborships")
-	List<NeighborshipResponse> getNeighborships(@RequestParam Long followerId) {
+	List<SocialService.NeighborshipResponse> getNeighborships(@RequestParam @Positive Long followerId) {
 		return socialService.getNeighborships(followerId);
 	}
 
 	@PostMapping("/blocks")
-	ResponseEntity<BlockResponse> blockUser(@RequestBody BlockUserRequest request) {
-		BlockResponse response = socialService.blockUser(new BlockUserCommand(request.blockerId(), request.blockedId()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	ResponseEntity<SocialService.BlockResponse> blockUser(@Valid @RequestBody BlockUserRequest request) {
+		SocialService.BlockResponse response = socialService
+			.blockUser(new SocialService.BlockUserCommand(request.blockerId(), request.blockedId()));
+		return ResponseEntity.created(URI.create("/blocks/" + response.id())).body(response);
 	}
 
-	@ExceptionHandler({ DomainException.class, SocialApplicationException.class })
-	ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException exception) {
-		return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage()));
+	@PostMapping("/blocks/removal")
+	ResponseEntity<Void> unblockUser(@Valid @RequestBody UnblockUserRequest request) {
+		socialService.unblockUser(new SocialService.UnblockUserCommand(request.blockerId(), request.blockedId()));
+		return ResponseEntity.noContent().build();
 	}
 
-	record SendNeighborRequestRequest(Long senderId, Long receiverId) {
+	@PostMapping("/neighborhood-changes")
+	ResponseEntity<Void> reconcileRelationshipsAfterNeighborhoodChange(
+			@Valid @RequestBody NeighborhoodChangedRequest request) {
+		socialService.reconcileRelationshipsAfterNeighborhoodChange(new SocialService.NeighborhoodChangedCommand(request.userId()));
+		return ResponseEntity.accepted().build();
 	}
 
-	record BlockUserRequest(Long blockerId, Long blockedId) {
+	record SendNeighborRequestRequest(@NotNull @Positive Long senderId, @NotNull @Positive Long receiverId) {
 	}
 
-	record ErrorResponse(String message, LocalDateTime timestamp) {
-		ErrorResponse(String message) {
-			this(message, LocalDateTime.now());
-		}
+	record BlockUserRequest(@NotNull @Positive Long blockerId, @NotNull @Positive Long blockedId) {
+	}
+
+	record UnblockUserRequest(@NotNull @Positive Long blockerId, @NotNull @Positive Long blockedId) {
+	}
+
+	record NeighborhoodChangedRequest(@NotNull @Positive Long userId) {
 	}
 }

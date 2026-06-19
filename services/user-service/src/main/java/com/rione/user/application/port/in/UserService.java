@@ -16,19 +16,17 @@ public interface UserService {
 	UserResponse getUser(Long userId);
 
 	record SignUpCommand(String name, String surname, String username, String mail, String password,
-			Long neighborhoodId, String neighborhoodName, String city, String country, LocalDateTime birthDate,
-			String bio) {
+			Long neighborhoodId, LocalDateTime birthDate, String bio) {
 	}
 
 	record LogInCommand(String mail, String password) {
 	}
 
 	record UpdateProfileCommand(Long userId, String name, String surname, String username, Long neighborhoodId,
-			String neighborhoodName, String city, String country, LocalDateTime birthDate, String bio) {
+			LocalDateTime birthDate, String bio) {
 	}
 
 	record UserResponse(Long id, String name, String surname, String username, String mail, Long neighborhoodId,
-			String neighborhoodName, String city, String country, LocalDateTime birthDate, String bio,
-			boolean admin) {
+			LocalDateTime birthDate, String bio, boolean admin) {
 	}
 }

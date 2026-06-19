@@ -20,10 +20,20 @@ public interface SocialService {
 
 	BlockResponse blockUser(BlockUserCommand command);
 
+	void unblockUser(UnblockUserCommand command);
+
+	void reconcileRelationshipsAfterNeighborhoodChange(NeighborhoodChangedCommand command);
+
 	record SendNeighborRequestCommand(Long senderId, Long receiverId) {
 	}
 
 	record BlockUserCommand(Long blockerId, Long blockedId) {
+	}
+
+	record UnblockUserCommand(Long blockerId, Long blockedId) {
+	}
+
+	record NeighborhoodChangedCommand(Long userId) {
 	}
 
 	record NeighborRequestResponse(Long id, Long senderId, Long receiverId, LocalDateTime date, String status) {
