@@ -15,6 +15,10 @@ public interface NeighborRequestRepository {
 
 	Optional<NeighborRequest> findById(NeighborRequestId id);
 
+	List<NeighborRequest> findBySender(UserId sender);
+
+	List<NeighborRequest> findByReceiver(UserId receiver);
+
 	boolean existsPendingBetween(UserId sender, UserId receiver);
 
 	List<NeighborRequest> findPendingInvolving(UserId userId);

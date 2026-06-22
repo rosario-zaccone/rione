@@ -5,10 +5,11 @@ spring:
     password: ${USER_SERVICE_DB_PASSWORD:rione_password}
   sql:
     init:
-      mode: never
+      mode: always
   jpa:
     hibernate:
       ddl-auto: update
+    defer-datasource-initialization: true
     open-in-view: false
     properties:
       hibernate:
@@ -19,3 +20,10 @@ management:
     web:
       exposure:
         include: health,metrics
+
+rione:
+  security:
+    jwt:
+      secret: ${RIONE_JWT_SECRET:change-this-demo-secret-key-1234567890}
+      service-secret: ${RIONE_SERVICE_JWT_SECRET:change-this-demo-service-secret-key-1234567890}
+      expiration-ms: ${RIONE_JWT_EXPIRATION_MS:86400000}

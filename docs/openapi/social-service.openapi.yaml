@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-17
+x-last-modified: 2026-06-21
 info:
   title: Rione Social Service API
-  version: v0.1.0
+  version: v0.3.0
   description: Neighbor request, neighborship, and blocking endpoints.
 servers:
   - url: http://localhost:8082
@@ -23,6 +23,9 @@ paths:
         - Neighbor Requests
       operationId: sendNeighborRequest
       summary: Send a neighbor request
+      description: The sender is resolved from the authenticated bearer token.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -38,12 +41,19 @@ paths:
                 $ref: '#/components/schemas/NeighborRequestResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /neighbor-requests/{requestId}/acceptance:
     post:
       tags:
         - Neighbor Requests
       operationId: acceptNeighborRequest
       summary: Accept a neighbor request
+      description: Requires the authenticated user to be the request receiver.
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/RequestId'
       responses:
@@ -55,12 +65,19 @@ paths:
                 $ref: '#/components/schemas/NeighborRequestResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /neighbor-requests/{requestId}/rejection:
     post:
       tags:
         - Neighbor Requests
       operationId: rejectNeighborRequest
       summary: Reject a neighbor request
+      description: Requires the authenticated user to be the request receiver.
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/RequestId'
       responses:
@@ -72,55 +89,187 @@ paths:
                 $ref: '#/components/schemas/NeighborRequestResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-  /neighbor-requests/{requestId}:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /me/neighbor-requests/sent:
     get:
       tags:
         - Neighbor Requests
-      operationId: getNeighborRequest
-      summary: Get a neighbor request
-      parameters:
-        - $ref: '#/components/parameters/RequestId'
+      operationId: getMySentNeighborRequests
+      summary: List my sent neighbor requests
+      description: The user is resolved from the authenticated bearer token.
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: Neighbor request found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NeighborRequestResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-  /neighborships:
-    get:
-      tags:
-        - Neighborships
-      operationId: getNeighborships
-      summary: List neighborships by follower
-      parameters:
-        - name: followerId
-          in: query
-          required: true
-          description: Identifier of the follower user.
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-      responses:
-        '200':
-          description: Neighborships for the follower.
+          description: Neighbor requests sent by the user.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NeighborshipResponse'
+                  $ref: '#/components/schemas/NeighborRequestResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /me/neighbor-requests/received:
+    get:
+      tags:
+        - Neighbor Requests
+      operationId: getMyReceivedNeighborRequests
+      summary: List my received neighbor requests
+      description: The user is resolved from the authenticated bearer token.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Neighbor requests received by the user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NeighborRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /me/neighborships:
+    get:
+      tags:
+        - Neighborships
+      operationId: getMyNeighbors
+      summary: List my neighbors
+      description: The user is resolved from the authenticated bearer token.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Neighbors for the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NeighborResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /me/neighborships/{neighborId}:
+    delete:
+      tags:
+        - Neighborships
+      operationId: deleteMyNeighborship
+      summary: Remove one of my neighborships
+      description: The authenticated user is resolved from the bearer token. The relationship is removed regardless of its stored direction.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/NeighborId'
+      responses:
+        '204':
+          description: Neighborship removed.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /me/blocks:
+    get:
+      tags:
+        - Blocks
+      operationId: getMyBlocks
+      summary: List users I blocked
+      description: The user is resolved from the authenticated bearer token.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Blocks created by the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlockResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /me/blocks/{blockedId}:
+    put:
+      tags:
+        - Blocks
+      operationId: putMyBlock
+      summary: Block a user idempotently
+      description: The authenticated user is the blocker. No request body is required.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BlockedId'
+      responses:
+        '200':
+          description: The block already existed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockResponse'
+        '201':
+          description: A new block was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags:
+        - Blocks
+      operationId: deleteMyBlock
+      summary: Unblock a user idempotently
+      description: The authenticated user is the blocker. No request body is required, and a missing block is treated as success.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BlockedId'
+      responses:
+        '204':
+          description: The user is not blocked after this operation.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /blocks:
     post:
+      deprecated: true
       tags:
         - Blocks
       operationId: blockUser
       summary: Block a user
+      description: The blocker is resolved from the authenticated bearer token.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -136,8 +285,60 @@ paths:
                 $ref: '#/components/schemas/BlockResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /blocks/removal:
+    post:
+      deprecated: true
+      tags:
+        - Blocks
+      operationId: unblockUser
+      summary: Unblock a user
+      description: The blocker is resolved from the authenticated bearer token.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnblockUserRequest'
+      responses:
+        '204':
+          description: Block removed.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
+    NeighborId:
+      name: neighborId
+      in: path
+      required: true
+      description: Identifier of the neighbor whose neighborship should be removed.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    BlockedId:
+      name: blockedId
+      in: path
+      required: true
+      description: Identifier of the user to block or unblock.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
     RequestId:
       name: requestId
       in: path
@@ -148,6 +349,24 @@ components:
         format: int64
         minimum: 1
   responses:
+    NotFound:
+      description: The requested social relationship was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: The authenticated user is not authorized for this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     BadRequest:
       description: Invalid request or rejected domain/application rule.
       content:
@@ -158,13 +377,8 @@ components:
     SendNeighborRequestRequest:
       type: object
       required:
-        - senderId
         - receiverId
       properties:
-        senderId:
-          type: integer
-          format: int64
-          example: 1
         receiverId:
           type: integer
           format: int64
@@ -172,16 +386,21 @@ components:
     BlockUserRequest:
       type: object
       required:
-        - blockerId
         - blockedId
       properties:
-        blockerId:
-          type: integer
-          format: int64
-          example: 1
         blockedId:
           type: integer
           format: int64
+          example: 2
+    UnblockUserRequest:
+      type: object
+      required:
+        - blockedId
+      properties:
+        blockedId:
+          type: integer
+          format: int64
+          minimum: 1
           example: 2
     NeighborRequestResponse:
       type: object
@@ -215,23 +434,23 @@ components:
             - ACCEPTED
             - REJECTED
           example: PENDING
-    NeighborshipResponse:
+    NeighborResponse:
       type: object
       required:
         - id
-        - followerId
-        - followedId
+        - userId
+        - neighborId
         - date
       properties:
         id:
           type: integer
           format: int64
           example: 50
-        followerId:
+        userId:
           type: integer
           format: int64
           example: 1
-        followedId:
+        neighborId:
           type: integer
           format: int64
           example: 2

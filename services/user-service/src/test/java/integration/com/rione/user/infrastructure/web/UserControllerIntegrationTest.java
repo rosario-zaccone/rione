@@ -25,11 +25,18 @@ class UserControllerIntegrationTest {
 
 	private MockMvc mockMvc;
 	private UserService userService;
+	private JwtService jwtService;
+	private CurrentUser currentUser;
 
 	@BeforeEach
 	void setUp() {
 		userService = org.mockito.Mockito.mock(UserService.class);
-		mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService), new UserExceptionHandler()).build();
+		jwtService = org.mockito.Mockito.mock(JwtService.class);
+		currentUser = org.mockito.Mockito.mock(CurrentUser.class);
+		when(currentUser.id()).thenReturn(1L);
+		mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService, jwtService, currentUser),
+				new UserExceptionHandler())
+			.build();
 	}
 
 	@Test
@@ -59,29 +66,32 @@ class UserControllerIntegrationTest {
 	@Test
 	void logsInThroughHttpContract() throws Exception {
 		when(userService.logIn(any())).thenReturn(response());
+		when(jwtService.createToken(1L, false)).thenReturn("jwt-token");
 
 		mockMvc.perform(post("/users/login").contentType(MediaType.APPLICATION_JSON)
 			.content("{\"mail\":\"ada@rione.test\",\"password\":\"secret-password\"}"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.mail").value("ada@rione.test"));
+			.andExpect(jsonPath("$.token").value("jwt-token"))
+			.andExpect(jsonPath("$.user.mail").value("ada@rione.test"));
 
 		verify(userService).logIn(any());
+		verify(jwtService).createToken(1L, false);
 	}
 
 	@Test
-	void getsUserThroughHttpContract() throws Exception {
+	void getsCurrentUserThroughMeEndpoint() throws Exception {
 		when(userService.getUser(1L)).thenReturn(response());
 
-		mockMvc.perform(get("/users/1")).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1L));
+		mockMvc.perform(get("/users/me")).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1L));
 
 		verify(userService).getUser(1L);
 	}
 
 	@Test
-	void updatesProfileThroughHttpContract() throws Exception {
+	void updatesCurrentUserProfileThroughMeEndpoint() throws Exception {
 		when(userService.updateProfile(any())).thenReturn(response());
 
-		mockMvc.perform(put("/users/1/profile").contentType(MediaType.APPLICATION_JSON).content("""
+		mockMvc.perform(put("/users/me/profile").contentType(MediaType.APPLICATION_JSON).content("""
 				{
 				  "name": "Ada",
 				  "surname": "Lovelace",
@@ -95,6 +105,13 @@ class UserControllerIntegrationTest {
 			.andExpect(jsonPath("$.username").value("ada"));
 
 		verify(userService).updateProfile(any());
+	}
+
+	@Test
+	void removedCrossUserRoutesReturnNotFound() throws Exception {
+		mockMvc.perform(get("/users/2")).andExpect(status().isNotFound());
+		mockMvc.perform(put("/users/2/profile").contentType(MediaType.APPLICATION_JSON).content("{}"))
+			.andExpect(status().isNotFound());
 	}
 
 	@Test

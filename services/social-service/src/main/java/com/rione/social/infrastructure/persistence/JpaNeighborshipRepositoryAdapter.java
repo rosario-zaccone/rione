@@ -26,11 +26,6 @@ class JpaNeighborshipRepositoryAdapter implements NeighborshipRepository {
 	}
 
 	@Override
-	public List<Neighborship> findByFollower(UserId follower) {
-		return repository.findByFollowerId(follower.value()).stream().map(this::toDomain).toList();
-	}
-
-	@Override
 	public List<Neighborship> findByParticipant(UserId userId) {
 		return repository.findByFollowerIdOrFollowedId(userId.value(), userId.value())
 			.stream()
@@ -41,6 +36,11 @@ class JpaNeighborshipRepositoryAdapter implements NeighborshipRepository {
 	@Override
 	public boolean exists(UserId follower, UserId followed) {
 		return repository.existsByFollowerIdAndFollowedId(follower.value(), followed.value());
+	}
+
+	@Override
+	public boolean existsBetween(UserId firstUser, UserId secondUser) {
+		return exists(firstUser, secondUser) || exists(secondUser, firstUser);
 	}
 
 	@Override

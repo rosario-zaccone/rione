@@ -1,5 +1,8 @@
 package com.rione.social.infrastructure.persistence;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,16 @@ class JpaBlockRepositoryAdapter implements BlockRepository {
 	@Override
 	public Block save(Block block) {
 		return toDomain(repository.save(toEntity(block)));
+	}
+
+	@Override
+	public List<Block> findByBlocker(UserId blocker) {
+		return repository.findByBlockerId(blocker.value()).stream().map(this::toDomain).toList();
+	}
+
+	@Override
+	public Optional<Block> findBetween(UserId blocker, UserId blocked) {
+		return repository.findByBlockerIdAndBlockedId(blocker.value(), blocked.value()).map(this::toDomain);
 	}
 
 	@Override

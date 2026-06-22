@@ -70,6 +70,12 @@ public class UserServiceImpl implements UserService {
 		return toResponse(findExisting(new UserId(userId)));
 	}
 
+	@Override
+	public UserNeighborhoodResponse getUserNeighborhood(Long userId) {
+		User user = findExisting(new UserId(userId));
+		return new UserNeighborhoodResponse(user.id().value(), user.neighborhoodId().value());
+	}
+
 	private User findExisting(UserId userId) {
 		return userRepository.findById(userId).orElseThrow(() -> new UserApplicationException("User not found"));
 	}

@@ -41,7 +41,7 @@ AGENTS.md
 .codex/
 .codex/**
 .env
-state
+state.md
 services/examples/
 
 # Frontend

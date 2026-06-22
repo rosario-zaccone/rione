@@ -4,12 +4,13 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rione.social.application.port.in.SocialService;
@@ -23,68 +24,92 @@ import jakarta.validation.constraints.Positive;
 class SocialController {
 
 	private final SocialService socialService;
+	private final CurrentUser currentUser;
 
-	SocialController(SocialService socialService) {
+	SocialController(SocialService socialService, CurrentUser currentUser) {
 		this.socialService = socialService;
+		this.currentUser = currentUser;
 	}
 
 	@PostMapping("/neighbor-requests")
 	ResponseEntity<SocialService.NeighborRequestResponse> sendNeighborRequest(
 			@Valid @RequestBody SendNeighborRequestRequest request) {
 		SocialService.NeighborRequestResponse response = socialService
-			.sendNeighborRequest(new SocialService.SendNeighborRequestCommand(request.senderId(), request.receiverId()));
+			.sendNeighborRequest(new SocialService.SendNeighborRequestCommand(currentUser.id(), request.receiverId()));
 		return ResponseEntity.created(URI.create("/neighbor-requests/" + response.id())).body(response);
 	}
 
 	@PostMapping("/neighbor-requests/{requestId}/acceptance")
 	SocialService.NeighborRequestResponse acceptNeighborRequest(@PathVariable @Positive Long requestId) {
-		return socialService.acceptNeighborRequest(requestId);
+		return socialService.acceptNeighborRequest(requestId, currentUser.actor());
 	}
 
 	@PostMapping("/neighbor-requests/{requestId}/rejection")
 	SocialService.NeighborRequestResponse rejectNeighborRequest(@PathVariable @Positive Long requestId) {
-		return socialService.rejectNeighborRequest(requestId);
+		return socialService.rejectNeighborRequest(requestId, currentUser.actor());
 	}
 
-	@GetMapping("/neighbor-requests/{requestId}")
-	SocialService.NeighborRequestResponse getNeighborRequest(@PathVariable @Positive Long requestId) {
-		return socialService.getNeighborRequest(requestId);
+	@GetMapping("/me/neighbor-requests/sent")
+	List<SocialService.NeighborRequestResponse> getMySentNeighborRequests() {
+		return socialService.getSentNeighborRequests(currentUser.id());
 	}
 
-	@GetMapping("/neighborships")
-	List<SocialService.NeighborshipResponse> getNeighborships(@RequestParam @Positive Long followerId) {
-		return socialService.getNeighborships(followerId);
+	@GetMapping("/me/neighbor-requests/received")
+	List<SocialService.NeighborRequestResponse> getMyReceivedNeighborRequests() {
+		return socialService.getReceivedNeighborRequests(currentUser.id());
 	}
 
-	@PostMapping("/blocks")
-	ResponseEntity<SocialService.BlockResponse> blockUser(@Valid @RequestBody BlockUserRequest request) {
-		SocialService.BlockResponse response = socialService
-			.blockUser(new SocialService.BlockUserCommand(request.blockerId(), request.blockedId()));
-		return ResponseEntity.created(URI.create("/blocks/" + response.id())).body(response);
+	@GetMapping("/me/neighborships")
+	List<SocialService.NeighborResponse> getMyNeighbors() {
+		return socialService.getNeighbors(currentUser.id());
 	}
 
-	@PostMapping("/blocks/removal")
-	ResponseEntity<Void> unblockUser(@Valid @RequestBody UnblockUserRequest request) {
-		socialService.unblockUser(new SocialService.UnblockUserCommand(request.blockerId(), request.blockedId()));
+	@DeleteMapping("/me/neighborships/{neighborId}")
+	ResponseEntity<Void> removeMyNeighborship(@PathVariable @Positive Long neighborId) {
+		socialService.removeNeighborship(new SocialService.RemoveNeighborshipCommand(currentUser.id(), neighborId));
 		return ResponseEntity.noContent().build();
 	}
 
-	@PostMapping("/neighborhood-changes")
-	ResponseEntity<Void> reconcileRelationshipsAfterNeighborhoodChange(
-			@Valid @RequestBody NeighborhoodChangedRequest request) {
-		socialService.reconcileRelationshipsAfterNeighborhoodChange(new SocialService.NeighborhoodChangedCommand(request.userId()));
-		return ResponseEntity.accepted().build();
+	@Deprecated
+	@PostMapping("/blocks")
+	ResponseEntity<SocialService.BlockResponse> blockUser(@Valid @RequestBody BlockUserRequest request) {
+		SocialService.BlockResponse response = socialService
+			.blockUser(new SocialService.BlockUserCommand(currentUser.id(), request.blockedId()));
+		return ResponseEntity.created(URI.create("/blocks/" + response.id())).body(response);
 	}
 
-	record SendNeighborRequestRequest(@NotNull @Positive Long senderId, @NotNull @Positive Long receiverId) {
+	@GetMapping("/me/blocks")
+	List<SocialService.BlockResponse> getMyBlocks() {
+		return socialService.getBlocks(currentUser.id());
 	}
 
-	record BlockUserRequest(@NotNull @Positive Long blockerId, @NotNull @Positive Long blockedId) {
+	@PutMapping("/me/blocks/{blockedId}")
+	ResponseEntity<SocialService.BlockResponse> putMyBlock(@PathVariable @Positive Long blockedId) {
+		SocialService.BlockOperationResult result = socialService
+			.putBlock(new SocialService.BlockUserCommand(currentUser.id(), blockedId));
+		return ResponseEntity.status(result.created() ? 201 : 200).body(result.block());
 	}
 
-	record UnblockUserRequest(@NotNull @Positive Long blockerId, @NotNull @Positive Long blockedId) {
+	@DeleteMapping("/me/blocks/{blockedId}")
+	ResponseEntity<Void> deleteMyBlock(@PathVariable @Positive Long blockedId) {
+		socialService.unblockUser(new SocialService.UnblockUserCommand(currentUser.id(), blockedId));
+		return ResponseEntity.noContent().build();
 	}
 
-	record NeighborhoodChangedRequest(@NotNull @Positive Long userId) {
+	@Deprecated
+	@PostMapping("/blocks/removal")
+	ResponseEntity<Void> unblockUser(@Valid @RequestBody UnblockUserRequest request) {
+		socialService.unblockUser(new SocialService.UnblockUserCommand(currentUser.id(), request.blockedId()));
+		return ResponseEntity.noContent().build();
 	}
+
+	record SendNeighborRequestRequest(@NotNull @Positive Long receiverId) {
+	}
+
+	record BlockUserRequest(@NotNull @Positive Long blockedId) {
+	}
+
+	record UnblockUserRequest(@NotNull @Positive Long blockedId) {
+	}
+
 }

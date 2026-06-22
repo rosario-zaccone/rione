@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-17
+x-last-modified: 2026-06-21
 info:
   title: Rione API Gateway
-  version: v0.1.0
+  version: v0.3.0
   description: Public gateway contract for Rione service routes.
 servers:
   - url: http://localhost:8080
@@ -32,7 +32,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/LogInResponse'
         '400':
           $ref: '#/components/responses/UserBadRequest'
   /users/login:
@@ -57,15 +57,15 @@ paths:
                 $ref: '#/components/schemas/UserResponse'
         '400':
           $ref: '#/components/responses/UserBadRequest'
-  /users/{userId}:
+  /users/me:
     get:
       tags:
         - Users
-      operationId: gatewayGetUser
-      summary: Get a user profile
-      description: Proxies GET /users/{userId} to the user service.
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      operationId: gatewayGetCurrentUser
+      summary: Get the authenticated user profile
+      description: Proxies GET /users/me to the user service.
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: User profile found.
@@ -73,17 +73,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        '400':
+        '401':
           $ref: '#/components/responses/UserBadRequest'
-  /users/{userId}/profile:
+  /users/me/profile:
     put:
       tags:
         - Users
-      operationId: gatewayUpdateProfile
-      summary: Update a user profile
-      description: Proxies PUT /users/{userId}/profile to the user service.
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      operationId: gatewayUpdateCurrentUserProfile
+      summary: Update the authenticated user profile
+      description: Proxies PUT /users/me/profile to the user service.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -106,6 +106,8 @@ paths:
       operationId: gatewaySendNeighborRequest
       summary: Send a neighbor request
       description: Proxies POST /social/neighbor-requests to POST /neighbor-requests in the social service.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -157,53 +159,138 @@ paths:
                 $ref: '#/components/schemas/NeighborRequestResponse'
         '400':
           $ref: '#/components/responses/SocialBadRequest'
-  /social/neighbor-requests/{requestId}:
+  /social/me/neighbor-requests/sent:
     get:
       tags:
         - Social
-      operationId: gatewayGetNeighborRequest
-      summary: Get a neighbor request
-      description: Proxies the request to the social service after removing the /social prefix.
-      parameters:
-        - $ref: '#/components/parameters/RequestId'
+      operationId: gatewayGetMySentNeighborRequests
+      summary: List my sent neighbor requests
+      description: Proxies to GET /me/neighbor-requests/sent in the social service.
       responses:
         '200':
-          description: Neighbor request found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NeighborRequestResponse'
-        '400':
-          $ref: '#/components/responses/SocialBadRequest'
-  /social/neighborships:
-    get:
-      tags:
-        - Social
-      operationId: gatewayGetNeighborships
-      summary: List neighborships by follower
-      description: Proxies GET /social/neighborships to GET /neighborships in the social service.
-      parameters:
-        - name: followerId
-          in: query
-          required: true
-          description: Identifier of the follower user.
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-      responses:
-        '200':
-          description: Neighborships for the follower.
+          description: Neighbor requests sent by the user.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NeighborshipResponse'
+                  $ref: '#/components/schemas/NeighborRequestResponse'
+        '400':
+          $ref: '#/components/responses/SocialBadRequest'
+  /social/me/neighbor-requests/received:
+    get:
+      tags:
+        - Social
+      operationId: gatewayGetMyReceivedNeighborRequests
+      summary: List my received neighbor requests
+      description: Proxies to GET /me/neighbor-requests/received in the social service.
+      responses:
+        '200':
+          description: Neighbor requests received by the user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NeighborRequestResponse'
+        '400':
+          $ref: '#/components/responses/SocialBadRequest'
+  /social/me/neighborships:
+    get:
+      tags:
+        - Social
+      operationId: gatewayGetMyNeighbors
+      summary: List my neighbors
+      description: Proxies to GET /me/neighborships in the social service.
+      responses:
+        '200':
+          description: Neighbors for the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NeighborResponse'
+        '400':
+          $ref: '#/components/responses/SocialBadRequest'
+  /social/me/neighborships/{neighborId}:
+    delete:
+      tags:
+        - Social
+      operationId: gatewayDeleteMyNeighborship
+      summary: Remove one of my neighborships
+      description: Proxies to DELETE /me/neighborships/{neighborId} in the social service.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/NeighborId'
+      responses:
+        '204':
+          description: Neighborship removed.
+        '400':
+          $ref: '#/components/responses/SocialBadRequest'
+  /social/me/blocks:
+    get:
+      tags:
+        - Social
+      operationId: gatewayGetMyBlocks
+      summary: List users I blocked
+      description: Proxies to GET /me/blocks in the social service.
+      responses:
+        '200':
+          description: Blocks created by the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlockResponse'
+        '400':
+          $ref: '#/components/responses/SocialBadRequest'
+  /social/me/blocks/{blockedId}:
+    put:
+      tags:
+        - Social
+      operationId: gatewayPutMyBlock
+      summary: Block a user idempotently
+      description: Proxies to PUT /me/blocks/{blockedId} in the social service without a request body.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BlockedId'
+      responses:
+        '200':
+          description: Existing block returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockResponse'
+        '201':
+          description: Block created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockResponse'
+        '400':
+          $ref: '#/components/responses/SocialBadRequest'
+    delete:
+      tags:
+        - Social
+      operationId: gatewayDeleteMyBlock
+      summary: Unblock a user idempotently
+      description: Proxies to DELETE /me/blocks/{blockedId} in the social service without a request body.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BlockedId'
+      responses:
+        '204':
+          description: User is unblocked.
         '400':
           $ref: '#/components/responses/SocialBadRequest'
   /social/blocks:
     post:
+      deprecated: true
       tags:
         - Social
       operationId: gatewayBlockUser
@@ -225,12 +312,24 @@ paths:
         '400':
           $ref: '#/components/responses/SocialBadRequest'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
-    UserId:
-      name: userId
+    NeighborId:
+      name: neighborId
       in: path
       required: true
-      description: User identifier.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    BlockedId:
+      name: blockedId
+      in: path
+      required: true
       schema:
         type: integer
         format: int64
@@ -408,27 +507,30 @@ components:
           nullable: true
         admin:
           type: boolean
+    LogInResponse:
+      type: object
+      required:
+        - token
+        - user
+      properties:
+        token:
+          type: string
+          description: JWT bearer token.
+        user:
+          $ref: '#/components/schemas/UserResponse'
     SendNeighborRequestRequest:
       type: object
       required:
-        - senderId
         - receiverId
       properties:
-        senderId:
-          type: integer
-          format: int64
         receiverId:
           type: integer
           format: int64
     BlockUserRequest:
       type: object
       required:
-        - blockerId
         - blockedId
       properties:
-        blockerId:
-          type: integer
-          format: int64
         blockedId:
           type: integer
           format: int64
@@ -459,21 +561,21 @@ components:
             - PENDING
             - ACCEPTED
             - REJECTED
-    NeighborshipResponse:
+    NeighborResponse:
       type: object
       required:
         - id
-        - followerId
-        - followedId
+        - userId
+        - neighborId
         - date
       properties:
         id:
           type: integer
           format: int64
-        followerId:
+        userId:
           type: integer
           format: int64
-        followedId:
+        neighborId:
           type: integer
           format: int64
         date:

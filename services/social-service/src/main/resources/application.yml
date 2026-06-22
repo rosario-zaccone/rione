@@ -21,6 +21,13 @@ management:
         include: health,metrics
 
 rione:
+  security:
+    jwt:
+      secret: ${RIONE_JWT_SECRET:change-this-demo-secret-key-1234567890}
+      service-secret: ${RIONE_SERVICE_JWT_SECRET:change-this-demo-service-secret-key-1234567890}
+      expiration-ms: ${RIONE_JWT_EXPIRATION_MS:86400000}
+      service-expiration-ms: ${RIONE_SERVICE_JWT_EXPIRATION_MS:300000}
+      service-name: social-service
   clients:
     user-service:
       base-url: ${USER_SERVICE_BASE_URL:http://localhost:8081}

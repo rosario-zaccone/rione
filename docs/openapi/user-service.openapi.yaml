@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-18
+x-last-modified: 2026-06-21
 info:
   title: Rione User Service API
-  version: v0.3.0
+  version: v0.4.0
   description: User account, authentication, profile, and city endpoints.
 servers:
   - url: http://localhost:8081
@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/LogInResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
   /users/login:
@@ -59,33 +59,31 @@ paths:
                 $ref: '#/components/schemas/UserResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-  /users/{userId}:
+  /users/me:
     get:
       tags:
         - Users
-      operationId: getUser
-      summary: Get a user profile
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      operationId: getCurrentUser
+      summary: Get the authenticated user profile
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: User profile found.
+          description: Authenticated user profile found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /users/{userId}/profile:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/me/profile:
     put:
       tags:
         - Users
-      operationId: updateProfile
-      summary: Update a user profile
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      operationId: updateCurrentUserProfile
+      summary: Update the authenticated user profile
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -94,15 +92,15 @@ paths:
               $ref: '#/components/schemas/UpdateProfileRequest'
       responses:
         '200':
-          description: User profile updated.
+          description: Authenticated user profile updated.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /cities:
     post:
       tags:
@@ -110,8 +108,8 @@ paths:
       operationId: createCity
       summary: Insert a city with neighborhoods
       description: Creates a platform-managed city with its neighborhoods. Only admin users can perform this operation.
-      parameters:
-        - $ref: '#/components/parameters/ActingUserId'
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -127,6 +125,8 @@ paths:
                 $ref: '#/components/schemas/CityResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -137,6 +137,9 @@ paths:
         - Cities
       operationId: getCity
       summary: Get a city with neighborhoods
+      description: Only admin users can perform this operation.
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/CityId'
       responses:
@@ -148,6 +151,10 @@ paths:
                 $ref: '#/components/schemas/CityResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
     delete:
@@ -156,31 +163,56 @@ paths:
       operationId: removeCity
       summary: Remove a city with neighborhoods
       description: Removes a platform-managed city with its neighborhoods. Only admin users can perform this operation, and removal is rejected while users belong to any of the city's neighborhoods.
+      security:
+        - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/ActingUserId'
         - $ref: '#/components/parameters/CityId'
       responses:
         '204':
           description: City and neighborhoods removed.
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+  /internal/users/{userId}/neighborhood:
+    get:
+      tags:
+        - Users
+      operationId: getUserNeighborhoodForService
+      summary: Resolve a user's neighborhood for an internal service
+      description: Internal service-to-service endpoint. Requires a service JWT with ROLE_SERVICE and audience user-service.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Minimal neighborhood membership data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNeighborhoodResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
-    ActingUserId:
-      name: X-User-Id
-      in: header
-      required: true
-      description: Authenticated acting user identifier.
-      schema:
-        type: integer
-        format: int64
-        minimum: 1
     UserId:
       name: userId
       in: path
@@ -212,6 +244,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     NotFound:
       description: Requested resource was not found.
       content:
@@ -225,6 +263,20 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
   schemas:
+    UserNeighborhoodResponse:
+      type: object
+      required:
+        - userId
+        - neighborhoodId
+      properties:
+        userId:
+          type: integer
+          format: int64
+          example: 2
+        neighborhoodId:
+          type: integer
+          format: int64
+          example: 10
     SignUpRequest:
       type: object
       required:
@@ -281,6 +333,17 @@ components:
           format: password
           writeOnly: true
           example: "correct-horse-battery-staple"
+    LogInResponse:
+      type: object
+      required:
+        - token
+        - user
+      properties:
+        token:
+          type: string
+          description: JWT bearer token.
+        user:
+          $ref: '#/components/schemas/UserResponse'
     UpdateProfileRequest:
       type: object
       required:

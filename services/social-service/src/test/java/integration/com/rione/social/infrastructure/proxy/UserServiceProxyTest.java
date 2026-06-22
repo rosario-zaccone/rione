@@ -2,6 +2,9 @@ package com.rione.social.infrastructure.proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -16,6 +19,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 import com.rione.social.domain.model.UserId;
+import com.rione.social.infrastructure.config.JwtService;
 
 class UserServiceProxyTest {
 
@@ -26,7 +30,9 @@ class UserServiceProxyTest {
 	void setUp() {
 		RestClient.Builder builder = RestClient.builder();
 		server = MockRestServiceServer.bindTo(builder).build();
-		proxy = new UserServiceProxy(builder, "http://user-service.test");
+		JwtService jwtService = mock(JwtService.class);
+		when(jwtService.createServiceToken()).thenReturn("service-token");
+		proxy = new UserServiceProxy(builder, "http://user-service.test", jwtService);
 	}
 
 	@Test
@@ -52,7 +58,9 @@ class UserServiceProxyTest {
 	@Test
 	void returnsFalseWhenAUserDoesNotExistInUserService() {
 		userServiceReturns(1L, 10L);
-		server.expect(once(), requestTo("http://user-service.test/users/2")).andRespond(withStatus(HttpStatus.NOT_FOUND));
+		server.expect(once(), requestTo("http://user-service.test/internal/users/2/neighborhood"))
+			.andExpect(header("Authorization", "Bearer service-token"))
+			.andRespond(withStatus(HttpStatus.NOT_FOUND));
 
 		assertThat(proxy.sameNeighborhood(new UserId(1L), new UserId(2L))).isFalse();
 
@@ -62,7 +70,9 @@ class UserServiceProxyTest {
 	@Test
 	void failsWhenUserServiceCannotResolveNeighborhood() {
 		userServiceReturns(1L, 10L);
-		server.expect(once(), requestTo("http://user-service.test/users/2")).andRespond(withServerError());
+		server.expect(once(), requestTo("http://user-service.test/internal/users/2/neighborhood"))
+			.andExpect(header("Authorization", "Bearer service-token"))
+			.andRespond(withServerError());
 
 		assertThatThrownBy(() -> proxy.sameNeighborhood(new UserId(1L), new UserId(2L)))
 			.isInstanceOf(IllegalStateException.class)
@@ -72,7 +82,8 @@ class UserServiceProxyTest {
 	}
 
 	private void userServiceReturns(Long userId, Long neighborhoodId) {
-		server.expect(once(), requestTo("http://user-service.test/users/" + userId))
+		server.expect(once(), requestTo("http://user-service.test/internal/users/" + userId + "/neighborhood"))
+			.andExpect(header("Authorization", "Bearer service-token"))
 			.andRespond(withSuccess("{\"id\":" + userId + ",\"neighborhoodId\":" + neighborhoodId + "}",
 					MediaType.APPLICATION_JSON));
 	}

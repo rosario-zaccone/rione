@@ -11,8 +11,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.rione.social.application.port.in.SocialService.BlockUserCommand;
+import com.rione.social.application.port.in.SocialService.BlockResponse;
+import com.rione.social.application.port.in.SocialService.Actor;
 import com.rione.social.application.port.in.SocialService.NeighborhoodChangedCommand;
 import com.rione.social.application.port.in.SocialService.NeighborRequestResponse;
+import com.rione.social.application.port.in.SocialService.RemoveNeighborshipCommand;
 import com.rione.social.application.port.in.SocialService.SendNeighborRequestCommand;
 import com.rione.social.application.port.in.SocialService.UnblockUserCommand;
 import com.rione.social.application.port.out.BlockRepository;
@@ -49,6 +52,8 @@ public class SocialStepDefinitions {
 	private BlockRepository blocks;
 	private NeighborhoodMembership neighborhoods;
 	private NeighborRequestResponse requestResponse;
+	private List<NeighborRequestResponse> neighborRequestResponses;
+	private List<BlockResponse> blockResponses;
 	private Throwable thrown;
 
 	@Before
@@ -68,6 +73,8 @@ public class SocialStepDefinitions {
 		stubBlockRepository();
 		service = new SocialServiceImpl(requests, neighborships, blocks, neighborhoods);
 		requestResponse = null;
+		neighborRequestResponses = List.of();
+		blockResponses = List.of();
 		thrown = null;
 	}
 
@@ -121,7 +128,7 @@ public class SocialStepDefinitions {
 
 	@When("the request is accepted")
 	public void theRequestIsAccepted() {
-		requestResponse = service.acceptNeighborRequest(requestResponse.id());
+		requestResponse = service.acceptNeighborRequest(requestResponse.id(), new Actor(requestResponse.receiverId()));
 	}
 
 	@When("user {long} blocks user {long}")
@@ -134,9 +141,34 @@ public class SocialStepDefinitions {
 		service.unblockUser(new UnblockUserCommand(blockerId, blockedId));
 	}
 
+	@When("user {long} puts a block for user {long}")
+	public void userPutsABlockForUser(Long blockerId, Long blockedId) {
+		thrown = catchThrowable(() -> service.putBlock(new BlockUserCommand(blockerId, blockedId)));
+	}
+
+	@When("user {long} removes the neighborship with user {long}")
+	public void userRemovesTheNeighborshipWithUser(Long userId, Long neighborId) {
+		thrown = catchThrowable(() -> service.removeNeighborship(new RemoveNeighborshipCommand(userId, neighborId)));
+	}
+
 	@When("social relationships are reconciled for user {long}")
 	public void socialRelationshipsAreReconciledForUser(Long userId) {
 		service.reconcileRelationshipsAfterNeighborhoodChange(new NeighborhoodChangedCommand(userId));
+	}
+
+	@When("user {long} lists blocked users")
+	public void userListsBlockedUsers(Long userId) {
+		blockResponses = service.getBlocks(userId);
+	}
+
+	@When("user {long} lists sent neighbour requests")
+	public void userListsSentNeighbourRequests(Long userId) {
+		neighborRequestResponses = service.getSentNeighborRequests(userId);
+	}
+
+	@When("user {long} lists received neighbour requests")
+	public void userListsReceivedNeighbourRequests(Long userId) {
+		neighborRequestResponses = service.getReceivedNeighborRequests(userId);
 	}
 
 	@Then("the neighbour request is created")
@@ -163,9 +195,46 @@ public class SocialStepDefinitions {
 		assertThat(neighborshipExists(secondUser, firstUser)).isFalse();
 	}
 
+	@Then("exactly one block exists from user {long} to user {long}")
+	public void exactlyOneBlockExistsFromUserToUser(Long blockerId, Long blockedId) {
+		assertThat(savedBlocks).filteredOn(block -> block.blocker().equals(new UserId(blockerId))
+				&& block.blocked().equals(new UserId(blockedId)))
+			.hasSize(1);
+	}
+
 	@Then("user {long} is no longer blocked by user {long}")
 	public void userIsNoLongerBlockedByUser(Long blockedId, Long blockerId) {
 		assertThat(blockExists(blockerId, blockedId)).isFalse();
+	}
+
+	@Then("the blocked users list contains user {long}")
+	public void theBlockedUsersListContainsUser(Long blockedId) {
+		assertThat(blockResponses).extracting(BlockResponse::blockedId).contains(blockedId);
+	}
+
+	@Then("the blocked users list does not contain user {long}")
+	public void theBlockedUsersListDoesNotContainUser(Long blockedId) {
+		assertThat(blockResponses).extracting(BlockResponse::blockedId).doesNotContain(blockedId);
+	}
+
+	@Then("the sent neighbour request list contains a request to user {long}")
+	public void theSentNeighbourRequestListContainsARequestToUser(Long receiverId) {
+		assertThat(neighborRequestResponses).extracting(NeighborRequestResponse::receiverId).contains(receiverId);
+	}
+
+	@Then("the sent neighbour request list does not contain a request from user {long}")
+	public void theSentNeighbourRequestListDoesNotContainARequestFromUser(Long senderId) {
+		assertThat(neighborRequestResponses).extracting(NeighborRequestResponse::senderId).doesNotContain(senderId);
+	}
+
+	@Then("the received neighbour request list contains a request from user {long}")
+	public void theReceivedNeighbourRequestListContainsARequestFromUser(Long senderId) {
+		assertThat(neighborRequestResponses).extracting(NeighborRequestResponse::senderId).contains(senderId);
+	}
+
+	@Then("the received neighbour request list does not contain a request to user {long}")
+	public void theReceivedNeighbourRequestListDoesNotContainARequestToUser(Long receiverId) {
+		assertThat(neighborRequestResponses).extracting(NeighborRequestResponse::receiverId).doesNotContain(receiverId);
 	}
 
 	@Then("the neighborship between user {long} and user {long} is not restored")
@@ -195,6 +264,14 @@ public class SocialStepDefinitions {
 			NeighborRequestId id = invocation.getArgument(0);
 			return savedRequests.stream().filter(request -> request.id().equals(id)).findFirst();
 		});
+		when(requests.findBySender(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> {
+			UserId sender = invocation.getArgument(0);
+			return savedRequests.stream().filter(request -> request.sender().equals(sender)).toList();
+		});
+		when(requests.findByReceiver(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> {
+			UserId receiver = invocation.getArgument(0);
+			return savedRequests.stream().filter(request -> request.receiver().equals(receiver)).toList();
+		});
 		when(requests.existsPendingBetween(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
 			.thenAnswer(invocation -> pendingRequestExists((UserId) invocation.getArgument(0),
 					(UserId) invocation.getArgument(1)));
@@ -216,12 +293,6 @@ public class SocialStepDefinitions {
 			Neighborship saved = saveNeighborship(invocation.getArgument(0));
 			return saved;
 		});
-		when(neighborships.findByFollower(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> {
-			UserId follower = invocation.getArgument(0);
-			return savedNeighborships.stream()
-				.filter(neighborship -> neighborship.follower().equals(follower))
-				.toList();
-		});
 		when(neighborships.findByParticipant(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> {
 			UserId userId = invocation.getArgument(0);
 			return savedNeighborships.stream().filter(neighborship -> neighborship.involves(userId)).toList();
@@ -229,6 +300,12 @@ public class SocialStepDefinitions {
 		when(neighborships.exists(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
 			.thenAnswer(invocation -> neighborshipExists((UserId) invocation.getArgument(0),
 					(UserId) invocation.getArgument(1)));
+		when(neighborships.existsBetween(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+			.thenAnswer(invocation -> {
+				UserId firstUser = invocation.getArgument(0);
+				UserId secondUser = invocation.getArgument(1);
+				return neighborshipExists(firstUser, secondUser) || neighborshipExists(secondUser, firstUser);
+			});
 		org.mockito.Mockito.doAnswer(invocation -> {
 			UserId firstUser = invocation.getArgument(0);
 			UserId secondUser = invocation.getArgument(1);
@@ -249,6 +326,18 @@ public class SocialStepDefinitions {
 			savedBlocks.add(saved);
 			return saved;
 		});
+		when(blocks.findByBlocker(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> {
+			UserId blocker = invocation.getArgument(0);
+			return savedBlocks.stream().filter(block -> block.blocker().equals(blocker)).toList();
+		});
+		when(blocks.findBetween(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+			.thenAnswer(invocation -> {
+				UserId blocker = invocation.getArgument(0);
+				UserId blocked = invocation.getArgument(1);
+				return savedBlocks.stream()
+					.filter(block -> block.blocker().equals(blocker) && block.blocked().equals(blocked))
+					.findFirst();
+			});
 		when(blocks.existsBetween(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
 			.thenAnswer(invocation -> blockExists((UserId) invocation.getArgument(0), (UserId) invocation.getArgument(1)));
 		org.mockito.Mockito.doAnswer(invocation -> {

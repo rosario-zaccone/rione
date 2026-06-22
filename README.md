@@ -23,6 +23,10 @@ PGADMIN_DEFAULT_PASSWORD=password
 
 The `.env` file is ignored by Git and is intended only for local development.
 
+## Local Seed Data
+
+The local user dataset is documented in `state.md`, which is ignored by Git so it can stay in sync with local manual tests without polluting the repository history.
+
 ## Start the Backend
 
 From the project root, build and start all backend containers:

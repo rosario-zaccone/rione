@@ -13,13 +13,17 @@ public class Neighborship {
 	private final LocalDateTime date;
 
 	private Neighborship(NeighborshipId id, UserId follower, UserId followed, LocalDateTime date) {
-		if (follower.equals(followed)) {
-			throw new DomainException("Neighborship users must be different");
-		}
+		validateUsers(follower, followed);
 		this.id = id;
 		this.follower = follower;
 		this.followed = followed;
 		this.date = date == null ? LocalDateTime.now() : date;
+	}
+
+	public static void validateUsers(UserId firstUser, UserId secondUser) {
+		if (firstUser.equals(secondUser)) {
+			throw new DomainException("Neighborship users must be different");
+		}
 	}
 
 	public static Neighborship create(UserId follower, UserId followed, LocalDateTime date) {
@@ -48,5 +52,15 @@ public class Neighborship {
 
 	public boolean involves(UserId userId) {
 		return follower.equals(userId) || followed.equals(userId);
+	}
+
+	public UserId counterpartOf(UserId userId) {
+		if (follower.equals(userId)) {
+			return followed;
+		}
+		if (followed.equals(userId)) {
+			return follower;
+		}
+		throw new DomainException("User is not part of this neighborship");
 	}
 }

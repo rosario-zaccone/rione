@@ -25,6 +25,12 @@ public class UserExceptionHandler {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
 	}
 
+	@ExceptionHandler(AuthorizationException.class)
+	ProblemDetail handleAuthorization(AuthorizationException exception) {
+		HttpStatus status = exception.isUnauthenticated() ? HttpStatus.UNAUTHORIZED : HttpStatus.FORBIDDEN;
+		return ProblemDetail.forStatusAndDetail(status, exception.getMessage());
+	}
+
 	@ExceptionHandler({ MethodArgumentNotValidException.class, ConstraintViolationException.class })
 	ProblemDetail handleValidation(Exception exception) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Request validation failed");

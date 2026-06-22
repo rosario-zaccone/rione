@@ -60,6 +60,8 @@ class JpaSocialRepositoriesIT {
 			.get()
 			.extracting(NeighborRequest::status, request -> request.sender().value(), request -> request.receiver().value())
 			.containsExactly(RequestStatus.PENDING, 1L, 2L);
+		assertThat(neighborRequests.findBySender(new UserId(1L))).hasSize(1);
+		assertThat(neighborRequests.findByReceiver(new UserId(2L))).hasSize(1);
 		assertThat(neighborRequests.existsPendingBetween(new UserId(2L), new UserId(1L))).isTrue();
 		assertThat(neighborRequests.findPendingInvolving(new UserId(1L))).hasSize(1);
 	}
@@ -69,9 +71,9 @@ class JpaSocialRepositoriesIT {
 		neighborships.save(Neighborship.create(new UserId(1L), new UserId(2L), LocalDateTime.now()));
 		neighborships.save(Neighborship.create(new UserId(2L), new UserId(1L), LocalDateTime.now()));
 
-		assertThat(neighborships.findByFollower(new UserId(1L))).hasSize(1);
 		assertThat(neighborships.findByParticipant(new UserId(1L))).hasSize(2);
 		assertThat(neighborships.exists(new UserId(1L), new UserId(2L))).isTrue();
+		assertThat(neighborships.existsBetween(new UserId(2L), new UserId(1L))).isTrue();
 
 		neighborships.deleteBetween(new UserId(1L), new UserId(2L));
 
@@ -81,9 +83,17 @@ class JpaSocialRepositoriesIT {
 	@Test
 	void savesDetectsAndDeletesBlock() {
 		Block saved = blocks.save(Block.create(new UserId(1L), new UserId(2L)));
+		blocks.save(Block.create(new UserId(1L), new UserId(3L)));
+		blocks.save(Block.create(new UserId(4L), new UserId(5L)));
 
 		assertThat(saved.id()).isNotNull();
+		assertThat(blocks.findByBlocker(new UserId(1L)))
+			.extracting(block -> block.blocked().value())
+			.containsExactlyInAnyOrder(2L, 3L);
 		assertThat(blocks.existsBetween(new UserId(1L), new UserId(2L))).isTrue();
+		assertThat(blocks.findBetween(new UserId(1L), new UserId(2L))).get()
+			.extracting(block -> block.id().value())
+			.isEqualTo(saved.id().value());
 
 		blocks.deleteBetween(new UserId(1L), new UserId(2L));
 

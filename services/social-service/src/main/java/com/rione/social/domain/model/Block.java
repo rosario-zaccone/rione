@@ -10,12 +10,16 @@ public class Block {
 	private final UserId blocked;
 
 	private Block(BlockId id, UserId blocker, UserId blocked) {
-		if (blocker.equals(blocked)) {
-			throw new DomainException("Blocker and blocked user must be different users");
-		}
+		validateUsers(blocker, blocked);
 		this.id = id;
 		this.blocker = blocker;
 		this.blocked = blocked;
+	}
+
+	public static void validateUsers(UserId blocker, UserId blocked) {
+		if (blocker.equals(blocked)) {
+			throw new DomainException("Blocker and blocked user must be different users");
+		}
 	}
 
 	public static Block create(UserId blocker, UserId blocked) {

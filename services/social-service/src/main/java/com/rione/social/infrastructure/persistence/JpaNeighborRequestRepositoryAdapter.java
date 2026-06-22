@@ -32,6 +32,16 @@ class JpaNeighborRequestRepositoryAdapter implements NeighborRequestRepository {
 	}
 
 	@Override
+	public List<NeighborRequest> findBySender(UserId sender) {
+		return repository.findBySenderId(sender.value()).stream().map(this::toDomain).toList();
+	}
+
+	@Override
+	public List<NeighborRequest> findByReceiver(UserId receiver) {
+		return repository.findByReceiverId(receiver.value()).stream().map(this::toDomain).toList();
+	}
+
+	@Override
 	public boolean existsPendingBetween(UserId sender, UserId receiver) {
 		return repository.existsByStatusAndSenderIdAndReceiverId(RequestStatus.PENDING, sender.value(),
 				receiver.value())

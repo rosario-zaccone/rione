@@ -15,6 +15,8 @@ public interface UserService {
 
 	UserResponse getUser(Long userId);
 
+	UserNeighborhoodResponse getUserNeighborhood(Long userId);
+
 	record SignUpCommand(String name, String surname, String username, String mail, String password,
 			Long neighborhoodId, LocalDateTime birthDate, String bio) {
 	}
@@ -28,5 +30,8 @@ public interface UserService {
 
 	record UserResponse(Long id, String name, String surname, String username, String mail, Long neighborhoodId,
 			LocalDateTime birthDate, String bio, boolean admin) {
+	}
+
+	record UserNeighborhoodResponse(Long userId, Long neighborhoodId) {
 	}
 }

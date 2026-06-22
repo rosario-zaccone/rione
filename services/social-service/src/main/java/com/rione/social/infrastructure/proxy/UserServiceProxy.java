@@ -11,15 +11,19 @@ import org.springframework.web.client.RestClientResponseException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.rione.social.application.port.out.NeighborhoodMembership;
 import com.rione.social.domain.model.UserId;
+import com.rione.social.infrastructure.config.JwtService;
 
 @Component
 class UserServiceProxy implements NeighborhoodMembership {
 
 	private final RestClient restClient;
+	private final JwtService jwtService;
 
 	UserServiceProxy(RestClient.Builder restClientBuilder,
-			@Value("${rione.clients.user-service.base-url:http://localhost:8081}") String userServiceBaseUrl) {
+			@Value("${rione.clients.user-service.base-url:http://localhost:8081}") String userServiceBaseUrl,
+			JwtService jwtService) {
 		this.restClient = restClientBuilder.baseUrl(userServiceBaseUrl).build();
+		this.jwtService = jwtService;
 	}
 
 	@Override
@@ -32,7 +36,8 @@ class UserServiceProxy implements NeighborhoodMembership {
 	private Optional<Long> neighborhoodOf(UserId userId) {
 		try {
 			UserResponse response = restClient.get()
-				.uri("/users/{userId}", userId.value())
+				.uri("/internal/users/{userId}/neighborhood", userId.value())
+				.header("Authorization", "Bearer " + jwtService.createServiceToken())
 				.retrieve()
 				.body(UserResponse.class);
 			return response == null ? Optional.empty() : Optional.ofNullable(response.neighborhoodId());
@@ -49,6 +54,6 @@ class UserServiceProxy implements NeighborhoodMembership {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	record UserResponse(Long neighborhoodId) {
+	record UserResponse(Long userId, Long neighborhoodId) {
 	}
 }

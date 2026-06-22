@@ -1,5 +1,6 @@
 package com.rione.social;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -15,7 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import com.rione.social.application.port.in.SocialService.Actor;
 import com.rione.social.application.port.in.SocialService.BlockUserCommand;
+import com.rione.social.application.port.in.SocialService.RemoveNeighborshipCommand;
 import com.rione.social.application.port.in.SocialService.NeighborhoodChangedCommand;
 import com.rione.social.application.port.in.SocialService.NeighborRequestResponse;
 import com.rione.social.application.port.in.SocialService.SendNeighborRequestCommand;
@@ -25,6 +28,7 @@ import com.rione.social.application.port.out.NeighborRequestRepository;
 import com.rione.social.application.port.out.NeighborhoodMembership;
 import com.rione.social.application.port.out.NeighborshipRepository;
 import com.rione.social.application.service.SocialApplicationException;
+import com.rione.social.application.service.SocialNotFoundException;
 import com.rione.social.application.service.SocialServiceImpl;
 import com.rione.social.domain.model.Block;
 import com.rione.social.domain.model.BlockId;
@@ -89,13 +93,35 @@ class SocialServiceImplTest {
 	}
 
 	@Test
+	void listsSentNeighborRequestsForUser() {
+		when(requests.findBySender(new UserId(1L))).thenReturn(List.of(
+				NeighborRequest.restore(new NeighborRequestId(1L), new UserId(1L), new UserId(2L), LocalDateTime.now(),
+						RequestStatus.PENDING)));
+
+		assertThat(service.getSentNeighborRequests(1L))
+			.extracting(response -> response.senderId(), response -> response.receiverId(), response -> response.status())
+			.containsExactly(org.assertj.core.groups.Tuple.tuple(1L, 2L, "PENDING"));
+	}
+
+	@Test
+	void listsReceivedNeighborRequestsForUser() {
+		when(requests.findByReceiver(new UserId(1L))).thenReturn(List.of(
+				NeighborRequest.restore(new NeighborRequestId(2L), new UserId(3L), new UserId(1L), LocalDateTime.now(),
+						RequestStatus.PENDING)));
+
+		assertThat(service.getReceivedNeighborRequests(1L))
+			.extracting(response -> response.senderId(), response -> response.receiverId(), response -> response.status())
+			.containsExactly(org.assertj.core.groups.Tuple.tuple(3L, 1L, "PENDING"));
+	}
+
+	@Test
 	void acceptingRequestCreatesReciprocalNeighborship() {
 		NeighborRequest request = NeighborRequest.restore(new NeighborRequestId(10L), new UserId(1L), new UserId(2L),
 				LocalDateTime.of(2026, 1, 1, 0, 0), RequestStatus.PENDING);
 		when(requests.findById(new NeighborRequestId(10L))).thenReturn(Optional.of(request));
 		when(neighborships.exists(any(), any())).thenReturn(false);
 
-		service.acceptNeighborRequest(10L);
+		service.acceptNeighborRequest(10L, new Actor(2L));
 
 		verify(requests).save(request);
 		ArgumentCaptor<Neighborship> captor = ArgumentCaptor.forClass(Neighborship.class);
@@ -113,7 +139,7 @@ class SocialServiceImplTest {
 		when(requests.findById(new NeighborRequestId(10L))).thenReturn(Optional.of(request));
 		givenDifferentNeighborhoods(1L, 2L);
 
-		assertThatThrownBy(() -> service.acceptNeighborRequest(10L))
+		assertThatThrownBy(() -> service.acceptNeighborRequest(10L, new Actor(2L)))
 			.isInstanceOf(SocialApplicationException.class)
 			.hasMessage("Users must belong to the same neighborhood");
 
@@ -135,11 +161,122 @@ class SocialServiceImplTest {
 	}
 
 	@Test
+	void rejectsAcceptingRequestWhenActorIsNotReceiver() {
+		NeighborRequest request = NeighborRequest.restore(new NeighborRequestId(10L), new UserId(1L), new UserId(2L),
+				LocalDateTime.of(2026, 1, 1, 0, 0), RequestStatus.PENDING);
+		when(requests.findById(new NeighborRequestId(10L))).thenReturn(Optional.of(request));
+
+		assertThatThrownBy(() -> service.acceptNeighborRequest(10L, new Actor(1L)))
+			.isInstanceOf(com.rione.social.application.service.SocialAuthorizationException.class)
+			.hasMessage("Access is forbidden");
+
+		verify(requests, never()).save(any());
+		verify(neighborships, never()).save(any());
+	}
+
+	@Test
+	void rejectsAdminWhoIsNotTheRequestReceiver() {
+		NeighborRequest request = NeighborRequest.restore(new NeighborRequestId(10L), new UserId(1L), new UserId(2L),
+				LocalDateTime.of(2026, 1, 1, 0, 0), RequestStatus.PENDING);
+		when(requests.findById(new NeighborRequestId(10L))).thenReturn(Optional.of(request));
+		assertThatThrownBy(() -> service.acceptNeighborRequest(10L, new Actor(99L)))
+			.isInstanceOf(com.rione.social.application.service.SocialAuthorizationException.class)
+			.hasMessage("Access is forbidden");
+
+		verify(requests, never()).save(any());
+	}
+
+	@Test
 	void unblockingRemovesBlockWithoutRestoringNeighborship() {
 		service.unblockUser(new UnblockUserCommand(1L, 2L));
 
 		verify(blocks).deleteBetween(new UserId(1L), new UserId(2L));
 		verify(neighborships, never()).save(any());
+	}
+
+	@Test
+	void putBlockCreatesBlockWhenMissing() {
+		when(blocks.findBetween(new UserId(1L), new UserId(2L))).thenReturn(Optional.empty());
+
+		var result = service.putBlock(new BlockUserCommand(1L, 2L));
+
+		assertThat(result.created()).isTrue();
+		assertThat(result.block()).extracting(response -> response.blockerId(), response -> response.blockedId())
+			.containsExactly(1L, 2L);
+		verify(blocks).save(any(Block.class));
+		verify(neighborships).deleteBetween(new UserId(1L), new UserId(2L));
+	}
+
+	@Test
+	void putBlockReturnsExistingBlockWithoutCreatingDuplicate() {
+		Block existing = Block.restore(new BlockId(7L), new UserId(1L), new UserId(2L));
+		when(blocks.findBetween(new UserId(1L), new UserId(2L))).thenReturn(Optional.of(existing));
+
+		var result = service.putBlock(new BlockUserCommand(1L, 2L));
+
+		assertThat(result.created()).isFalse();
+		assertThat(result.block().id()).isEqualTo(7L);
+		verify(blocks, never()).save(any());
+		verify(neighborships, never()).deleteBetween(any(), any());
+	}
+
+	@Test
+	void removesExistingNeighborshipRegardlessOfStoredDirection() {
+		when(neighborships.findByParticipant(new UserId(1L))).thenReturn(List.of(
+				Neighborship.restore(new NeighborshipId(1L), new UserId(2L), new UserId(1L), LocalDateTime.now())));
+
+		service.removeNeighborship(new RemoveNeighborshipCommand(1L, 2L));
+
+		verify(neighborships).deleteBetween(new UserId(1L), new UserId(2L));
+	}
+
+	@Test
+	void rejectsRemovingMissingNeighborship() {
+		when(neighborships.findByParticipant(new UserId(1L))).thenReturn(List.of());
+
+		assertThatThrownBy(() -> service.removeNeighborship(new RemoveNeighborshipCommand(1L, 2L)))
+			.isInstanceOf(SocialNotFoundException.class)
+			.hasMessage("Neighborship not found");
+
+		verify(neighborships, never()).deleteBetween(any(), any());
+	}
+
+	@Test
+	void rejectsRemovingNeighborshipWithSelf() {
+		assertThatThrownBy(() -> service.removeNeighborship(new RemoveNeighborshipCommand(1L, 1L)))
+			.isInstanceOf(DomainException.class)
+			.hasMessage("Neighborship users must be different");
+	}
+
+	@Test
+	void rejectsUnblockingSelf() {
+		assertThatThrownBy(() -> service.unblockUser(new UnblockUserCommand(1L, 1L)))
+			.isInstanceOf(DomainException.class)
+			.hasMessage("Blocker and blocked user must be different users");
+	}
+
+	@Test
+	void listsBlocksCreatedByUser() {
+		when(blocks.findByBlocker(new UserId(1L))).thenReturn(List.of(Block.restore(new BlockId(1L), new UserId(1L),
+				new UserId(2L)), Block.restore(new BlockId(2L), new UserId(1L), new UserId(3L))));
+
+		assertThat(service.getBlocks(1L))
+			.extracting(response -> response.blockerId(), response -> response.blockedId())
+			.containsExactly(org.assertj.core.groups.Tuple.tuple(1L, 2L),
+					org.assertj.core.groups.Tuple.tuple(1L, 3L));
+	}
+
+	@Test
+	void listsUniqueNeighborsForUserFromAnyDirection() {
+		when(neighborships.findByParticipant(new UserId(1L))).thenReturn(List.of(
+				Neighborship.restore(new NeighborshipId(1L), new UserId(1L), new UserId(2L), LocalDateTime.now()),
+				Neighborship.restore(new NeighborshipId(2L), new UserId(2L), new UserId(1L), LocalDateTime.now()),
+				Neighborship.restore(new NeighborshipId(3L), new UserId(3L), new UserId(1L), LocalDateTime.now())));
+
+		assertThat(service.getNeighbors(1L))
+			.extracting(response -> response.userId(), response -> response.neighborId())
+			.containsExactly(org.assertj.core.groups.Tuple.tuple(1L, 2L),
+					org.assertj.core.groups.Tuple.tuple(1L, 3L));
 	}
 
 	@Test

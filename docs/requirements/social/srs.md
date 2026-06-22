@@ -1,6 +1,6 @@
 # Social Service Software Requirements Specification
-**Version:** v0.3.0  
-**Last Updated:** 2026-06-17
+**Version:** v0.3.2  
+**Last Updated:** 2026-06-20
 
 ## 1. Scope
 
@@ -74,7 +74,17 @@ The service shall allow a registered user to unblock a user they previously bloc
 - Unblocking does not recreate previous neighbour connections or pending requests.
 - Unblocking a user who is not currently blocked creates no duplicate side effects.
 
-### SOC-FR-007 - Reconcile Relationships After Neighborhood Change
+### SOC-FR-007 - List Blocked Users
+
+The service shall allow a registered user to list the users they have blocked.
+
+**Acceptance Criteria**
+- The requester can retrieve the blocks they created.
+- The response identifies each blocked user.
+- Users with no blocked users receive an empty list.
+- Blocks created by other users are not included.
+
+### SOC-FR-008 - Reconcile Relationships After Neighborhood Change
 
 The service shall reconcile social relationships when a user changes neighborhood.
 
@@ -83,6 +93,16 @@ The service shall reconcile social relationships when a user changes neighborhoo
 - Pending neighbour requests with users outside the new neighborhood are removed.
 - Relationships with users who remain in the same neighborhood are preserved.
 - Historical posts, comments, reactions, and notifications are preserved.
+
+### SOC-FR-009 - List Neighbour Requests By User
+
+The service shall allow a registered user to list neighbour requests they sent and neighbour requests they received.
+
+**Acceptance Criteria**
+- The user can retrieve neighbour requests they sent.
+- The user can retrieve neighbour requests they received.
+- Sent and received requests are returned by separate operations.
+- Requests involving other users are not included.
 
 ## 4. Business Rules
 
@@ -94,6 +114,8 @@ The service shall reconcile social relationships when a user changes neighborhoo
 - **SOC-BR-006:** Blocking takes precedence over neighbour connections, search visibility, requests, reactions, comments, and notifications.
 - **SOC-BR-007:** Unblocking removes the block but does not restore previous neighbour connections or pending requests.
 - **SOC-BR-008:** When a user changes neighborhood, the platform removes neighbour connections and pending neighbour requests with users who no longer belong to the same neighborhood.
+- **SOC-BR-009:** A user can only list blocks they created.
+- **SOC-BR-010:** A user can only list neighbour requests they sent or received.
 
 ## 5. Non-Functional Requirements
 
@@ -111,4 +133,6 @@ The service shall reconcile social relationships when a user changes neighborhoo
 | SOC-FR-004 | SOC-US-004 | SOC-BR-005 |
 | SOC-FR-005 | SOC-US-005 | SOC-BR-005, SOC-BR-006 |
 | SOC-FR-006 | SOC-US-006 | SOC-BR-006, SOC-BR-007 |
-| SOC-FR-007 | SOC-US-007 | SOC-BR-001, SOC-BR-005, SOC-BR-008 |
+| SOC-FR-007 | SOC-US-007 | SOC-BR-009 |
+| SOC-FR-008 | SOC-US-008 | SOC-BR-001, SOC-BR-005, SOC-BR-008 |
+| SOC-FR-009 | SOC-US-009 | SOC-BR-010 |

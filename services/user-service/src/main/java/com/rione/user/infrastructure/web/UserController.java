@@ -26,9 +26,13 @@ import jakarta.validation.constraints.Size;
 public class UserController {
 
 	private final UserService userService;
+	private final JwtService jwtService;
+	private final CurrentUser currentUser;
 
-	public UserController(UserService userService) {
+	public UserController(UserService userService, JwtService jwtService, CurrentUser currentUser) {
 		this.userService = userService;
+		this.jwtService = jwtService;
+		this.currentUser = currentUser;
 	}
 
 	@PostMapping
@@ -40,18 +44,19 @@ public class UserController {
 	}
 
 	@PostMapping("/login")
-	UserService.UserResponse logIn(@Valid @RequestBody LogInRequest request) {
-		return userService.logIn(new UserService.LogInCommand(request.mail(), request.password()));
+	LogInResponse logIn(@Valid @RequestBody LogInRequest request) {
+		UserService.UserResponse user = userService.logIn(new UserService.LogInCommand(request.mail(), request.password()));
+		return new LogInResponse(jwtService.createToken(user.id(), user.admin()), user);
 	}
 
-	@GetMapping("/{userId}")
-	UserService.UserResponse getUser(@PathVariable @Positive Long userId) {
-		return userService.getUser(userId);
+	@GetMapping("/me")
+	UserService.UserResponse getCurrentUser() {
+		return userService.getUser(currentUser.id());
 	}
 
-	@PutMapping("/{userId}/profile")
-	UserService.UserResponse updateProfile(@PathVariable @Positive Long userId,
-			@Valid @RequestBody UpdateProfileRequest request) {
+	@PutMapping("/me/profile")
+	UserService.UserResponse updateCurrentUserProfile(@Valid @RequestBody UpdateProfileRequest request) {
+		Long userId = currentUser.id();
 		return userService.updateProfile(new UserService.UpdateProfileCommand(userId, request.name(), request.surname(),
 				request.username(), request.neighborhoodId(), request.birthDate(), request.bio()));
 	}
@@ -63,6 +68,9 @@ public class UserController {
 	}
 
 	record LogInRequest(@NotBlank @Email String mail, @NotBlank String password) {
+	}
+
+	record LogInResponse(String token, UserService.UserResponse user) {
 	}
 
 	record UpdateProfileRequest(@NotBlank @Size(max = 80) String name, @NotBlank @Size(max = 80) String surname,

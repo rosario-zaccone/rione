@@ -8,8 +8,6 @@ import com.rione.social.infrastructure.persistence.entity.NeighborshipJpaEntity;
 
 interface SpringDataNeighborshipJpaRepository extends JpaRepository<NeighborshipJpaEntity, Long> {
 
-	List<NeighborshipJpaEntity> findByFollowerId(Long followerId);
-
 	List<NeighborshipJpaEntity> findByFollowerIdOrFollowedId(Long followerId, Long followedId);
 
 	boolean existsByFollowerIdAndFollowedId(Long followerId, Long followedId);

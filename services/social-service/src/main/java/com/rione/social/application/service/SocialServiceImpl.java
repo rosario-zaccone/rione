@@ -1,7 +1,9 @@
 package com.rione.social.application.service;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -53,8 +55,9 @@ public class SocialServiceImpl implements SocialService {
 	}
 
 	@Override
-	public NeighborRequestResponse acceptNeighborRequest(Long requestId) {
+	public NeighborRequestResponse acceptNeighborRequest(Long requestId, Actor actor) {
 		NeighborRequest request = findRequest(requestId);
+		requireReceiver(request, actor);
 		if (!neighborhoodMembership.sameNeighborhood(request.sender(), request.receiver())) {
 			throw new SocialApplicationException("Users must belong to the same neighborhood");
 		}
@@ -66,20 +69,46 @@ public class SocialServiceImpl implements SocialService {
 	}
 
 	@Override
-	public NeighborRequestResponse rejectNeighborRequest(Long requestId) {
+	public NeighborRequestResponse rejectNeighborRequest(Long requestId, Actor actor) {
 		NeighborRequest request = findRequest(requestId);
+		requireReceiver(request, actor);
 		request.reject();
 		return toResponse(neighborRequests.save(request));
 	}
 
 	@Override
-	public NeighborRequestResponse getNeighborRequest(Long requestId) {
-		return toResponse(findRequest(requestId));
+	public List<NeighborRequestResponse> getSentNeighborRequests(Long userId) {
+		return neighborRequests.findBySender(new UserId(userId)).stream().map(this::toResponse).toList();
 	}
 
 	@Override
-	public List<NeighborshipResponse> getNeighborships(Long followerId) {
-		return neighborships.findByFollower(new UserId(followerId)).stream().map(this::toResponse).toList();
+	public List<NeighborRequestResponse> getReceivedNeighborRequests(Long userId) {
+		return neighborRequests.findByReceiver(new UserId(userId)).stream().map(this::toResponse).toList();
+	}
+
+	@Override
+	public List<NeighborResponse> getNeighbors(Long userId) {
+		UserId user = new UserId(userId);
+		Map<Long, NeighborResponse> neighborsById = new LinkedHashMap<>();
+		neighborships.findByParticipant(user)
+			.forEach(neighborship -> {
+				UserId neighbor = neighborship.counterpartOf(user);
+				neighborsById.putIfAbsent(neighbor.value(), toNeighborResponse(neighborship, user, neighbor));
+			});
+		return List.copyOf(neighborsById.values());
+	}
+
+	@Override
+	public void removeNeighborship(RemoveNeighborshipCommand command) {
+		UserId user = new UserId(command.userId());
+		UserId neighbor = new UserId(command.neighborId());
+		Neighborship.validateUsers(user, neighbor);
+		boolean exists = neighborships.findByParticipant(user).stream()
+			.anyMatch(neighborship -> neighborship.counterpartOf(user).equals(neighbor));
+		if (!exists) {
+			throw new SocialNotFoundException("Neighborship not found");
+		}
+		neighborships.deleteBetween(user, neighbor);
 	}
 
 	@Override
@@ -89,15 +118,29 @@ public class SocialServiceImpl implements SocialService {
 		if (blocks.existsBetween(blocker, blocked)) {
 			throw new SocialApplicationException("User is already blocked");
 		}
-		neighborships.deleteBetween(blocker, blocked);
-		Block block = Block.create(blocker, blocked);
-		return toResponse(blocks.save(block));
+		return createBlock(blocker, blocked);
+	}
+
+	@Override
+	public BlockOperationResult putBlock(BlockUserCommand command) {
+		UserId blocker = new UserId(command.blockerId());
+		UserId blocked = new UserId(command.blockedId());
+		Block.validateUsers(blocker, blocked);
+		return blocks.findBetween(blocker, blocked)
+			.map(block -> new BlockOperationResult(toResponse(block), false))
+			.orElseGet(() -> new BlockOperationResult(createBlock(blocker, blocked), true));
+	}
+
+	@Override
+	public List<BlockResponse> getBlocks(Long userId) {
+		return blocks.findByBlocker(new UserId(userId)).stream().map(this::toResponse).toList();
 	}
 
 	@Override
 	public void unblockUser(UnblockUserCommand command) {
 		UserId blocker = new UserId(command.blockerId());
 		UserId blocked = new UserId(command.blockedId());
+		Block.validateUsers(blocker, blocked);
 		blocks.deleteBetween(blocker, blocked);
 	}
 
@@ -111,7 +154,7 @@ public class SocialServiceImpl implements SocialService {
 	private void removeInvalidNeighborships(UserId user) {
 		neighborships.findByParticipant(user)
 			.stream()
-			.map(neighborship -> counterpartOf(neighborship, user))
+			.map(neighborship -> neighborship.counterpartOf(user))
 			.filter(counterpart -> !neighborhoodMembership.sameNeighborhood(user, counterpart))
 			.distinct()
 			.forEach(counterpart -> neighborships.deleteBetween(user, counterpart));
@@ -124,19 +167,26 @@ public class SocialServiceImpl implements SocialService {
 			.forEach(request -> neighborRequests.delete(request.id()));
 	}
 
-	private UserId counterpartOf(Neighborship neighborship, UserId user) {
-		return neighborship.follower().equals(user) ? neighborship.followed() : neighborship.follower();
-	}
-
 	private NeighborRequest findRequest(Long requestId) {
 		return neighborRequests.findById(new NeighborRequestId(requestId))
 			.orElseThrow(() -> new SocialApplicationException("Neighbor request not found"));
 	}
 
-	private void createNeighborshipIfMissing(UserId follower, UserId followed) {
-		if (!neighborships.exists(follower, followed)) {
-			neighborships.save(Neighborship.create(follower, followed, LocalDateTime.now()));
+	private void requireReceiver(NeighborRequest request, Actor actor) {
+		if (!request.receiver().value().equals(actor.userId())) {
+			throw new SocialAuthorizationException("Access is forbidden");
 		}
+	}
+
+	private void createNeighborshipIfMissing(UserId user, UserId neighbor) {
+		if (!neighborships.exists(user, neighbor)) {
+			neighborships.save(Neighborship.create(user, neighbor, LocalDateTime.now()));
+		}
+	}
+
+	private BlockResponse createBlock(UserId blocker, UserId blocked) {
+		neighborships.deleteBetween(blocker, blocked);
+		return toResponse(blocks.save(Block.create(blocker, blocked)));
 	}
 
 	private NeighborRequestResponse toResponse(NeighborRequest request) {
@@ -144,9 +194,8 @@ public class SocialServiceImpl implements SocialService {
 				request.date(), request.status().name());
 	}
 
-	private NeighborshipResponse toResponse(Neighborship neighborship) {
-		return new NeighborshipResponse(neighborship.id().value(), neighborship.follower().value(),
-				neighborship.followed().value(), neighborship.date());
+	private NeighborResponse toNeighborResponse(Neighborship neighborship, UserId user, UserId neighbor) {
+		return new NeighborResponse(neighborship.id().value(), user.value(), neighbor.value(), neighborship.date());
 	}
 
 	private BlockResponse toResponse(Block block) {

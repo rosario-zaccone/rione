@@ -39,6 +39,18 @@ class GatewayRoutesConfiguration {
 	}
 
 	@Bean
+	RouterFunction<ServerResponse> socialServiceRootResourceRoute(
+			@Value("${rione.gateway.routes.social-service-uri:http://localhost:8082}") String socialServiceUri) {
+		return route("social-service-root-resources")
+			.route(path("/neighbor-requests"), http())
+			.route(path("/neighbor-requests/**"), http())
+			.route(path("/me/**"), http())
+			.route(path("/blocks"), http())
+			.before(uri(socialServiceUri))
+			.build();
+	}
+
+	@Bean
 	RouterFunction<ServerResponse> socialServiceRoute(
 			@Value("${rione.gateway.routes.social-service-uri:http://localhost:8082}") String socialServiceUri) {
 		return route("social-service")

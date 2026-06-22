@@ -12,11 +12,11 @@ public interface NeighborshipRepository {
 
 	Neighborship save(Neighborship neighborship);
 
-	List<Neighborship> findByFollower(UserId follower);
-
 	List<Neighborship> findByParticipant(UserId userId);
 
 	boolean exists(UserId follower, UserId followed);
+
+	boolean existsBetween(UserId firstUser, UserId secondUser);
 
 	void deleteBetween(UserId firstUser, UserId secondUser);
 }

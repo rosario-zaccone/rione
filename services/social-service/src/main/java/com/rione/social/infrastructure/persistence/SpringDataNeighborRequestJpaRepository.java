@@ -9,6 +9,10 @@ import com.rione.social.infrastructure.persistence.entity.NeighborRequestJpaEnti
 
 interface SpringDataNeighborRequestJpaRepository extends JpaRepository<NeighborRequestJpaEntity, Long> {
 
+	List<NeighborRequestJpaEntity> findBySenderId(Long senderId);
+
+	List<NeighborRequestJpaEntity> findByReceiverId(Long receiverId);
+
 	boolean existsByStatusAndSenderIdAndReceiverId(RequestStatus status, Long senderId, Long receiverId);
 
 	List<NeighborRequestJpaEntity> findByStatusAndSenderIdOrStatusAndReceiverId(RequestStatus senderStatus,

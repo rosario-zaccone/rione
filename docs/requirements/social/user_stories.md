@@ -1,6 +1,6 @@
 # Social Service User Stories
-**Version:** v0.3.0  
-**Last Updated:** 2026-06-17
+**Version:** v0.3.2  
+**Last Updated:** 2026-06-20
 
 ## SOC-US-001 - Search Neighbours
 
@@ -74,7 +74,19 @@
 - Unblocking does not recreate deleted neighbour connections or pending requests.
 - The platform handles attempts to unblock a user who is not currently blocked without duplicate side effects.
 
-## SOC-US-007 - Reconcile Relationships After Neighborhood Change
+## SOC-US-007 - List Blocked Users
+
+**As a** registered user  
+**I want** to view the users I have blocked  
+**So that** I can review and manage my blocked users
+
+**Acceptance Criteria**
+- A registered user can retrieve the blocks they created.
+- The response identifies each blocked user.
+- A user with no blocked users receives an empty list.
+- Blocks created by other users are not included.
+
+## SOC-US-008 - Reconcile Relationships After Neighborhood Change
 
 **As a** registered user  
 **I want** my neighbour connections to match my current neighborhood  
@@ -86,6 +98,18 @@
 - The platform preserves neighbour connections and pending requests with users who still belong to the same neighborhood.
 - The platform preserves historical posts, comments, reactions, and notifications.
 
+## SOC-US-009 - View Sent And Received Neighbour Requests
+
+**As a** registered user  
+**I want** to view neighbour requests I sent and neighbour requests I received  
+**So that** I can track pending connection workflows separately
+
+**Acceptance Criteria**
+- A registered user can retrieve neighbour requests they sent.
+- A registered user can retrieve neighbour requests they received.
+- Sent and received neighbour requests are shown in separate lists.
+- Neighbour requests involving other users are not included.
+
 ## Business Rules
 
 - **SOC-BR-001:** Neighbour requests can only be sent between users in the same neighborhood.
@@ -96,3 +120,5 @@
 - **SOC-BR-006:** Blocking takes precedence over neighbour connections, search visibility, requests, reactions, comments, and notifications.
 - **SOC-BR-007:** Unblocking removes the block but does not restore previous neighbour connections or pending requests.
 - **SOC-BR-008:** When a user changes neighborhood, the platform removes neighbour connections and pending neighbour requests with users who no longer belong to the same neighborhood.
+- **SOC-BR-009:** A user can only list blocks they created.
+- **SOC-BR-010:** A user can only list neighbour requests they sent or received.
