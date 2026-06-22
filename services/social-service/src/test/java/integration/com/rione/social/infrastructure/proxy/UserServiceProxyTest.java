@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rione.social.domain.model.UserId;
 import com.rione.social.infrastructure.config.JwtService;
@@ -78,6 +79,26 @@ class UserServiceProxyTest {
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessage("User neighborhood could not be resolved");
 
+		server.verify();
+	}
+
+	@Test
+	void searchesUsersInRequestersNeighborhood() {
+		userServiceReturns(1L, 10L);
+		String url = UriComponentsBuilder.fromUriString("http://user-service.test/internal/users/search")
+			.queryParam("neighborhoodId", 10L)
+			.queryParam("query", "Ada Lovelace")
+			.build()
+			.encode()
+			.toUriString();
+		server.expect(once(), requestTo(url))
+			.andExpect(header("Authorization", "Bearer service-token"))
+			.andRespond(withSuccess("[{\"id\":2,\"name\":\"Ada\",\"surname\":\"Lovelace\",\"username\":\"ada\"}]",
+					MediaType.APPLICATION_JSON));
+
+		assertThat(proxy.searchInNeighborhood(new UserId(1L), "Ada Lovelace"))
+			.extracting(profile -> profile.id().value(), profile -> profile.username())
+			.containsExactly(org.assertj.core.groups.Tuple.tuple(2L, "ada"));
 		server.verify();
 	}
 

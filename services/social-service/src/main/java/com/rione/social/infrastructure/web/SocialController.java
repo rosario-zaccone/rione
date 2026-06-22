@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rione.social.application.port.in.SocialService;
@@ -64,18 +65,15 @@ class SocialController {
 		return socialService.getNeighbors(currentUser.id());
 	}
 
+	@GetMapping("/users")
+	List<SocialService.UserSearchResponse> searchUsers(@RequestParam(defaultValue = "") String query) {
+		return socialService.searchUsers(new SocialService.SearchUsersQuery(currentUser.id(), query));
+	}
+
 	@DeleteMapping("/me/neighborships/{neighborId}")
 	ResponseEntity<Void> removeMyNeighborship(@PathVariable @Positive Long neighborId) {
 		socialService.removeNeighborship(new SocialService.RemoveNeighborshipCommand(currentUser.id(), neighborId));
 		return ResponseEntity.noContent().build();
-	}
-
-	@Deprecated
-	@PostMapping("/blocks")
-	ResponseEntity<SocialService.BlockResponse> blockUser(@Valid @RequestBody BlockUserRequest request) {
-		SocialService.BlockResponse response = socialService
-			.blockUser(new SocialService.BlockUserCommand(currentUser.id(), request.blockedId()));
-		return ResponseEntity.created(URI.create("/blocks/" + response.id())).body(response);
 	}
 
 	@GetMapping("/me/blocks")
@@ -96,20 +94,7 @@ class SocialController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@Deprecated
-	@PostMapping("/blocks/removal")
-	ResponseEntity<Void> unblockUser(@Valid @RequestBody UnblockUserRequest request) {
-		socialService.unblockUser(new SocialService.UnblockUserCommand(currentUser.id(), request.blockedId()));
-		return ResponseEntity.noContent().build();
-	}
-
 	record SendNeighborRequestRequest(@NotNull @Positive Long receiverId) {
-	}
-
-	record BlockUserRequest(@NotNull @Positive Long blockedId) {
-	}
-
-	record UnblockUserRequest(@NotNull @Positive Long blockedId) {
 	}
 
 }

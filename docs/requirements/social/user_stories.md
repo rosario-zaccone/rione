@@ -1,6 +1,6 @@
 # Social Service User Stories
-**Version:** v0.3.2  
-**Last Updated:** 2026-06-20
+**Version:** v0.4.0  
+**Last Updated:** 2026-06-23
 
 ## SOC-US-001 - Search Neighbours
 
@@ -9,7 +9,7 @@
 **So that** I can find people in my neighbourhood and decide who to connect with
 
 **Acceptance Criteria**
-- A registered user can search users in their own neighborhood by supported profile fields.
+- A registered user can search users in their own neighborhood with one string matched case-insensitively against username, name, and surname.
 - Search results exclude blocked users and users who should not be visible to the requester.
 - Search results show only profile information allowed by privacy rules.
 - Empty searches or no-match searches return an empty result set instead of an error.

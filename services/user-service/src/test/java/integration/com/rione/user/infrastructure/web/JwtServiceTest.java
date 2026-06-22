@@ -53,6 +53,23 @@ class JwtServiceTest {
 		assertThatThrownBy(() -> jwtService.parse(token)).isInstanceOf(AuthorizationException.class);
 	}
 
+	@Test
+	void rejectsUserTokenAfterLogoutRevokesIt() {
+		String token = jwtService.createToken(1L, false);
+		jwtService.revoke(token);
+		assertThatThrownBy(() -> jwtService.parse(token)).isInstanceOf(AuthorizationException.class);
+	}
+
+	@Test
+	void logoutRevokesOnlyTheTokenUsedForLogout() {
+		String loggedOutToken = jwtService.createToken(1L, false);
+		String otherToken = jwtService.createToken(1L, false);
+
+		jwtService.revoke(loggedOutToken);
+
+		assertThat(jwtService.parse(otherToken).userId()).isEqualTo(1L);
+	}
+
 	private String serviceToken(String signingSecret, String subject, String audience) throws Exception {
 		Map<String, Object> payload = new LinkedHashMap<>();
 		payload.put("sub", subject);

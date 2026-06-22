@@ -20,6 +20,8 @@ public interface SocialService {
 
 	List<NeighborResponse> getNeighbors(Long userId);
 
+	List<UserSearchResponse> searchUsers(SearchUsersQuery query);
+
 	void removeNeighborship(RemoveNeighborshipCommand command);
 
 	BlockResponse blockUser(BlockUserCommand command);
@@ -50,6 +52,9 @@ public interface SocialService {
 	record Actor(Long userId) {
 	}
 
+	record SearchUsersQuery(Long requesterId, String query) {
+	}
+
 	record NeighborRequestResponse(Long id, Long senderId, Long receiverId, LocalDateTime date, String status) {
 	}
 
@@ -57,6 +62,9 @@ public interface SocialService {
 	}
 
 	record BlockResponse(Long id, Long blockerId, Long blockedId) {
+	}
+
+	record UserSearchResponse(Long id, String name, String surname, String username) {
 	}
 
 	record BlockOperationResult(BlockResponse block, boolean created) {

@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.rione.social.application.port.in.SocialService;
-import com.rione.social.application.port.in.SocialService.BlockUserCommand;
 import com.rione.social.application.port.in.SocialService.BlockResponse;
 import com.rione.social.application.port.in.SocialService.BlockOperationResult;
 import com.rione.social.application.port.in.SocialService.NeighborRequestResponse;
@@ -82,6 +81,19 @@ class SocialControllerIntegrationTest {
 	}
 
 	@Test
+	void searchesUsersThroughHttpContract() throws Exception {
+		when(socialService.searchUsers(any())).thenReturn(List.of(
+				new SocialService.UserSearchResponse(20L, "Ada", "Lovelace", "ada")));
+
+		mockMvc.perform(get("/users").param("query", "ada"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[0].id").value(20L))
+			.andExpect(jsonPath("$[0].username").value("ada"));
+
+		verify(socialService).searchUsers(new SocialService.SearchUsersQuery(10L, "ada"));
+	}
+
+	@Test
 	void listsCurrentUsersReceivedNeighborRequestsThroughHttpContract() throws Exception {
 		when(socialService.getReceivedNeighborRequests(10L))
 			.thenReturn(List.of(new NeighborRequestResponse(1L, 20L, 10L, LocalDateTime.of(2026, 1, 1, 0, 0),
@@ -100,23 +112,11 @@ class SocialControllerIntegrationTest {
 	void oldUserScopedAndRequestByIdRoutesNoLongerExist() throws Exception {
 		mockMvc.perform(get("/neighbor-requests/users/20/sent")).andExpect(status().isNotFound());
 		mockMvc.perform(get("/neighbor-requests/99")).andExpect(status().isNotFound());
-	}
-
-	@Test
-	void blocksUserThroughHttpContract() throws Exception {
-		when(socialService.blockUser(any())).thenReturn(new BlockResponse(1L, 10L, 20L));
-
-		mockMvc.perform(post("/blocks").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/blocks").contentType(MediaType.APPLICATION_JSON).content("{\"blockedId\":20}"))
+			.andExpect(status().isNotFound());
+		mockMvc.perform(post("/blocks/removal").contentType(MediaType.APPLICATION_JSON)
 			.content("{\"blockedId\":20}"))
-			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$.blockerId").value(10L))
-			.andExpect(jsonPath("$.blockedId").value(20L));
-
-		ArgumentCaptor<BlockUserCommand> command = ArgumentCaptor.forClass(BlockUserCommand.class);
-		verify(socialService).blockUser(command.capture());
-		org.assertj.core.api.Assertions.assertThat(command.getValue())
-			.extracting(BlockUserCommand::blockerId, BlockUserCommand::blockedId)
-			.containsExactly(10L, 20L);
+			.andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -185,19 +185,6 @@ class SocialControllerIntegrationTest {
 		mockMvc.perform(delete("/me/blocks/20")).andExpect(status().isNoContent());
 
 		verify(socialService).unblockUser(new UnblockUserCommand(10L, 20L));
-	}
-
-	@Test
-	void unblocksUserThroughHttpContract() throws Exception {
-		mockMvc.perform(post("/blocks/removal").contentType(MediaType.APPLICATION_JSON)
-			.content("{\"blockedId\":20}"))
-			.andExpect(status().isNoContent());
-
-		ArgumentCaptor<UnblockUserCommand> command = ArgumentCaptor.forClass(UnblockUserCommand.class);
-		verify(socialService).unblockUser(command.capture());
-		org.assertj.core.api.Assertions.assertThat(command.getValue())
-			.extracting(UnblockUserCommand::blockerId, UnblockUserCommand::blockedId)
-			.containsExactly(10L, 20L);
 	}
 
 	@Test

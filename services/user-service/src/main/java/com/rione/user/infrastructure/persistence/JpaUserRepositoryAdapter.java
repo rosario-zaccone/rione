@@ -2,6 +2,7 @@ package com.rione.user.infrastructure.persistence;
 
 import java.util.Optional;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
@@ -54,6 +55,11 @@ class JpaUserRepositoryAdapter implements UserRepository {
 	@Override
 	public boolean existsByNeighborhoodIdIn(Collection<NeighborhoodId> neighborhoodIds) {
 		return repository.existsByNeighborhoodIdIn(neighborhoodIds.stream().map(NeighborhoodId::value).toList());
+	}
+
+	@Override
+	public List<User> searchByNeighborhood(NeighborhoodId neighborhoodId, String query) {
+		return repository.searchByNeighborhood(neighborhoodId.value(), query).stream().map(this::toDomain).toList();
 	}
 
 	private UserJpaEntity toEntity(User user) {

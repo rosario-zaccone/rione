@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -24,6 +26,7 @@ public class JwtService {
 	private final byte[] userSecret;
 	private final byte[] serviceSecret;
 	private final long expirationMs;
+	private final Map<String, Long> revokedTokens = new ConcurrentHashMap<>();
 
 	public JwtService(ObjectMapper objectMapper, @Value("${rione.security.jwt.secret}") String secret,
 			@Value("${rione.security.jwt.service-secret}") String serviceSecret,
@@ -42,6 +45,7 @@ public class JwtService {
 			payload.put("sub", userId.toString());
 			payload.put("admin", admin);
 			payload.put("service", false);
+			payload.put("jti", UUID.randomUUID().toString());
 			payload.put("iat", now.getEpochSecond());
 			payload.put("exp", now.plusMillis(expirationMs).getEpochSecond());
 			String unsigned = encodeJson(header) + "." + encodeJson(payload);
@@ -71,6 +75,10 @@ public class JwtService {
 			if (Instant.now().getEpochSecond() >= expiresAt) {
 				throw new IllegalArgumentException("Expired JWT");
 			}
+			purgeExpiredRevocations();
+			if (revokedTokens.containsKey(token)) {
+				throw new IllegalArgumentException("Revoked JWT");
+			}
 			String subject = payload.get("sub").toString();
 			boolean admin = Boolean.TRUE.equals(payload.get("admin"));
 			if (service) {
@@ -86,6 +94,28 @@ public class JwtService {
 		catch (Exception exception) {
 			throw new AuthorizationException("Authentication is invalid", true);
 		}
+	}
+
+	public void revoke(String token) {
+		AuthenticatedPrincipal principal = parse(token);
+		if (principal.service()) {
+			throw new AuthorizationException("A service token cannot be logged out", false);
+		}
+		try {
+			String[] parts = token.split("\\.");
+			Map<String, Object> payload = objectMapper.readValue(Base64.getUrlDecoder().decode(parts[1]),
+					new TypeReference<>() {
+					});
+			revokedTokens.put(token, ((Number) payload.get("exp")).longValue());
+		}
+		catch (Exception exception) {
+			throw new AuthorizationException("Authentication is invalid", true);
+		}
+	}
+
+	private void purgeExpiredRevocations() {
+		long now = Instant.now().getEpochSecond();
+		revokedTokens.entrySet().removeIf(entry -> entry.getValue() <= now);
 	}
 
 	private String encodeJson(Map<String, Object> value) throws Exception {

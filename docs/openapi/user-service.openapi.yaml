@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-21
+x-last-modified: 2026-06-23
 info:
   title: Rione User Service API
-  version: v0.4.0
+  version: v0.5.0
   description: User account, authentication, profile, and city endpoints.
 servers:
   - url: http://localhost:8081
@@ -74,6 +74,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/logout:
+    post:
+      tags:
+        - Users
+      operationId: logOut
+      summary: Log out the authenticated user
+      description: Invalidates the bearer token used for this request for its remaining lifetime.
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Access token invalidated.
         '401':
           $ref: '#/components/responses/Unauthorized'
   /users/me/profile:
@@ -206,6 +220,41 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+  /internal/users/search:
+    get:
+      tags:
+        - Users
+      operationId: searchUsersForService
+      summary: Search minimal user profiles in a neighborhood
+      description: Internal service-to-service endpoint used for neighborhood-scoped social discovery.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: neighborhoodId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Minimal profiles matching username, name, or surname.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDirectoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 components:
   securitySchemes:
     bearerAuth:
@@ -263,6 +312,19 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
   schemas:
+    UserDirectoryResponse:
+      type: object
+      required: [id, name, surname, username]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        surname:
+          type: string
+        username:
+          type: string
     UserNeighborhoodResponse:
       type: object
       required:

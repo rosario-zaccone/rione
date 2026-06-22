@@ -49,6 +49,12 @@ public class UserController {
 		return new LogInResponse(jwtService.createToken(user.id(), user.admin()), user);
 	}
 
+	@PostMapping("/logout")
+	ResponseEntity<Void> logOut() {
+		jwtService.revoke(currentUser.token());
+		return ResponseEntity.noContent().build();
+	}
+
 	@GetMapping("/me")
 	UserService.UserResponse getCurrentUser() {
 		return userService.getUser(currentUser.id());

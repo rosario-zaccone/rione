@@ -45,7 +45,6 @@ class GatewayRoutesConfiguration {
 			.route(path("/neighbor-requests"), http())
 			.route(path("/neighbor-requests/**"), http())
 			.route(path("/me/**"), http())
-			.route(path("/blocks"), http())
 			.before(uri(socialServiceUri))
 			.build();
 	}

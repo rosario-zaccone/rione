@@ -27,6 +27,8 @@ import com.rione.social.application.port.out.BlockRepository;
 import com.rione.social.application.port.out.NeighborRequestRepository;
 import com.rione.social.application.port.out.NeighborhoodMembership;
 import com.rione.social.application.port.out.NeighborshipRepository;
+import com.rione.social.application.port.out.UserDirectory;
+import com.rione.social.application.port.out.UserDirectory.UserProfile;
 import com.rione.social.application.service.SocialApplicationException;
 import com.rione.social.application.service.SocialNotFoundException;
 import com.rione.social.application.service.SocialServiceImpl;
@@ -46,6 +48,7 @@ class SocialServiceImplTest {
 	private NeighborshipRepository neighborships;
 	private BlockRepository blocks;
 	private NeighborhoodMembership neighborhoods;
+	private UserDirectory userDirectory;
 	private SocialServiceImpl service;
 
 	@BeforeEach
@@ -54,11 +57,33 @@ class SocialServiceImplTest {
 		neighborships = mock(NeighborshipRepository.class);
 		blocks = mock(BlockRepository.class);
 		neighborhoods = mock(NeighborhoodMembership.class);
-		service = new SocialServiceImpl(requests, neighborships, blocks, neighborhoods);
+		userDirectory = mock(UserDirectory.class);
+		service = new SocialServiceImpl(requests, neighborships, blocks, neighborhoods, userDirectory);
 		givenSameNeighborhood(1L, 2L);
 		when(requests.save(any())).thenAnswer(invocation -> withId((NeighborRequest) invocation.getArgument(0)));
 		when(neighborships.save(any())).thenAnswer(invocation -> withId((Neighborship) invocation.getArgument(0)));
 		when(blocks.save(any())).thenAnswer(invocation -> withId((Block) invocation.getArgument(0)));
+	}
+
+	@Test
+	void searchesVisibleUsersByProfileText() {
+		when(userDirectory.searchInNeighborhood(new UserId(1L), "ada")).thenReturn(List.of(
+				new UserProfile(new UserId(1L), "Current", "User", "current"),
+				new UserProfile(new UserId(2L), "Ada", "Lovelace", "ada"),
+				new UserProfile(new UserId(3L), "Ada", "Blocked", "blocked")));
+		when(blocks.existsBetween(new UserId(3L), new UserId(1L))).thenReturn(true);
+
+		assertThat(service.searchUsers(new com.rione.social.application.port.in.SocialService.SearchUsersQuery(1L, " ada ")))
+			.extracting(response -> response.id(), response -> response.name(), response -> response.surname(),
+					response -> response.username())
+			.containsExactly(org.assertj.core.groups.Tuple.tuple(2L, "Ada", "Lovelace", "ada"));
+	}
+
+	@Test
+	void blankSearchReturnsEmptyWithoutCallingDirectory() {
+		assertThat(service.searchUsers(new com.rione.social.application.port.in.SocialService.SearchUsersQuery(1L, "  ")))
+			.isEmpty();
+		verify(userDirectory, never()).searchInNeighborhood(any(), any());
 	}
 
 	@Test

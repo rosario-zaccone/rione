@@ -12,6 +12,7 @@ import com.rione.social.application.port.out.BlockRepository;
 import com.rione.social.application.port.out.NeighborRequestRepository;
 import com.rione.social.application.port.out.NeighborhoodMembership;
 import com.rione.social.application.port.out.NeighborshipRepository;
+import com.rione.social.application.port.out.UserDirectory;
 import com.rione.social.domain.model.Block;
 import com.rione.social.domain.model.NeighborRequest;
 import com.rione.social.domain.model.NeighborRequestId;
@@ -25,13 +26,31 @@ public class SocialServiceImpl implements SocialService {
 	private final NeighborshipRepository neighborships;
 	private final BlockRepository blocks;
 	private final NeighborhoodMembership neighborhoodMembership;
+	private final UserDirectory userDirectory;
 
 	public SocialServiceImpl(NeighborRequestRepository neighborRequests, NeighborshipRepository neighborships,
-			BlockRepository blocks, NeighborhoodMembership neighborhoodMembership) {
+			BlockRepository blocks, NeighborhoodMembership neighborhoodMembership, UserDirectory userDirectory) {
 		this.neighborRequests = neighborRequests;
 		this.neighborships = neighborships;
 		this.blocks = blocks;
 		this.neighborhoodMembership = neighborhoodMembership;
+		this.userDirectory = userDirectory;
+	}
+
+	@Override
+	public List<UserSearchResponse> searchUsers(SearchUsersQuery query) {
+		if (query.query() == null || query.query().isBlank()) {
+			return List.of();
+		}
+		UserId requester = new UserId(query.requesterId());
+		return userDirectory.searchInNeighborhood(requester, query.query().trim())
+			.stream()
+			.filter(profile -> !profile.id().equals(requester))
+			.filter(profile -> !blocks.existsBetween(requester, profile.id()))
+			.filter(profile -> !blocks.existsBetween(profile.id(), requester))
+			.map(profile -> new UserSearchResponse(profile.id().value(), profile.name(), profile.surname(),
+					profile.username()))
+			.toList();
 	}
 
 	@Override

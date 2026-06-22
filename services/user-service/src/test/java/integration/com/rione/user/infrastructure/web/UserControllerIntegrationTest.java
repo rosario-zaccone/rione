@@ -79,6 +79,15 @@ class UserControllerIntegrationTest {
 	}
 
 	@Test
+	void logsOutThroughHttpContract() throws Exception {
+		when(currentUser.token()).thenReturn("jwt-token");
+
+		mockMvc.perform(post("/users/logout")).andExpect(status().isNoContent());
+
+		verify(jwtService).revoke("jwt-token");
+	}
+
+	@Test
 	void getsCurrentUserThroughMeEndpoint() throws Exception {
 		when(userService.getUser(1L)).thenReturn(response());
 

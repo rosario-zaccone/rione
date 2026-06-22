@@ -45,6 +45,5 @@ state.md
 services/examples/
 
 # Frontend
-frontend/
 node_modules/
 dist/

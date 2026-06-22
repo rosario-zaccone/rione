@@ -80,8 +80,29 @@ class JpaUserRepositoryIT {
 			.containsExactly("Augusta King", "augusta", 20L);
 	}
 
+	@Test
+	void searchesUsernameNameAndSurnameCaseInsensitivelyWithinNeighborhood() {
+		users.save(user("localhero", "ada@rione.test", 10L, "Ada", "Lovelace"));
+		users.save(user("coder", "grace@rione.test", 10L, "Grace", "Hopper"));
+		users.save(user("ada_fan", "alan@rione.test", 20L, "Alan", "Turing"));
+
+		assertThat(users.searchByNeighborhood(new NeighborhoodId(10L), "LOCAL"))
+			.extracting(user -> user.username().value())
+			.containsExactly("localhero");
+		assertThat(users.searchByNeighborhood(new NeighborhoodId(10L), "ada"))
+			.extracting(user -> user.username().value())
+			.containsExactly("localhero");
+		assertThat(users.searchByNeighborhood(new NeighborhoodId(10L), "HOP"))
+			.extracting(user -> user.username().value())
+			.containsExactly("coder");
+	}
+
 	private static User user(String username, String mail, Long neighborhoodId) {
-		return User.register(new FullName("Ada", "Lovelace"), new Username(username), new Mail(mail),
+		return user(username, mail, neighborhoodId, "Ada", "Lovelace");
+	}
+
+	private static User user(String username, String mail, Long neighborhoodId, String name, String surname) {
+		return User.register(new FullName(name, surname), new Username(username), new Mail(mail),
 				new NeighborhoodId(neighborhoodId), new BirthDate(LocalDateTime.of(1990, 1, 1, 0, 0)),
 				new Biography("I enjoy helping neighbors solve local problems."), new Password("hashed-password"));
 	}

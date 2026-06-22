@@ -1,6 +1,7 @@
 package com.rione.user.application.port.in;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.rione.common.application.InPort;
 
@@ -16,6 +17,8 @@ public interface UserService {
 	UserResponse getUser(Long userId);
 
 	UserNeighborhoodResponse getUserNeighborhood(Long userId);
+
+	List<UserDirectoryResponse> searchUsers(Long neighborhoodId, String query);
 
 	record SignUpCommand(String name, String surname, String username, String mail, String password,
 			Long neighborhoodId, LocalDateTime birthDate, String bio) {
@@ -33,5 +36,8 @@ public interface UserService {
 	}
 
 	record UserNeighborhoodResponse(Long userId, Long neighborhoodId) {
+	}
+
+	record UserDirectoryResponse(Long id, String name, String surname, String username) {
 	}
 }

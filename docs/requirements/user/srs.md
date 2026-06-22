@@ -1,6 +1,6 @@
 # User Service Software Requirements Specification
-**Version:** v0.4.0  
-**Last Updated:** 2026-06-18
+**Version:** v0.5.0  
+**Last Updated:** 2026-06-23
 
 ## 1. Scope
 
@@ -71,6 +71,16 @@ The service shall allow only an admin user to remove a city with its neighborhoo
 - City removal is rejected when any user still belongs to one of the city's neighborhoods.
 - Successfully removed cities and neighborhoods are no longer available for user profile neighborhood selection.
 
+### USR-FR-006 - Log Out
+
+The service shall allow an authenticated user to log out by invalidating the access token used for the request.
+
+**Acceptance Criteria**
+- The service accepts a logout request authenticated with a valid user access token.
+- The service invalidates that access token for its remaining lifetime.
+- Subsequent requests using the invalidated token are rejected as unauthorized.
+- Other access tokens issued to the same user remain valid.
+
 ## 4. Business Rules
 
 - **USR-BR-001:** A user must have a unique email address and a unique username.
@@ -96,3 +106,4 @@ The service shall allow only an admin user to remove a city with its neighborhoo
 | USR-FR-003 | USR-US-003 | USR-BR-001, USR-BR-002, USR-BR-003, USR-BR-004 |
 | USR-FR-004 | USR-US-004 | USR-BR-005 |
 | USR-FR-005 | USR-US-005 | USR-BR-006, USR-BR-007 |
+| USR-FR-006 | USR-US-006 | None |

@@ -1,5 +1,7 @@
 package com.rione.user.infrastructure.web;
 
+import java.util.List;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +20,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.rione.user.application.port.in.UserService;
+import com.rione.user.application.port.in.UserService.UserDirectoryResponse;
 import com.rione.user.application.port.in.UserService.UserNeighborhoodResponse;
 
 class InternalUserControllerSecurityIntegrationTest {
@@ -80,6 +83,21 @@ class InternalUserControllerSecurityIntegrationTest {
 			.andExpect(jsonPath("$.admin").doesNotExist());
 
 		verify(userService).getUserNeighborhood(2L);
+	}
+
+	@Test
+	void searchesMinimalUserProfilesForServiceToken() throws Exception {
+		when(jwtService.parse("service-token"))
+			.thenReturn(new AuthenticatedPrincipal("social-service", false, true));
+		when(userService.searchUsers(10L, "ada"))
+			.thenReturn(List.of(new UserDirectoryResponse(2L, "Ada", "Lovelace", "ada")));
+
+		mockMvc.perform(get("/internal/users/search").param("neighborhoodId", "10").param("query", "ada")
+			.header("Authorization", "Bearer service-token"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[0].username").value("ada"))
+			.andExpect(jsonPath("$[0].mail").doesNotExist())
+			.andExpect(jsonPath("$[0].bio").doesNotExist());
 	}
 
 	@Configuration(proxyBeanMethods = false)

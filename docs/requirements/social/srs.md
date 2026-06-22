@@ -1,6 +1,6 @@
 # Social Service Software Requirements Specification
-**Version:** v0.3.2  
-**Last Updated:** 2026-06-20
+**Version:** v0.4.0  
+**Last Updated:** 2026-06-23
 
 ## 1. Scope
 
@@ -21,7 +21,8 @@ The Social Service manages neighbour discovery, neighbour requests, neighbour co
 The service shall allow a registered user to search for neighbours in their neighborhood.
 
 **Acceptance Criteria**
-- Search can use supported profile fields.
+- Search accepts one string and matches it case-insensitively as a substring of username, name, or surname.
+- Results contain only users in the requester's neighborhood and exclude the requester.
 - Results exclude blocked users and users hidden by visibility rules.
 - Results show only allowed profile information.
 - No-match searches return an empty result set.

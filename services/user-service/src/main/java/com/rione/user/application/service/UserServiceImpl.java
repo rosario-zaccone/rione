@@ -1,5 +1,7 @@
 package com.rione.user.application.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.rione.user.application.port.in.UserService;
@@ -74,6 +76,18 @@ public class UserServiceImpl implements UserService {
 	public UserNeighborhoodResponse getUserNeighborhood(Long userId) {
 		User user = findExisting(new UserId(userId));
 		return new UserNeighborhoodResponse(user.id().value(), user.neighborhoodId().value());
+	}
+
+	@Override
+	public List<UserDirectoryResponse> searchUsers(Long neighborhoodId, String query) {
+		if (query == null || query.isBlank()) {
+			return List.of();
+		}
+		return userRepository.searchByNeighborhood(new NeighborhoodId(neighborhoodId), query.trim())
+			.stream()
+			.map(user -> new UserDirectoryResponse(user.id().value(), user.fullName().name(),
+					user.fullName().surname(), user.username().value()))
+			.toList();
 	}
 
 	private User findExisting(UserId userId) {

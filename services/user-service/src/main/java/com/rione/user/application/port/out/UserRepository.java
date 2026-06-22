@@ -1,6 +1,7 @@
 package com.rione.user.application.port.out;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import com.rione.common.application.OutPort;
@@ -24,4 +25,6 @@ public interface UserRepository {
 	boolean existsByUsername(Username username);
 
 	boolean existsByNeighborhoodIdIn(Collection<NeighborhoodId> neighborhoodIds);
+
+	List<User> searchByNeighborhood(NeighborhoodId neighborhoodId, String query);
 }

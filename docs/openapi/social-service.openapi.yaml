@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-21
+x-last-modified: 2026-06-23
 info:
   title: Rione Social Service API
-  version: v0.3.0
+  version: v0.5.0
   description: Neighbor request, neighborship, and blocking endpoints.
 servers:
   - url: http://localhost:8082
@@ -10,6 +10,8 @@ servers:
   - url: http://localhost:8080
     description: Service container port
 tags:
+  - name: Users
+    description: Neighborhood-scoped user discovery
   - name: Neighbor Requests
     description: Neighbor request lifecycle operations
   - name: Neighborships
@@ -17,6 +19,33 @@ tags:
   - name: Blocks
     description: User blocking operations
 paths:
+  /users:
+    get:
+      tags:
+        - Users
+      operationId: searchUsers
+      summary: Search users in my neighborhood
+      description: Case-insensitive substring search across username, name, and surname. Excludes the requester and blocked users.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search text. Blank text returns an empty list.
+      responses:
+        '200':
+          description: Visible matching users in the requester's neighborhood.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSearchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /neighbor-requests:
     post:
       tags:
@@ -260,60 +289,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /blocks:
-    post:
-      deprecated: true
-      tags:
-        - Blocks
-      operationId: blockUser
-      summary: Block a user
-      description: The blocker is resolved from the authenticated bearer token.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BlockUserRequest'
-      responses:
-        '201':
-          description: Block created.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BlockResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-  /blocks/removal:
-    post:
-      deprecated: true
-      tags:
-        - Blocks
-      operationId: unblockUser
-      summary: Unblock a user
-      description: The blocker is resolved from the authenticated bearer token.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UnblockUserRequest'
-      responses:
-        '204':
-          description: Block removed.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
 components:
   securitySchemes:
     bearerAuth:
@@ -374,6 +349,19 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
   schemas:
+    UserSearchResponse:
+      type: object
+      required: [id, name, surname, username]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        surname:
+          type: string
+        username:
+          type: string
     SendNeighborRequestRequest:
       type: object
       required:
@@ -382,25 +370,6 @@ components:
         receiverId:
           type: integer
           format: int64
-          example: 2
-    BlockUserRequest:
-      type: object
-      required:
-        - blockedId
-      properties:
-        blockedId:
-          type: integer
-          format: int64
-          example: 2
-    UnblockUserRequest:
-      type: object
-      required:
-        - blockedId
-      properties:
-        blockedId:
-          type: integer
-          format: int64
-          minimum: 1
           example: 2
     NeighborRequestResponse:
       type: object

@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-21
+x-last-modified: 2026-06-22
 info:
   title: Rione API Gateway
-  version: v0.3.0
+  version: v0.4.0
   description: Public gateway contract for Rione service routes.
 servers:
   - url: http://localhost:8080
@@ -288,29 +288,6 @@ paths:
           description: User is unblocked.
         '400':
           $ref: '#/components/responses/SocialBadRequest'
-  /social/blocks:
-    post:
-      deprecated: true
-      tags:
-        - Social
-      operationId: gatewayBlockUser
-      summary: Block a user
-      description: Proxies POST /social/blocks to POST /blocks in the social service.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BlockUserRequest'
-      responses:
-        '201':
-          description: Block created.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BlockResponse'
-        '400':
-          $ref: '#/components/responses/SocialBadRequest'
 components:
   securitySchemes:
     bearerAuth:
@@ -524,14 +501,6 @@ components:
         - receiverId
       properties:
         receiverId:
-          type: integer
-          format: int64
-    BlockUserRequest:
-      type: object
-      required:
-        - blockedId
-      properties:
-        blockedId:
           type: integer
           format: int64
     NeighborRequestResponse:

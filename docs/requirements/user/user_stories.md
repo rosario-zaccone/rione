@@ -1,6 +1,6 @@
 # User Service User Stories
-**Version:** v0.4.0  
-**Last Updated:** 2026-06-18
+**Version:** v0.5.0  
+**Last Updated:** 2026-06-23
 
 ## USR-US-001 - Sign Up
 
@@ -63,6 +63,18 @@
 - The platform rejects city removal when the acting user is not an admin.
 - The platform rejects city removal when any user still belongs to one of the city's neighborhoods.
 - Removed cities and neighborhoods are no longer available for user profile neighborhood selection.
+
+## USR-US-006 - Log Out
+
+**As a** registered user  
+**I want** to log out  
+**So that** my current access token can no longer be used to access my account
+
+**Acceptance Criteria**
+- An authenticated user can log out using their current access token.
+- The platform invalidates the current access token.
+- Requests made with the invalidated token are rejected as unauthorized.
+- Other access tokens issued to the same user are not invalidated.
 
 ## Business Rules
 
