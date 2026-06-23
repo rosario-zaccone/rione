@@ -60,12 +60,38 @@ services:
     depends_on:
       - user-service
       - social-service
+      - post-service
+      - notification-service
     environment:
       SPRING_PROFILES_ACTIVE: local
       RIONE_GATEWAY_ROUTES_USER_SERVICE_URI: http://user-service:8080
       RIONE_GATEWAY_ROUTES_SOCIAL_SERVICE_URI: http://social-service:8080
     ports:
       - "8080:8080"
+
+  post-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/post-service
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+    ports:
+      - "8083:8080"
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/notification-service
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+    ports:
+      - "8084:8080"
 
   social-service:
     build:
@@ -91,6 +117,36 @@ services:
     ports:
       - "8082:8080"
 
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    depends_on:
+      - api-gateway
+      - user-service
+      - social-service
+      - post-service
+      - notification-service
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: unless-stopped
@@ -109,3 +165,5 @@ volumes:
   user_postgres_data:
   social_postgres_data:
   pgadmin_data:
+  prometheus_data:
+  grafana_data:

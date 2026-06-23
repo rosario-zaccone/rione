@@ -25,7 +25,8 @@ class SecurityConfig {
 				.accessDeniedHandler((request, response, exception) -> response
 					.sendError(HttpServletResponse.SC_FORBIDDEN, "Access is forbidden")))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+				.requestMatchers("/actuator/health", "/actuator/prometheus", "/v3/api-docs/**", "/swagger-ui/**",
+						"/swagger-ui.html")
 				.permitAll()
 				.anyRequest()
 				.authenticated())

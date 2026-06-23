@@ -27,4 +27,6 @@ public interface UserRepository {
 	boolean existsByNeighborhoodIdIn(Collection<NeighborhoodId> neighborhoodIds);
 
 	List<User> searchByNeighborhood(NeighborhoodId neighborhoodId, String query);
+
+	long countRegisteredUsers();
 }
