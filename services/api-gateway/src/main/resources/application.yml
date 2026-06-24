@@ -6,12 +6,16 @@ rione:
     routes:
       user-service-uri: ${RIONE_GATEWAY_ROUTES_USER_SERVICE_URI:http://localhost:8081}
       social-service-uri: ${RIONE_GATEWAY_ROUTES_SOCIAL_SERVICE_URI:http://localhost:8082}
+      notification-service-uri: ${RIONE_GATEWAY_ROUTES_NOTIFICATION_SERVICE_URI:http://localhost:8084}
 
 management:
+  metrics:
+    tags:
+      application: api-gateway
   endpoints:
     web:
       exposure:
-        include: health,metrics
+        include: health,metrics,prometheus
 
 springdoc:
   swagger-ui:
@@ -22,3 +26,5 @@ springdoc:
         url: /users/v3/api-docs
       - name: social-service
         url: /social/v3/api-docs
+      - name: notification-service
+        url: /notifications/v3/api-docs

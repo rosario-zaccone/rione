@@ -12,6 +12,7 @@ import com.rione.social.application.port.out.BlockRepository;
 import com.rione.social.application.port.out.NeighborRequestRepository;
 import com.rione.social.application.port.out.NeighborhoodMembership;
 import com.rione.social.application.port.out.NeighborshipRepository;
+import com.rione.social.application.port.out.SocialEventPublisher;
 import com.rione.social.application.port.out.UserDirectory;
 import com.rione.social.domain.model.Block;
 import com.rione.social.domain.model.NeighborRequest;
@@ -27,14 +28,17 @@ public class SocialServiceImpl implements SocialService {
 	private final BlockRepository blocks;
 	private final NeighborhoodMembership neighborhoodMembership;
 	private final UserDirectory userDirectory;
+	private final SocialEventPublisher socialEvents;
 
 	public SocialServiceImpl(NeighborRequestRepository neighborRequests, NeighborshipRepository neighborships,
-			BlockRepository blocks, NeighborhoodMembership neighborhoodMembership, UserDirectory userDirectory) {
+			BlockRepository blocks, NeighborhoodMembership neighborhoodMembership, UserDirectory userDirectory,
+			SocialEventPublisher socialEvents) {
 		this.neighborRequests = neighborRequests;
 		this.neighborships = neighborships;
 		this.blocks = blocks;
 		this.neighborhoodMembership = neighborhoodMembership;
 		this.userDirectory = userDirectory;
+		this.socialEvents = socialEvents;
 	}
 
 	@Override
@@ -70,7 +74,9 @@ public class SocialServiceImpl implements SocialService {
 		if (neighborRequests.existsPendingBetween(sender, receiver)) {
 			throw new SocialApplicationException("A pending neighbor request already exists between these users");
 		}
-		return toResponse(neighborRequests.save(request));
+		NeighborRequest saved = neighborRequests.save(request);
+		socialEvents.publishNeighborRequestReceived(saved);
+		return toResponse(saved);
 	}
 
 	@Override
@@ -81,10 +87,11 @@ public class SocialServiceImpl implements SocialService {
 			throw new SocialApplicationException("Users must belong to the same neighborhood");
 		}
 		request.accept();
-		neighborRequests.save(request);
+		NeighborRequest saved = neighborRequests.save(request);
 		createNeighborshipIfMissing(request.sender(), request.receiver());
 		createNeighborshipIfMissing(request.receiver(), request.sender());
-		return toResponse(request);
+		socialEvents.publishNeighborRequestAccepted(saved);
+		return toResponse(saved);
 	}
 
 	@Override

@@ -1,0 +1,11 @@
+server:
+  port: ${POST_SERVICE_PORT:8080}
+
+management:
+  metrics:
+    tags:
+      application: post-service
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus

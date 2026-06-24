@@ -19,6 +19,9 @@ SOCIAL_SERVICE_DB_USERNAME=postgres
 SOCIAL_SERVICE_DB_PASSWORD=password
 PGADMIN_DEFAULT_EMAIL=admin@example.com
 PGADMIN_DEFAULT_PASSWORD=password
+RIONE_SERVICE_JWT_SECRET=change-this-demo-service-secret-key-1234567890
+GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_PASSWORD=admin
 ```
 
 The `.env` file is ignored by Git and is intended only for local development.
@@ -47,6 +50,10 @@ Main local URLs:
 API Gateway:    http://localhost:8080
 User Service:   http://localhost:8081
 Social Service: http://localhost:8082
+Post Service:   http://localhost:8083
+Notification:   http://localhost:8084
+Prometheus:     http://localhost:9090
+Grafana:        http://localhost:3000
 pgAdmin:        http://localhost:5050
 ```
 
@@ -115,6 +122,61 @@ Expected response when the service is running:
 ```
 
 The gateway health endpoint reports the gateway status. To check the whole local backend, call the health endpoint of each service.
+
+## Metrics, Prometheus, and Grafana
+
+The services expose Prometheus-compatible metrics through Spring Boot Actuator:
+
+```text
+API Gateway:          http://localhost:8080/actuator/prometheus
+User Service:         http://localhost:8081/actuator/prometheus
+Social Service:       http://localhost:8082/actuator/prometheus
+Post Service:         http://localhost:8083/actuator/prometheus
+Notification Service: http://localhost:8084/actuator/prometheus
+```
+
+Start the monitoring stack together with the backend:
+
+```bash
+docker compose up -d --build
+```
+
+Prometheus is available at:
+
+```text
+http://localhost:9090
+```
+
+Grafana is available at:
+
+```text
+http://localhost:3000
+```
+
+Default local Grafana credentials are `admin` / `admin`. Override them with `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD` in `.env`.
+
+The Prometheus datasource and the `Rione Microservices` dashboard are provisioned automatically from:
+
+```text
+monitoring/grafana/provisioning/
+monitoring/grafana/dashboards/rione-services-dashboard.json
+```
+
+Open Grafana, go to Dashboards, then open the `Rione / Rione Microservices` dashboard. No manual import is needed when using Docker Compose.
+
+Prometheus scrapes all local microservices from `monitoring/prometheus/prometheus.yml`. The dashboard visualizes:
+
+```text
+HTTP request rate:       http_server_requests_seconds_count
+Average response time:   http_server_requests_seconds_sum / http_server_requests_seconds_count
+HTTP 4xx/5xx error rate: http_server_requests_seconds_count filtered by status
+Service uptime:          process_uptime_seconds
+CPU usage:               process_cpu_usage
+Memory usage:            jvm_memory_used_bytes
+Registered users:        rione_registered_users
+```
+
+The `rione_registered_users` business metric is currently exposed by user-service. The technical metrics are exposed by each service.
 
 ## Run Tests
 

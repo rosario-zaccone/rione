@@ -1,0 +1,41 @@
+server:
+  port: ${NOTIFICATION_SERVICE_PORT:8080}
+
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${NOTIFICATION_SERVICE_KAFKA_GROUP:rione-notification-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+  datasource:
+    url: jdbc:postgresql://${NOTIFICATION_SERVICE_DB_HOST:localhost}:${NOTIFICATION_SERVICE_DB_PORT:5436}/${NOTIFICATION_SERVICE_DB_NAME:rione-notification}
+    username: ${NOTIFICATION_SERVICE_DB_USERNAME:postgres}
+    password: ${NOTIFICATION_SERVICE_DB_PASSWORD:banana}
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+management:
+  metrics:
+    tags:
+      application: notification-service
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+
+rione:
+  security:
+    jwt:
+      secret: ${RIONE_JWT_SECRET:change-this-demo-secret-key-1234567890}
+  messaging:
+    social-topic: ${RIONE_SOCIAL_TOPIC:social}

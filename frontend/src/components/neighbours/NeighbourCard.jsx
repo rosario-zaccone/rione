@@ -1,0 +1,29 @@
+import { formatDate, fullName, username } from "./personUtils";
+import { Avatar } from "../ui/Avatar";
+import { Button } from "../ui/Button";
+import { Card } from "../ui/Card";
+
+export function NeighbourCard({ currentUser, loading, neighbor, onBlock, onRemove, user }) {
+  const counterpartId = neighbor.userId === currentUser?.id ? neighbor.neighborId : neighbor.userId;
+
+  return (
+    <Card className="person-card" as="article">
+      <div className="person-heading">
+        <Avatar user={user} />
+        <div>
+          <h3>{fullName(user, counterpartId)}</h3>
+          <p>{username(user, counterpartId)}</p>
+        </div>
+      </div>
+      <p className="muted">Connected {formatDate(neighbor.date)}</p>
+      <div className="button-row">
+        <Button variant="ghost" loading={loading} onClick={() => onRemove(counterpartId)}>
+          Remove neighbour
+        </Button>
+        <Button variant="danger" loading={loading} onClick={() => onBlock(counterpartId)}>
+          Block user
+        </Button>
+      </div>
+    </Card>
+  );
+}

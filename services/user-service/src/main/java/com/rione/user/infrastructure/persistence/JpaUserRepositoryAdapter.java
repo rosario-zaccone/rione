@@ -62,6 +62,11 @@ class JpaUserRepositoryAdapter implements UserRepository {
 		return repository.searchByNeighborhood(neighborhoodId.value(), query).stream().map(this::toDomain).toList();
 	}
 
+	@Override
+	public long countRegisteredUsers() {
+		return repository.count();
+	}
+
 	private UserJpaEntity toEntity(User user) {
 		Long id = user.id() == null ? null : user.id().value();
 		return new UserJpaEntity(id, user.fullName().name(), user.fullName().surname(), user.username().value(),

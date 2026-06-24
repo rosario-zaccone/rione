@@ -1,10 +1,162 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-17
+x-last-modified: 2026-06-24
 info:
   title: Rione Notification Service API
-  version: v0.1.0
-  description: The notification service currently exposes no public business HTTP endpoints.
+  version: v0.2.0
+  description: Notification read-side API for authenticated users.
 servers:
+  - url: http://localhost:8084
+    description: Local Docker Compose port
   - url: http://localhost:8080
     description: Service container port
-paths: {}
+tags:
+  - name: Notifications
+    description: Authenticated user notification operations
+paths:
+  /notifications/me:
+    get:
+      tags:
+        - Notifications
+      operationId: getMyNotifications
+      summary: List my notifications
+      description: The recipient is resolved from the authenticated bearer token.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications for the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /notifications/me/{notificationId}/read:
+    patch:
+      tags:
+        - Notifications
+      operationId: markMyNotificationRead
+      summary: Mark one of my notifications as read
+      description: The recipient is resolved from the authenticated bearer token. Notifications owned by another user are returned as not found.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/NotificationId'
+      responses:
+        '200':
+          description: Notification marked as read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    NotificationId:
+      name: notificationId
+      in: path
+      required: true
+      description: Notification identifier.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+  responses:
+    BadRequest:
+      description: Invalid request or rejected notification service rule.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    Unauthorized:
+      description: Authentication is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Notification not found for the authenticated user.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+  schemas:
+    NotificationResponse:
+      type: object
+      required:
+        - id
+        - recipientId
+        - actorId
+        - requestId
+        - type
+        - title
+        - message
+        - occurredAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        recipientId:
+          type: integer
+          format: int64
+          example: 2
+        actorId:
+          type: integer
+          format: int64
+          example: 1
+        requestId:
+          type: integer
+          format: int64
+          example: 10
+        type:
+          type: string
+          enum:
+            - REQUEST_RECEIVED
+            - REQUEST_ACCEPTED
+        title:
+          type: string
+          example: Neighbor request received
+        message:
+          type: string
+          example: User 1 sent you a neighbor request
+        occurredAt:
+          type: string
+          format: date-time
+          example: "2026-06-24T22:00:00"
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-06-24T22:05:00"
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string

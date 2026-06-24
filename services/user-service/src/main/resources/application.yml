@@ -16,10 +16,13 @@ spring:
         format_sql: true
 
 management:
+  metrics:
+    tags:
+      application: user-service
   endpoints:
     web:
       exposure:
-        include: health,metrics
+        include: health,metrics,prometheus
 
 rione:
   security:

@@ -22,6 +22,7 @@ import com.rione.social.application.port.out.BlockRepository;
 import com.rione.social.application.port.out.NeighborRequestRepository;
 import com.rione.social.application.port.out.NeighborhoodMembership;
 import com.rione.social.application.port.out.NeighborshipRepository;
+import com.rione.social.application.port.out.SocialEventPublisher;
 import com.rione.social.application.port.out.UserDirectory;
 import com.rione.social.application.service.SocialServiceImpl;
 import com.rione.social.domain.model.Block;
@@ -72,7 +73,8 @@ public class SocialStepDefinitions {
 		stubRequestRepository();
 		stubNeighborshipRepository();
 		stubBlockRepository();
-		service = new SocialServiceImpl(requests, neighborships, blocks, neighborhoods, mock(UserDirectory.class));
+		service = new SocialServiceImpl(requests, neighborships, blocks, neighborhoods, mock(UserDirectory.class),
+				mock(SocialEventPublisher.class));
 		requestResponse = null;
 		neighborRequestResponses = List.of();
 		blockResponses = List.of();

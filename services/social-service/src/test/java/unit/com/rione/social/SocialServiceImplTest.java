@@ -27,6 +27,7 @@ import com.rione.social.application.port.out.BlockRepository;
 import com.rione.social.application.port.out.NeighborRequestRepository;
 import com.rione.social.application.port.out.NeighborhoodMembership;
 import com.rione.social.application.port.out.NeighborshipRepository;
+import com.rione.social.application.port.out.SocialEventPublisher;
 import com.rione.social.application.port.out.UserDirectory;
 import com.rione.social.application.port.out.UserDirectory.UserProfile;
 import com.rione.social.application.service.SocialApplicationException;
@@ -49,6 +50,7 @@ class SocialServiceImplTest {
 	private BlockRepository blocks;
 	private NeighborhoodMembership neighborhoods;
 	private UserDirectory userDirectory;
+	private SocialEventPublisher socialEvents;
 	private SocialServiceImpl service;
 
 	@BeforeEach
@@ -58,7 +60,8 @@ class SocialServiceImplTest {
 		blocks = mock(BlockRepository.class);
 		neighborhoods = mock(NeighborhoodMembership.class);
 		userDirectory = mock(UserDirectory.class);
-		service = new SocialServiceImpl(requests, neighborships, blocks, neighborhoods, userDirectory);
+		socialEvents = mock(SocialEventPublisher.class);
+		service = new SocialServiceImpl(requests, neighborships, blocks, neighborhoods, userDirectory, socialEvents);
 		givenSameNeighborhood(1L, 2L);
 		when(requests.save(any())).thenAnswer(invocation -> withId((NeighborRequest) invocation.getArgument(0)));
 		when(neighborships.save(any())).thenAnswer(invocation -> withId((Neighborship) invocation.getArgument(0)));
@@ -129,6 +132,18 @@ class SocialServiceImplTest {
 	}
 
 	@Test
+	void sendingNeighborRequestPublishesRequestReceivedEvent() {
+		NeighborRequestResponse response = service.sendNeighborRequest(new SendNeighborRequestCommand(1L, 2L));
+
+		ArgumentCaptor<NeighborRequest> captor = ArgumentCaptor.forClass(NeighborRequest.class);
+		verify(socialEvents).publishNeighborRequestReceived(captor.capture());
+		assertThat(captor.getValue())
+			.extracting(request -> request.id().value(), request -> request.sender().value(),
+					request -> request.receiver().value(), request -> request.status())
+			.containsExactly(response.id(), 1L, 2L, RequestStatus.PENDING);
+	}
+
+	@Test
 	void listsReceivedNeighborRequestsForUser() {
 		when(requests.findByReceiver(new UserId(1L))).thenReturn(List.of(
 				NeighborRequest.restore(new NeighborRequestId(2L), new UserId(3L), new UserId(1L), LocalDateTime.now(),
@@ -155,6 +170,12 @@ class SocialServiceImplTest {
 			.extracting(neighborship -> neighborship.follower().value(), neighborship -> neighborship.followed().value())
 			.containsExactlyInAnyOrder(org.assertj.core.groups.Tuple.tuple(1L, 2L),
 					org.assertj.core.groups.Tuple.tuple(2L, 1L));
+		ArgumentCaptor<NeighborRequest> eventCaptor = ArgumentCaptor.forClass(NeighborRequest.class);
+		verify(socialEvents).publishNeighborRequestAccepted(eventCaptor.capture());
+		assertThat(eventCaptor.getValue())
+			.extracting(event -> event.id().value(), event -> event.sender().value(), event -> event.receiver().value(),
+					event -> event.status())
+			.containsExactly(10L, 1L, 2L, RequestStatus.ACCEPTED);
 	}
 
 	@Test
