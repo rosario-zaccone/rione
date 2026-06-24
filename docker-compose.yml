@@ -50,6 +50,40 @@ services:
       timeout: 5s
       retries: 5
 
+  notification-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rione-notification
+      POSTGRES_USER: ${NOTIFICATION_SERVICE_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${NOTIFICATION_SERVICE_DB_PASSWORD:-banana}
+    volumes:
+      - notification_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: apache/kafka:4.1.0
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9092:9092"
+
   api-gateway:
     build:
       context: .
@@ -66,6 +100,7 @@ services:
       SPRING_PROFILES_ACTIVE: local
       RIONE_GATEWAY_ROUTES_USER_SERVICE_URI: http://user-service:8080
       RIONE_GATEWAY_ROUTES_SOCIAL_SERVICE_URI: http://social-service:8080
+      RIONE_GATEWAY_ROUTES_NOTIFICATION_SERVICE_URI: http://notification-service:8080
     ports:
       - "8080:8080"
 
@@ -88,8 +123,19 @@ services:
       args:
         SERVICE_PATH: services/notification-service
     restart: unless-stopped
+    depends_on:
+      notification-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: local
+      NOTIFICATION_SERVICE_DB_HOST: notification-postgres
+      NOTIFICATION_SERVICE_DB_PORT: 5432
+      NOTIFICATION_SERVICE_DB_NAME: rione-notification
+      NOTIFICATION_SERVICE_DB_USERNAME: ${NOTIFICATION_SERVICE_DB_USERNAME:-postgres}
+      NOTIFICATION_SERVICE_DB_PASSWORD: ${NOTIFICATION_SERVICE_DB_PASSWORD:-banana}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8084:8080"
 
@@ -105,6 +151,8 @@ services:
         condition: service_started
       social-postgres:
         condition: service_healthy
+      kafka:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: local
       USER_SERVICE_BASE_URL: http://user-service:8080
@@ -113,6 +161,7 @@ services:
       SOCIAL_SERVICE_DB_NAME: rione-social
       SOCIAL_SERVICE_DB_USERNAME: ${SOCIAL_SERVICE_DB_USERNAME:-postgres}
       SOCIAL_SERVICE_DB_PASSWORD: ${SOCIAL_SERVICE_DB_PASSWORD:-banana}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       RIONE_SERVICE_JWT_SECRET: ${RIONE_SERVICE_JWT_SECRET:?Set RIONE_SERVICE_JWT_SECRET}
     ports:
       - "8082:8080"
@@ -164,6 +213,7 @@ services:
 volumes:
   user_postgres_data:
   social_postgres_data:
+  notification_postgres_data:
   pgadmin_data:
   prometheus_data:
   grafana_data:

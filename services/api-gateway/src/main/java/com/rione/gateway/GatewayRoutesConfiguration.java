@@ -58,4 +58,13 @@ class GatewayRoutesConfiguration {
 			.before(uri(socialServiceUri))
 			.build();
 	}
+
+	@Bean
+	RouterFunction<ServerResponse> notificationServiceRoute(
+			@Value("${rione.gateway.routes.notification-service-uri:http://localhost:8084}") String notificationServiceUri) {
+		return route("notification-service")
+			.route(path("/notifications/**"), http())
+			.before(uri(notificationServiceUri))
+			.build();
+	}
 }

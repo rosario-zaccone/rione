@@ -1,4 +1,9 @@
 spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   datasource:
     url: jdbc:postgresql://${SOCIAL_SERVICE_DB_HOST:localhost}:${SOCIAL_SERVICE_DB_PORT:5433}/${SOCIAL_SERVICE_DB_NAME:rione-social}
     username: ${SOCIAL_SERVICE_DB_USERNAME:postgres}
@@ -34,3 +39,5 @@ rione:
   clients:
     user-service:
       base-url: ${USER_SERVICE_BASE_URL:http://localhost:8081}
+  messaging:
+    social-topic: ${RIONE_SOCIAL_TOPIC:social}
