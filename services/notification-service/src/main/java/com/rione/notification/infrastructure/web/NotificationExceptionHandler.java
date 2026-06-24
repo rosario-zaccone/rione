@@ -28,4 +28,10 @@ class NotificationExceptionHandler {
 	ProblemDetail handleValidation(Exception exception) {
 		return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Request validation failed");
 	}
+
+	@ExceptionHandler(AuthorizationException.class)
+	ProblemDetail handleAuthorization(AuthorizationException exception) {
+		HttpStatus status = exception.isUnauthenticated() ? HttpStatus.UNAUTHORIZED : HttpStatus.FORBIDDEN;
+		return ProblemDetail.forStatusAndDetail(status, exception.getMessage());
+	}
 }

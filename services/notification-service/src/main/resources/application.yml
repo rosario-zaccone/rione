@@ -34,5 +34,8 @@ management:
         include: health,metrics,prometheus
 
 rione:
+  security:
+    jwt:
+      secret: ${RIONE_JWT_SECRET:change-this-demo-secret-key-1234567890}
   messaging:
     social-topic: ${RIONE_SOCIAL_TOPIC:social}

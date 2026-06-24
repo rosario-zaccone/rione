@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rione.social.application.port.out.SocialEventPublisher;
 import com.rione.social.domain.model.NeighborRequest;
+
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 class KafkaSocialEventPublisher implements SocialEventPublisher {
@@ -37,9 +37,10 @@ class KafkaSocialEventPublisher implements SocialEventPublisher {
 
 	private void publish(String type, NeighborRequest request, String key) {
 		try {
-			kafkaTemplate.send(topic, key, objectMapper.writeValueAsString(NeighborRequestEvent.from(type, request)));
+			String payload = new String(objectMapper.writeValueAsBytes(NeighborRequestEvent.from(type, request)));
+			kafkaTemplate.send(topic, key, payload);
 		}
-		catch (JsonProcessingException exception) {
+		catch (Exception exception) {
 			throw new IllegalStateException("Unable to serialize social event", exception);
 		}
 	}

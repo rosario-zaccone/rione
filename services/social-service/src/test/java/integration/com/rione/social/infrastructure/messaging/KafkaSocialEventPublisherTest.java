@@ -9,12 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rione.social.domain.model.NeighborRequest;
 import com.rione.social.domain.model.NeighborRequestId;
 import com.rione.social.domain.model.RequestStatus;
 import com.rione.social.domain.model.UserId;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 class KafkaSocialEventPublisherTest {
 
@@ -22,7 +23,7 @@ class KafkaSocialEventPublisherTest {
 	void publishesRequestReceivedEventAsJsonOnSocialTopic() throws Exception {
 		@SuppressWarnings("unchecked")
 		KafkaTemplate<String, String> kafkaTemplate = org.mockito.Mockito.mock(KafkaTemplate.class);
-		ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+		ObjectMapper objectMapper = new ObjectMapper();
 		KafkaSocialEventPublisher publisher = new KafkaSocialEventPublisher(kafkaTemplate, objectMapper, "social");
 		NeighborRequest request = NeighborRequest.restore(new NeighborRequestId(10L), new UserId(1L),
 				new UserId(2L), LocalDateTime.of(2026, 1, 1, 10, 0), RequestStatus.PENDING);
@@ -42,8 +43,7 @@ class KafkaSocialEventPublisherTest {
 	void usesOriginalSenderAsKeyForRequestAcceptedEvent() {
 		@SuppressWarnings("unchecked")
 		KafkaTemplate<String, String> kafkaTemplate = org.mockito.Mockito.mock(KafkaTemplate.class);
-		KafkaSocialEventPublisher publisher = new KafkaSocialEventPublisher(kafkaTemplate,
-				new ObjectMapper().findAndRegisterModules(), "social");
+		KafkaSocialEventPublisher publisher = new KafkaSocialEventPublisher(kafkaTemplate, new ObjectMapper(), "social");
 		NeighborRequest request = NeighborRequest.restore(new NeighborRequestId(10L), new UserId(1L),
 				new UserId(2L), LocalDateTime.of(2026, 1, 1, 10, 0), RequestStatus.ACCEPTED);
 

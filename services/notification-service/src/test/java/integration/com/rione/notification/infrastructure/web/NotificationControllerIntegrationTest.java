@@ -21,12 +21,15 @@ class NotificationControllerIntegrationTest {
 
 	private MockMvc mockMvc;
 	private NotificationService notificationService;
+	private CurrentUser currentUser;
 
 	@BeforeEach
 	void setUp() {
 		notificationService = org.mockito.Mockito.mock(NotificationService.class);
+		currentUser = org.mockito.Mockito.mock(CurrentUser.class);
+		when(currentUser.id()).thenReturn(2L);
 		mockMvc = MockMvcBuilders
-			.standaloneSetup(new NotificationController(notificationService), new NotificationExceptionHandler())
+			.standaloneSetup(new NotificationController(notificationService, currentUser), new NotificationExceptionHandler())
 			.build();
 	}
 
@@ -37,7 +40,7 @@ class NotificationControllerIntegrationTest {
 					"Neighbor request received", "User 1 sent you a neighbor request",
 					LocalDateTime.of(2026, 1, 1, 10, 0), null)));
 
-		mockMvc.perform(get("/notifications/users/2"))
+		mockMvc.perform(get("/notifications/me"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$[0].recipientId").value(2L))
 			.andExpect(jsonPath("$[0].type").value("REQUEST_RECEIVED"));
@@ -52,7 +55,7 @@ class NotificationControllerIntegrationTest {
 					"Neighbor request received", "User 1 sent you a neighbor request",
 					LocalDateTime.of(2026, 1, 1, 10, 0), LocalDateTime.of(2026, 1, 1, 10, 1)));
 
-		mockMvc.perform(patch("/notifications/users/2/1/read"))
+		mockMvc.perform(patch("/notifications/me/1/read"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.readAt").exists());
 	}

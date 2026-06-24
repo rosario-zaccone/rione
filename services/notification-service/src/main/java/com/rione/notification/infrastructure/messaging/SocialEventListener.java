@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rione.notification.application.port.in.NotificationService;
 import com.rione.notification.domain.NotificationType;
+
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 class SocialEventListener {
@@ -33,9 +33,10 @@ class SocialEventListener {
 
 	private NeighborRequestEvent read(String payload) {
 		try {
-			return objectMapper.readValue(payload, NeighborRequestEvent.class);
+			return objectMapper.readValue(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+					NeighborRequestEvent.class);
 		}
-		catch (JsonProcessingException exception) {
+		catch (Exception exception) {
 			throw new IllegalArgumentException("Invalid social event payload", exception);
 		}
 	}

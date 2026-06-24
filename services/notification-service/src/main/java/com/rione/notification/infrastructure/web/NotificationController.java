@@ -13,24 +13,25 @@ import com.rione.notification.application.port.in.NotificationService;
 import jakarta.validation.constraints.Positive;
 
 @RestController
-@RequestMapping("/notifications/users/{userId}")
+@RequestMapping("/notifications/me")
 class NotificationController {
 
 	private final NotificationService notificationService;
+	private final CurrentUser currentUser;
 
-	NotificationController(NotificationService notificationService) {
+	NotificationController(NotificationService notificationService, CurrentUser currentUser) {
 		this.notificationService = notificationService;
+		this.currentUser = currentUser;
 	}
 
 	@GetMapping
-	List<NotificationService.NotificationResponse> getNotifications(@PathVariable @Positive Long userId) {
-		return notificationService.getNotifications(userId);
+	List<NotificationService.NotificationResponse> getNotifications() {
+		return notificationService.getNotifications(currentUser.id());
 	}
 
 	@PatchMapping("/{notificationId}/read")
-	NotificationService.NotificationResponse markNotificationRead(@PathVariable @Positive Long userId,
-			@PathVariable @Positive Long notificationId) {
+	NotificationService.NotificationResponse markNotificationRead(@PathVariable @Positive Long notificationId) {
 		return notificationService
-			.markNotificationRead(new NotificationService.MarkNotificationReadCommand(userId, notificationId));
+			.markNotificationRead(new NotificationService.MarkNotificationReadCommand(currentUser.id(), notificationId));
 	}
 }
