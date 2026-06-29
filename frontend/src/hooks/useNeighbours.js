@@ -1,12 +1,30 @@
 import { useCallback, useMemo, useState } from "react";
 import * as socialApi from "../api/socialApi";
 
+function mergeUsers(current, users) {
+  const next = new Map(current);
+  users
+    .filter((user) => user?.id && user?.username)
+    .forEach((user) => next.set(user.id, user));
+  return next;
+}
+
+function profilesFromSocialState(received, sent, currentNeighbors, currentBlocks) {
+  return [
+    ...received.flatMap((request) => [request.sender, request.receiver]),
+    ...sent.flatMap((request) => [request.sender, request.receiver]),
+    ...currentNeighbors.map((neighbor) => neighbor.neighbor),
+    ...currentBlocks.map((block) => block.blocked),
+  ].filter(Boolean);
+}
+
 export function useNeighbours(token) {
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [neighbors, setNeighbors] = useState([]);
   const [blocks, setBlocks] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const [userCache, setUserCache] = useState(() => new Map());
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,6 +48,9 @@ export function useNeighbours(token) {
       setSentRequests(sent);
       setNeighbors(currentNeighbors);
       setBlocks(currentBlocks);
+      setUserCache((current) =>
+        mergeUsers(current, profilesFromSocialState(received, sent, currentNeighbors, currentBlocks)),
+      );
     } catch (socialError) {
       setError(socialError.message);
     } finally {
@@ -48,6 +69,7 @@ export function useNeighbours(token) {
     try {
       const results = await socialApi.searchUsers(token, query, signal);
       setSearchResults(results);
+      setUserCache((current) => mergeUsers(current, results));
       return results;
     } catch (searchError) {
       if (searchError.name !== "AbortError") {
@@ -121,11 +143,8 @@ export function useNeighbours(token) {
   );
 
   const knownUsers = useMemo(() => {
-    return searchResults.reduce((map, user) => {
-      map.set(user.id, user);
-      return map;
-    }, new Map());
-  }, [searchResults]);
+    return userCache;
+  }, [userCache]);
 
   return {
     receivedRequests,

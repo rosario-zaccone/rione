@@ -35,7 +35,7 @@ class SocialRelationshipSecurityIntegrationTest {
 		CurrentUser currentUser = mock(CurrentUser.class);
 		when(currentUser.id()).thenReturn(10L);
 		when(socialService.putBlock(org.mockito.ArgumentMatchers.any()))
-			.thenReturn(new BlockOperationResult(new BlockResponse(1L, 10L, 20L), true));
+			.thenReturn(new BlockOperationResult(new BlockResponse(1L, 10L, 20L, null), true));
 		context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new org.springframework.mock.web.MockServletContext());
 		context.register(WebConfiguration.class, SecurityConfig.class, JwtAuthenticationFilter.class,

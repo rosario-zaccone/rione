@@ -7,6 +7,7 @@ Rione is a didactic microservices project. The local setup runs the backend serv
 - Java 21
 - Docker and Docker Compose v2
 - Maven Wrapper from this repository
+- Node.js and npm
 
 ## Local Configuration
 
@@ -67,6 +68,35 @@ Stop the backend and remove local database volumes:
 
 ```bash
 docker compose down -v
+```
+
+## Start the Frontend
+
+The frontend is a React/Vite application in `frontend/`.
+
+Install dependencies:
+
+```bash
+cd frontend
+npm ci
+```
+
+Start the local development server:
+
+```bash
+npm run dev
+```
+
+Open the frontend at:
+
+```text
+http://localhost:5173
+```
+
+By default, the frontend calls the API Gateway at `http://localhost:8080`. To use a different backend URL, start Vite with `VITE_API_BASE_URL`:
+
+```bash
+VITE_API_BASE_URL=http://localhost:8080 npm run dev
 ```
 
 ## Swagger / OpenAPI

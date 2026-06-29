@@ -1,6 +1,7 @@
 package com.rione.user.infrastructure.persistence;
 
 import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,6 +20,8 @@ interface SpringDataUserJpaRepository extends JpaRepository<UserJpaEntity, Long>
 	boolean existsByUsername(String username);
 
 	boolean existsByNeighborhoodIdIn(Collection<Long> neighborhoodIds);
+
+	long countByRegisteredAtGreaterThanEqual(LocalDateTime registeredAt);
 
 	@Query("""
 			select user from UserJpaEntity user

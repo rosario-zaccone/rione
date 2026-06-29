@@ -1,43 +1,48 @@
 import { MobileNav } from "./MobileNav";
-import { RightPanel } from "./RightPanel";
 import { Sidebar } from "./Sidebar";
-import { TopNav } from "./TopNav";
 import { Toast } from "../ui/Toast";
+
+const pageTitles = {
+  home: "Home",
+  find: "Search Neighbors",
+  requests: "Requests",
+  neighbours: "Neighbours",
+  notifications: "Notifications",
+  profile: "My Profile",
+  blocked: "Blocked Users",
+  admin: "Admin Locations",
+  settings: "Settings",
+  "post-detail": "Conversation",
+  "public-profile": "Public Profile",
+};
 
 export function MainLayout({
   activePage,
   children,
   currentUser,
   metrics,
-  neighborhoodLabel,
   onDismissToast,
   onLogout,
   onNavigate,
-  onSearch,
-  searchValue,
   toast,
 }) {
   return (
     <div className="app-shell">
-      <Sidebar activePage={activePage} isAdmin={currentUser?.admin} onNavigate={onNavigate} />
+      <Sidebar
+        activePage={activePage}
+        currentUser={currentUser}
+        isAdmin={currentUser?.admin}
+        metrics={metrics}
+        onLogout={onLogout}
+        onNavigate={onNavigate}
+      />
       <div className="main-column">
-        <TopNav
-          currentUser={currentUser}
-          onFindNeighbours={() => onNavigate("find")}
-          onLogout={onLogout}
-          onOpenNotifications={() => onNavigate("notifications")}
-          onSearch={onSearch}
-          searchValue={searchValue}
-          unreadCount={metrics.unread}
-        />
+        <header className="main-header">
+          <h1>{pageTitles[activePage] ?? "Rione"}</h1>
+        </header>
         <Toast message={toast?.message} tone={toast?.tone} onClose={onDismissToast} />
         <main className="page-content">{children}</main>
       </div>
-      <RightPanel
-        currentUser={currentUser}
-        metrics={metrics}
-        neighborhoodLabel={neighborhoodLabel}
-      />
       <MobileNav activePage={activePage} onNavigate={onNavigate} />
     </div>
   );

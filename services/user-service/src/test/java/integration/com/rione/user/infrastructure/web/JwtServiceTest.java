@@ -33,6 +33,15 @@ class JwtServiceTest {
 	}
 
 	@Test
+	void parsesPostServiceTokenSignedForUserService() throws Exception {
+		AuthenticatedPrincipal principal = jwtService.parse(serviceToken(SERVICE_SECRET, "post-service", "user-service"));
+
+		assertThat(principal.subject()).isEqualTo("post-service");
+		assertThat(principal.service()).isTrue();
+		assertThat(principal.admin()).isFalse();
+	}
+
+	@Test
 	void rejectsServiceClaimSignedWithUserSecret() throws Exception {
 		String token = serviceToken(USER_SECRET, "social-service", "user-service");
 

@@ -16,7 +16,11 @@ public interface UserService {
 
 	UserResponse getUser(Long userId);
 
+	PublicUserProfileResponse getPublicUserProfile(Long userId);
+
 	UserNeighborhoodResponse getUserNeighborhood(Long userId);
+
+	List<UserDirectoryResponse> getUserProfiles(List<Long> userIds);
 
 	List<UserDirectoryResponse> searchUsers(Long neighborhoodId, String query);
 
@@ -39,5 +43,9 @@ public interface UserService {
 	}
 
 	record UserDirectoryResponse(Long id, String name, String surname, String username) {
+	}
+
+	record PublicUserProfileResponse(Long id, String name, String surname, String username, Long neighborhoodId,
+			String bio) {
 	}
 }

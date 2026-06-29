@@ -1,6 +1,7 @@
 package com.rione.user.application.port.out;
 
 import java.util.Collection;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,4 +30,6 @@ public interface UserRepository {
 	List<User> searchByNeighborhood(NeighborhoodId neighborhoodId, String query);
 
 	long countRegisteredUsers();
+
+	long countRegisteredUsersSince(LocalDate date);
 }

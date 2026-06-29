@@ -29,6 +29,21 @@ public class NotificationServiceImpl implements NotificationService {
 					command.occurredAt());
 			case REQUEST_ACCEPTED -> Notification.requestAccepted(recipient, actor, command.requestId(),
 					command.occurredAt());
+			default -> throw new IllegalArgumentException("Unsupported neighbor request notification type");
+		};
+		return toResponse(notifications.save(notification));
+	}
+
+	@Override
+	public NotificationResponse recordPostEvent(PostEventCommand command) {
+		UserId recipient = new UserId(command.recipientId());
+		UserId actor = new UserId(command.actorId());
+		Notification notification = switch (command.type()) {
+			case POST_COMMENT_ADDED -> Notification.postCommentAdded(recipient, actor, command.postId(),
+					command.occurredAt());
+			case POST_REACTION_ADDED -> Notification.postReactionAdded(recipient, actor, command.postId(),
+					command.occurredAt());
+			default -> throw new IllegalArgumentException("Unsupported post notification type");
 		};
 		return toResponse(notifications.save(notification));
 	}
@@ -51,8 +66,16 @@ public class NotificationServiceImpl implements NotificationService {
 	}
 
 	private NotificationResponse toResponse(Notification notification) {
+		Long requestId = switch (notification.type()) {
+			case REQUEST_RECEIVED, REQUEST_ACCEPTED -> notification.requestId();
+			case POST_COMMENT_ADDED, POST_REACTION_ADDED -> null;
+		};
+		Long postId = switch (notification.type()) {
+			case REQUEST_RECEIVED, REQUEST_ACCEPTED -> null;
+			case POST_COMMENT_ADDED, POST_REACTION_ADDED -> notification.requestId();
+		};
 		return new NotificationResponse(notification.id().value(), notification.recipient().value(),
-				notification.actor().value(), notification.requestId(), notification.type().name(), notification.title(),
+				notification.actor().value(), requestId, postId, notification.type().name(), notification.title(),
 				notification.message(), notification.occurredAt(), notification.readAt());
 	}
 }

@@ -27,6 +27,8 @@ class GatewayRoutesConfigurationTest {
 
 	private static final HttpServer socialService = startSocialBackend();
 
+	private static final HttpServer postService = startPostBackend();
+
 	@LocalServerPort
 	private int gatewayPort;
 
@@ -38,12 +40,15 @@ class GatewayRoutesConfigurationTest {
 				() -> "http://localhost:" + userService.getAddress().getPort());
 		registry.add("rione.gateway.routes.social-service-uri",
 				() -> "http://localhost:" + socialService.getAddress().getPort());
+		registry.add("rione.gateway.routes.post-service-uri",
+				() -> "http://localhost:" + postService.getAddress().getPort());
 	}
 
 	@AfterAll
 	static void stopBackend() {
 		userService.stop(0);
 		socialService.stop(0);
+		postService.stop(0);
 	}
 
 	@Test
@@ -66,6 +71,17 @@ class GatewayRoutesConfigurationTest {
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).contains("\"path\":\"/users/me\"");
+	}
+
+	@Test
+	void routesCityCatalogToUserService() {
+		ResponseEntity<String> response = restClient.get()
+			.uri("http://localhost:" + gatewayPort + "/cities")
+			.retrieve()
+			.toEntity(String.class);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).contains("\"path\":\"/cities\"");
 	}
 
 	@Test
@@ -130,11 +146,24 @@ class GatewayRoutesConfigurationTest {
 		assertThat(deleteResponse.getBody()).contains("\"path\":\"/me/neighborships/3\"");
 	}
 
+	@Test
+	void routesSpecificAuthorPostsToPostServiceBeforeUsersCatchAll() {
+		ResponseEntity<String> response = restClient.get()
+			.uri("http://localhost:" + gatewayPort + "/users/20/posts")
+			.retrieve()
+			.toEntity(String.class);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).contains("\"service\":\"post\"", "\"path\":\"/users/20/posts\"");
+	}
+
 	private static HttpServer startUserBackend() {
 		try {
 			HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
 			server.createContext("/v3/api-docs", exchange -> writeJson(exchange, "{\"service\":\"user\"}"));
 			server.createContext("/users/me", exchange -> writeJson(exchange, "{\"path\":\"/users/me\"}"));
+			server.createContext("/cities", exchange -> writeJson(exchange,
+					"{\"path\":\"" + exchange.getRequestURI().getPath() + "\"}"));
 			server.start();
 			return server;
 		} catch (IOException exception) {
@@ -151,6 +180,18 @@ class GatewayRoutesConfigurationTest {
 			});
 			server.createContext("/me", exchange -> writeJson(exchange,
 					"{\"path\":\"" + exchange.getRequestURI().getPath() + "\"}"));
+			server.start();
+			return server;
+		} catch (IOException exception) {
+			throw new IllegalStateException("Cannot start test backend", exception);
+		}
+	}
+
+	private static HttpServer startPostBackend() {
+		try {
+			HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+			server.createContext("/users", exchange -> writeJson(exchange,
+					"{\"service\":\"post\",\"path\":\"" + exchange.getRequestURI().getPath() + "\"}"));
 			server.start();
 			return server;
 		} catch (IOException exception) {

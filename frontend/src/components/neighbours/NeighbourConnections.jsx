@@ -1,16 +1,19 @@
 import { NeighbourCard } from "./NeighbourCard";
 import { EmptyState } from "../ui/EmptyState";
 
-export function NeighbourConnections({ currentUser, knownUsers, loading, neighbors, onBlock, onRemove }) {
+export function NeighbourConnections({
+  currentUser,
+  knownUsers,
+  loading,
+  neighbors,
+  onBlock,
+  onOpenUserProfile,
+  onRemove,
+}) {
   return (
-    <section className="page-grid">
-      <div className="page-intro card">
-        <p className="eyebrow">My Neighbours</p>
-        <h1>Accepted neighbour connections</h1>
-        <p>Removing a neighbour does not imply deleting historical activity. Blocking takes precedence.</p>
-      </div>
+    <div className="page-grid">
       {neighbors.length === 0 ? (
-        <EmptyState title="No neighbours yet">Accepted backend connections will appear here.</EmptyState>
+        <EmptyState title="No neighbours yet">Accepted connections will appear here.</EmptyState>
       ) : (
         <div className="people-grid">
           {neighbors.map((neighbor) => {
@@ -21,14 +24,15 @@ export function NeighbourConnections({ currentUser, knownUsers, loading, neighbo
                 key={neighbor.id}
                 loading={loading}
                 neighbor={neighbor}
-                user={knownUsers.get(counterpartId)}
+                user={neighbor.neighbor ?? knownUsers.get(counterpartId)}
                 onBlock={onBlock}
+                onOpenUserProfile={onOpenUserProfile}
                 onRemove={onRemove}
               />
             );
           })}
         </div>
       )}
-    </section>
+    </div>
   );
 }

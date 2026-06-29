@@ -2,38 +2,40 @@ import { NotificationItem } from "./NotificationItem";
 import { EmptyState } from "../ui/EmptyState";
 import { Skeleton } from "../ui/Skeleton";
 
-const supportedTypes = new Set(["REQUEST_RECEIVED", "REQUEST_ACCEPTED"]);
-
-export function NotificationList({ knownUsers, loading, notifications, onMarkRead }) {
-  const visibleNotifications = notifications.filter((notification) =>
-    supportedTypes.has(notification.type),
-  );
-
+export function NotificationList({
+  knownUsers,
+  loading,
+  notifications,
+  onMarkRead,
+  onOpenPost,
+  onOpenRequest,
+  onOpenUserProfile,
+}) {
   return (
     <section className="page-grid">
       <div className="page-intro card">
         <p className="eyebrow">Notifications</p>
-        <h1>Request updates</h1>
-        <p>
-          Supported notification types are REQUEST_RECEIVED and REQUEST_ACCEPTED. Unsupported feed,
-          post, comment, reaction, or message notifications are not shown.
-        </p>
+        <h1>Updates from your neighbourhood</h1>
+        <p>Requests, comments, and reactions from your neighbours are collected here.</p>
       </div>
       {loading ? (
         <Skeleton lines={4} />
-      ) : visibleNotifications.length === 0 ? (
+      ) : notifications.length === 0 ? (
         <EmptyState title="You have no notifications yet.">
-          When neighbours send or accept requests, updates will appear here.
+          New activity around your profile, requests, and posts will appear here.
         </EmptyState>
       ) : (
         <div className="card-list">
-          {visibleNotifications.map((notification) => (
+          {notifications.map((notification) => (
             <NotificationItem
               actor={knownUsers.get(notification.actorId)}
               key={notification.id}
               loading={loading}
               notification={notification}
               onMarkRead={onMarkRead}
+              onOpenPost={onOpenPost}
+              onOpenRequest={onOpenRequest}
+              onOpenUserProfile={onOpenUserProfile}
             />
           ))}
         </div>

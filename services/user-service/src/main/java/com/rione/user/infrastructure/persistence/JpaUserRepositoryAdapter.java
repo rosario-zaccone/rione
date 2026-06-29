@@ -1,6 +1,7 @@
 package com.rione.user.infrastructure.persistence;
 
 import java.util.Optional;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -67,11 +68,16 @@ class JpaUserRepositoryAdapter implements UserRepository {
 		return repository.count();
 	}
 
+	@Override
+	public long countRegisteredUsersSince(LocalDate date) {
+		return repository.countByRegisteredAtGreaterThanEqual(date.atStartOfDay());
+	}
+
 	private UserJpaEntity toEntity(User user) {
 		Long id = user.id() == null ? null : user.id().value();
 		return new UserJpaEntity(id, user.fullName().name(), user.fullName().surname(), user.username().value(),
 				user.mail().mail(), user.neighborhoodId().value(), user.birthDate().value(), user.bio().info(),
-				user.password().hash(), user.isAdmin());
+				user.password().hash(), user.isAdmin(), null);
 	}
 
 	private User toDomain(UserJpaEntity entity) {

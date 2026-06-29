@@ -1,0 +1,62 @@
+@startuml
+
+' Version: 1.0.0
+' Last modified: 2026-06-25
+' Notification domain references users and neighbor requests by identifier only
+
+skinparam classAttributeIconSize 0
+
+interface DomainId {
+  + value(): Long
+  + validate(name: String)
+}
+
+class Notification <<aggregate root>> {
+  - id: NotificationId
+  - recipient: UserId
+  - actor: UserId
+  - requestId: Long
+  - type: NotificationType
+  - title: String
+  - message: String
+  - occurredAt: LocalDateTime
+  - readAt: LocalDateTime
+  --
+  + requestReceived(receiver: UserId, sender: UserId, requestId: Long, occurredAt: LocalDateTime)
+  + requestAccepted(sender: UserId, receiver: UserId, requestId: Long, occurredAt: LocalDateTime)
+  + restore(id: NotificationId, recipient: UserId, actor: UserId, requestId: Long, type: NotificationType, title: String, message: String, occurredAt: LocalDateTime, readAt: LocalDateTime)
+  + markRead(readAt: LocalDateTime)
+  + belongsTo(userId: UserId): bool
+}
+
+class NotificationId <<value object>> {
+  - value: Long
+}
+
+class UserId <<value object>> {
+  - value: Long
+}
+
+enum NotificationType {
+  REQUEST_RECEIVED
+  REQUEST_ACCEPTED
+}
+
+Notification "1" --> "1" NotificationId : id
+Notification "*" --> "1" UserId : recipient
+Notification "*" --> "1" UserId : actor
+Notification "*" --> "1" NotificationType : type
+
+NotificationId ..|> DomainId
+UserId ..|> DomainId
+
+note right of Notification
+  Invariants:
+  - recipient and actor are different users
+  - requestId is positive
+  - title and message are required
+  - occurredAt defaults to current time when omitted
+  - markRead is idempotent
+end note
+
+@enduml

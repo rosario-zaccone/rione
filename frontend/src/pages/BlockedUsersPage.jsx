@@ -1,11 +1,12 @@
 import { BlockedUsersList } from "../components/neighbours/BlockedUsersList";
 
-export function BlockedUsersPage({ neighbours, onUnblock }) {
+export function BlockedUsersPage({ knownUsers, neighbours, onOpenUserProfile, onUnblock }) {
   return (
     <BlockedUsersList
       blocks={neighbours.blocks}
-      knownUsers={neighbours.knownUsers}
+      knownUsers={knownUsers}
       loading={neighbours.loading}
+      onOpenUserProfile={onOpenUserProfile}
       onUnblock={onUnblock}
     />
   );

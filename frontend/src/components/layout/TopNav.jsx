@@ -9,6 +9,7 @@ export function TopNav({
   onFindNeighbours,
   onLogout,
   onOpenNotifications,
+  onOpenProfile,
   onSearch,
   searchValue,
   unreadCount,
@@ -33,7 +34,7 @@ export function TopNav({
           Find neighbours
         </Button>
         <NotificationBell unreadCount={unreadCount} onClick={onOpenNotifications} />
-        <button className="profile-shortcut" type="button" aria-label="Open profile">
+        <button className="profile-shortcut" type="button" aria-label="Open profile" onClick={onOpenProfile}>
           <Avatar user={currentUser} />
           <span>{currentUser?.username}</span>
         </button>

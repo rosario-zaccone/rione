@@ -6,7 +6,7 @@ export function CityList({ cities, loading, onRemove }) {
   if (cities.length === 0) {
     return (
       <EmptyState title="No loaded cities">
-        The backend did not provide a city catalog. Created or loaded cities will appear here.
+        Created or loaded cities will appear here.
       </EmptyState>
     );
   }

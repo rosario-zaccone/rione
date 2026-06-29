@@ -82,7 +82,8 @@ public class JwtService {
 			String subject = payload.get("sub").toString();
 			boolean admin = Boolean.TRUE.equals(payload.get("admin"));
 			if (service) {
-				if (admin || !"social-service".equals(subject) || !"user-service".equals(payload.get("aud"))) {
+				if (admin || !("social-service".equals(subject) || "post-service".equals(subject))
+						|| !"user-service".equals(payload.get("aud"))) {
 					throw new IllegalArgumentException("Invalid service JWT claims");
 				}
 			}

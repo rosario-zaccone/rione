@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,9 +20,11 @@ import jakarta.servlet.http.HttpServletResponse;
 class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
+	private final ActiveUserTracker activeUserTracker;
 
-	JwtAuthenticationFilter(JwtService jwtService) {
+	JwtAuthenticationFilter(JwtService jwtService, ObjectProvider<ActiveUserTracker> activeUserTracker) {
 		this.jwtService = jwtService;
+		this.activeUserTracker = activeUserTracker.getIfAvailable(ActiveUserTracker::new);
 	}
 
 	@Override
@@ -43,6 +46,9 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 			SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken(principal, header.substring(7), authorities));
+			if (!principal.service()) {
+				activeUserTracker.record(principal.userId());
+			}
 			filterChain.doFilter(request, response);
 		}
 		catch (AuthorizationException exception) {

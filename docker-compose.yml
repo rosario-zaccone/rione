@@ -65,6 +65,21 @@ services:
       timeout: 5s
       retries: 5
 
+  post-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rione-post
+      POSTGRES_USER: ${POST_SERVICE_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${POST_SERVICE_DB_PASSWORD:-banana}
+    volumes:
+      - post_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   kafka:
     image: apache/kafka:4.1.0
     restart: unless-stopped
@@ -100,6 +115,7 @@ services:
       SPRING_PROFILES_ACTIVE: local
       RIONE_GATEWAY_ROUTES_USER_SERVICE_URI: http://user-service:8080
       RIONE_GATEWAY_ROUTES_SOCIAL_SERVICE_URI: http://social-service:8080
+      RIONE_GATEWAY_ROUTES_POST_SERVICE_URI: http://post-service:8080
       RIONE_GATEWAY_ROUTES_NOTIFICATION_SERVICE_URI: http://notification-service:8080
     ports:
       - "8080:8080"
@@ -111,8 +127,22 @@ services:
       args:
         SERVICE_PATH: services/post-service
     restart: unless-stopped
+    depends_on:
+      post-postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: local
+      POST_SERVICE_DB_HOST: post-postgres
+      POST_SERVICE_DB_PORT: 5432
+      POST_SERVICE_DB_NAME: rione-post
+      POST_SERVICE_DB_USERNAME: ${POST_SERVICE_DB_USERNAME:-postgres}
+      POST_SERVICE_DB_PASSWORD: ${POST_SERVICE_DB_PASSWORD:-banana}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      RIONE_SERVICE_JWT_SECRET: ${RIONE_SERVICE_JWT_SECRET:?Set RIONE_SERVICE_JWT_SECRET}
+      RIONE_SOCIAL_SERVICE_URL: http://social-service:8080
+      RIONE_USER_SERVICE_URL: http://user-service:8080
     ports:
       - "8083:8080"
 
@@ -136,6 +166,7 @@ services:
       NOTIFICATION_SERVICE_DB_USERNAME: ${NOTIFICATION_SERVICE_DB_USERNAME:-postgres}
       NOTIFICATION_SERVICE_DB_PASSWORD: ${NOTIFICATION_SERVICE_DB_PASSWORD:-banana}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      RIONE_POST_TOPIC: ${RIONE_POST_TOPIC:-post}
     ports:
       - "8084:8080"
 
@@ -214,6 +245,7 @@ volumes:
   user_postgres_data:
   social_postgres_data:
   notification_postgres_data:
+  post_postgres_data:
   pgadmin_data:
   prometheus_data:
   grafana_data:

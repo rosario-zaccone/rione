@@ -1,5 +1,5 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-23
+x-last-modified: 2026-06-26
 info:
   title: Rione Social Service API
   version: v0.5.0
@@ -362,6 +362,19 @@ components:
           type: string
         username:
           type: string
+    UserProfile:
+      type: object
+      required: [id, name, surname, username]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        surname:
+          type: string
+        username:
+          type: string
     SendNeighborRequestRequest:
       type: object
       required:
@@ -403,6 +416,12 @@ components:
             - ACCEPTED
             - REJECTED
           example: PENDING
+        sender:
+          nullable: true
+          $ref: '#/components/schemas/UserProfile'
+        receiver:
+          nullable: true
+          $ref: '#/components/schemas/UserProfile'
     NeighborResponse:
       type: object
       required:
@@ -427,6 +446,9 @@ components:
           type: string
           format: date-time
           example: "2026-06-17T10:15:30"
+        neighbor:
+          nullable: true
+          $ref: '#/components/schemas/UserProfile'
     BlockResponse:
       type: object
       required:
@@ -446,6 +468,9 @@ components:
           type: integer
           format: int64
           example: 2
+        blocked:
+          nullable: true
+          $ref: '#/components/schemas/UserProfile'
     ErrorResponse:
       type: object
       required:

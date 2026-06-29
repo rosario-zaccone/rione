@@ -23,9 +23,7 @@ export function useLocations(token) {
       setCities(Array.isArray(result) ? result : []);
     } catch (locationsError) {
       setCities([]);
-      setError(
-        `${locationsError.message}. The backend currently needs a real city catalog endpoint for public location selection.`,
-      );
+      setError(`${locationsError.message}. Locations are temporarily unavailable.`);
     } finally {
       setLoading(false);
     }
@@ -94,9 +92,7 @@ export function useLocations(token) {
 
   function neighborhoodLabel(neighborhoodId) {
     const neighborhood = neighborhoods.find((item) => item.id === Number(neighborhoodId));
-    return neighborhood
-      ? `${neighborhood.name}, ${neighborhood.cityName}`
-      : `Neighborhood ${neighborhoodId}`;
+    return neighborhood ? `${neighborhood.name}, ${neighborhood.cityName}` : "Quartiere non disponibile";
   }
 
   return {

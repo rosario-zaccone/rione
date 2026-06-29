@@ -85,20 +85,27 @@ public class JwtService {
 			if (parts.length != 3) {
 				throw new IllegalArgumentException("Invalid JWT");
 			}
-			String unsigned = parts[0] + "." + parts[1];
-			if (!constantTimeEquals(sign(unsigned), parts[2])) {
-				throw new IllegalArgumentException("Invalid JWT signature");
-			}
 			Map<String, Object> payload = objectMapper.readValue(Base64.getUrlDecoder().decode(parts[1]),
 					new TypeReference<>() {
 					});
+			boolean service = Boolean.TRUE.equals(payload.get("service"));
+			String unsigned = parts[0] + "." + parts[1];
+			if (!constantTimeEquals(sign(unsigned, service ? serviceSecret : secret), parts[2])) {
+				throw new IllegalArgumentException("Invalid JWT signature");
+			}
 			long expiresAt = ((Number) payload.get("exp")).longValue();
 			if (Instant.now().getEpochSecond() >= expiresAt) {
 				throw new IllegalArgumentException("Expired JWT");
 			}
-			Long userId = Long.valueOf(payload.get("sub").toString());
+			String subject = payload.get("sub").toString();
 			boolean admin = Boolean.TRUE.equals(payload.get("admin"));
-			return new AuthenticatedPrincipal(userId, admin);
+			if (service) {
+				if (admin || !"post-service".equals(subject) || !serviceName.equals(payload.get("aud"))) {
+					throw new IllegalArgumentException("Invalid service JWT claims");
+				}
+				return new AuthenticatedPrincipal(null, false, true);
+			}
+			return new AuthenticatedPrincipal(Long.valueOf(subject), admin);
 		}
 		catch (Exception exception) {
 			throw new AuthorizationException("Authentication is invalid", true);

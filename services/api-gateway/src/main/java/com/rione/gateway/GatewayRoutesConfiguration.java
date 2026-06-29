@@ -34,6 +34,8 @@ class GatewayRoutesConfiguration {
 			@Value("${rione.gateway.routes.user-service-uri:http://localhost:8081}") String userServiceUri) {
 		return route("user-service")
 			.route(path("/users/**"), http())
+			.route(path("/cities"), http())
+			.route(path("/cities/**"), http())
 			.before(uri(userServiceUri))
 			.build();
 	}
@@ -65,6 +67,31 @@ class GatewayRoutesConfiguration {
 		return route("notification-service")
 			.route(path("/notifications/**"), http())
 			.before(uri(notificationServiceUri))
+			.build();
+	}
+
+	@Bean
+	@Order(Ordered.HIGHEST_PRECEDENCE)
+	RouterFunction<ServerResponse> postServiceOpenApiRoute(
+			@Value("${rione.gateway.routes.post-service-uri:http://localhost:8083}") String postServiceUri) {
+		return route("post-service-openapi")
+			.route(path("/posts/v3/api-docs"), http())
+			.before(stripPrefix(1))
+			.before(uri(postServiceUri))
+			.build();
+	}
+
+	@Bean
+	@Order(Ordered.HIGHEST_PRECEDENCE)
+	RouterFunction<ServerResponse> postServiceRoute(
+			@Value("${rione.gateway.routes.post-service-uri:http://localhost:8083}") String postServiceUri) {
+		return route("post-service")
+			.route(path("/posts"), http())
+			.route(path("/posts/**"), http())
+			.route(path("/me/posts"), http())
+			.route(path("/users/{authorId}/posts"), http())
+			.route(path("/users/{authorId}/public-posts"), http())
+			.before(uri(postServiceUri))
 			.build();
 	}
 }

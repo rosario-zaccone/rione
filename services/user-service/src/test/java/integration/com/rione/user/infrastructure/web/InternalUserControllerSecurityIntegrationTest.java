@@ -100,6 +100,25 @@ class InternalUserControllerSecurityIntegrationTest {
 			.andExpect(jsonPath("$[0].bio").doesNotExist());
 	}
 
+	@Test
+	void resolvesMinimalUserProfilesForServiceToken() throws Exception {
+		when(jwtService.parse("service-token"))
+			.thenReturn(new AuthenticatedPrincipal("social-service", false, true));
+		when(userService.getUserProfiles(List.of(2L, 3L)))
+			.thenReturn(List.of(new UserDirectoryResponse(2L, "Ada", "Lovelace", "ada"),
+					new UserDirectoryResponse(3L, "Grace", "Hopper", "grace")));
+
+		mockMvc.perform(get("/internal/users/profiles").param("ids", "2", "3")
+			.header("Authorization", "Bearer service-token"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[0].username").value("ada"))
+			.andExpect(jsonPath("$[1].username").value("grace"))
+			.andExpect(jsonPath("$[0].mail").doesNotExist())
+			.andExpect(jsonPath("$[0].bio").doesNotExist());
+
+		verify(userService).getUserProfiles(List.of(2L, 3L));
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableWebMvc
 	static class WebConfiguration {

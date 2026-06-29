@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.List;
 
@@ -60,11 +61,21 @@ class CityControllerSecurityIntegrationTest {
 	}
 
 	@Test
-	void rejectsEveryCityOperationForAuthenticatedNonAdmin() throws Exception {
+	void allowsPublicCityCatalogReads() throws Exception {
+		when(cityService.listCities()).thenReturn(List.of(new CityResponse(10L, "Rome", List.of())));
+		when(cityService.getCity(10L)).thenReturn(new CityResponse(10L, "Rome", List.of()));
+
+		mockMvc.perform(get("/cities")).andExpect(status().isOk()).andExpect(jsonPath("$[0].name").value("Rome"));
+		mockMvc.perform(get("/cities/10")).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Rome"));
+
+		verify(cityService).listCities();
+		verify(cityService).getCity(10L);
+	}
+
+	@Test
+	void rejectsCityWriteOperationsForAuthenticatedNonAdmin() throws Exception {
 		when(jwtService.parse("user-token")).thenReturn(new AuthenticatedPrincipal("2", false, false));
 
-		mockMvc.perform(get("/cities/10").header("Authorization", "Bearer user-token"))
-			.andExpect(status().isForbidden());
 		mockMvc.perform(post("/cities").header("Authorization", "Bearer user-token")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("{\"name\":\"Rome\",\"neighborhoods\":[\"Trastevere\"]}"))
@@ -74,13 +85,10 @@ class CityControllerSecurityIntegrationTest {
 	}
 
 	@Test
-	void allowsAdminToUseEveryCityOperation() throws Exception {
+	void allowsAdminToUseCityWriteOperations() throws Exception {
 		when(jwtService.parse("admin-token")).thenReturn(new AuthenticatedPrincipal("1", true, false));
-		when(cityService.getCity(10L)).thenReturn(new CityResponse(10L, "Rome", List.of()));
 		when(cityService.createCity(any())).thenReturn(new CityResponse(10L, "Rome", List.of()));
 
-		mockMvc.perform(get("/cities/10").header("Authorization", "Bearer admin-token"))
-			.andExpect(status().isOk());
 		mockMvc.perform(post("/cities").header("Authorization", "Bearer admin-token")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("{\"name\":\"Rome\",\"neighborhoods\":[\"Trastevere\"]}"))
@@ -88,7 +96,6 @@ class CityControllerSecurityIntegrationTest {
 		mockMvc.perform(delete("/cities/10").header("Authorization", "Bearer admin-token"))
 			.andExpect(status().isNoContent());
 
-		verify(cityService).getCity(10L);
 		verify(cityService).createCity(any());
 		verify(cityService).removeCity(any());
 	}

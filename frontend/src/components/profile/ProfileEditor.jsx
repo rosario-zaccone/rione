@@ -92,7 +92,7 @@ export function ProfileEditor({
       </div>
       <div className="two-col">
         <FormField
-          help="The backend validates username uniqueness."
+          help="This is how neighbours find you."
           label="Username"
           minLength="3"
           name="username"
@@ -116,7 +116,7 @@ export function ProfileEditor({
         onChange={(value) => update("neighborhoodId", value)}
       />
       <FormField
-        error={invalidBio ? "Biography must contain at least 20 non-whitespace characters." : ""}
+        error={invalidBio ? "Tell neighbours a little more about yourself." : ""}
         label="Bio"
         maxLength="500"
         name="bio"

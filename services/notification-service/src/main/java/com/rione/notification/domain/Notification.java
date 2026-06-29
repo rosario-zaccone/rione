@@ -23,7 +23,7 @@ public class Notification {
 			throw new DomainException("Notification recipient and actor must be different users");
 		}
 		if (requestId == null || requestId <= 0) {
-			throw new DomainException("Neighbor request id must be positive");
+			throw new DomainException("Notification resource id must be positive");
 		}
 		this.id = id;
 		this.recipient = recipient;
@@ -48,6 +48,18 @@ public class Notification {
 		return new Notification(null, sender, receiver, requestId, NotificationType.REQUEST_ACCEPTED,
 				"Neighbor request accepted", "User " + receiver.value() + " accepted your neighbor request",
 				occurredAt, null);
+	}
+
+	public static Notification postCommentAdded(UserId recipient, UserId actor, Long postId,
+			LocalDateTime occurredAt) {
+		return new Notification(null, recipient, actor, postId, NotificationType.POST_COMMENT_ADDED,
+				"New comment on your post", "User " + actor.value() + " commented on your post", occurredAt, null);
+	}
+
+	public static Notification postReactionAdded(UserId recipient, UserId actor, Long postId,
+			LocalDateTime occurredAt) {
+		return new Notification(null, recipient, actor, postId, NotificationType.POST_REACTION_ADDED,
+				"New reaction on your post", "User " + actor.value() + " reacted to your post", occurredAt, null);
 	}
 
 	public static Notification restore(NotificationId id, UserId recipient, UserId actor, Long requestId,

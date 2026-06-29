@@ -7,10 +7,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = @Index(name = "idx_users_registered_at", columnList = "registeredAt"))
 public class UserJpaEntity {
 
 	@Id
@@ -44,11 +45,13 @@ public class UserJpaEntity {
 	@Column(nullable = false)
 	private boolean admin;
 
+	private LocalDateTime registeredAt;
+
 	protected UserJpaEntity() {
 	}
 
 	public UserJpaEntity(Long id, String name, String surname, String username, String mail, Long neighborhoodId,
-			LocalDateTime birthDate, String bio, String passwordHash, boolean admin) {
+			LocalDateTime birthDate, String bio, String passwordHash, boolean admin, LocalDateTime registeredAt) {
 		this.id = id;
 		this.name = name;
 		this.surname = surname;
@@ -59,6 +62,7 @@ public class UserJpaEntity {
 		this.bio = bio;
 		this.passwordHash = passwordHash;
 		this.admin = admin;
+		this.registeredAt = registeredAt == null ? LocalDateTime.now() : registeredAt;
 	}
 
 	public Long id() {
@@ -99,5 +103,9 @@ public class UserJpaEntity {
 
 	public boolean admin() {
 		return admin;
+	}
+
+	public LocalDateTime registeredAt() {
+		return registeredAt;
 	}
 }

@@ -73,9 +73,30 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public PublicUserProfileResponse getPublicUserProfile(Long userId) {
+		User user = findExisting(new UserId(userId));
+		return new PublicUserProfileResponse(user.id().value(), user.fullName().name(), user.fullName().surname(),
+				user.username().value(), user.neighborhoodId().value(), user.bio().info());
+	}
+
+	@Override
 	public UserNeighborhoodResponse getUserNeighborhood(Long userId) {
 		User user = findExisting(new UserId(userId));
 		return new UserNeighborhoodResponse(user.id().value(), user.neighborhoodId().value());
+	}
+
+	@Override
+	public List<UserDirectoryResponse> getUserProfiles(List<Long> userIds) {
+		if (userIds == null || userIds.isEmpty()) {
+			return List.of();
+		}
+		return userIds.stream()
+			.distinct()
+			.map(UserId::new)
+			.map(userRepository::findById)
+			.flatMap(java.util.Optional::stream)
+			.map(this::toDirectoryResponse)
+			.toList();
 	}
 
 	@Override
@@ -85,8 +106,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return userRepository.searchByNeighborhood(new NeighborhoodId(neighborhoodId), query.trim())
 			.stream()
-			.map(user -> new UserDirectoryResponse(user.id().value(), user.fullName().name(),
-					user.fullName().surname(), user.username().value()))
+			.map(this::toDirectoryResponse)
 			.toList();
 	}
 
@@ -98,5 +118,10 @@ public class UserServiceImpl implements UserService {
 		return new UserResponse(user.id().value(), user.fullName().name(), user.fullName().surname(),
 				user.username().value(), user.mail().mail(), user.neighborhoodId().value(), user.birthDate().value(),
 				user.bio().info(), user.isAdmin());
+	}
+
+	private UserDirectoryResponse toDirectoryResponse(User user) {
+		return new UserDirectoryResponse(user.id().value(), user.fullName().name(), user.fullName().surname(),
+				user.username().value());
 	}
 }

@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-23
+x-last-modified: 2026-06-29
 info:
   title: Rione User Service API
-  version: v0.5.0
+  version: v0.6.0
   description: User account, authentication, profile, and city endpoints.
 servers:
   - url: http://localhost:8081
@@ -21,7 +21,7 @@ paths:
         - Users
       operationId: signUp
       summary: Create a user account
-      description: Creates a registered user with account, neighborhood, and profile information.
+      description: Anyone can access this endpoint. It creates a new user account with unique mail and username and stores private account data for authenticated account operations.
       requestBody:
         required: true
         content:
@@ -43,7 +43,7 @@ paths:
         - Users
       operationId: logIn
       summary: Log in a user
-      description: Authenticates a registered user with email and password.
+      description: Anyone can access this endpoint. It authenticates user credentials and returns a JWT for subsequent authenticated requests; failed credentials do not reveal whether the mail exists.
       requestBody:
         required: true
         content:
@@ -65,6 +65,7 @@ paths:
         - Users
       operationId: getCurrentUser
       summary: Get the authenticated user profile
+      description: Only authenticated users can access this endpoint. It returns the authenticated user's own profile, including private account fields needed by the owner.
       security:
         - bearerAuth: []
       responses:
@@ -82,7 +83,7 @@ paths:
         - Users
       operationId: logOut
       summary: Log out the authenticated user
-      description: Invalidates the bearer token used for this request for its remaining lifetime.
+      description: Only authenticated users can access this endpoint. It revokes the current bearer token so it can no longer be used.
       security:
         - bearerAuth: []
       responses:
@@ -96,6 +97,7 @@ paths:
         - Users
       operationId: updateCurrentUserProfile
       summary: Update the authenticated user profile
+      description: Only authenticated users can access this endpoint. Users can update only their own profile; username uniqueness is enforced and private account ownership is resolved from the bearer token.
       security:
         - bearerAuth: []
       requestBody:
@@ -115,13 +117,54 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /users/{userId}/public-profile:
+    get:
+      tags:
+        - Users
+      operationId: getPublicUserProfile
+      summary: Get public user profile
+      description: Only authenticated users can access this endpoint. It returns public profile information for the selected user and excludes private account data such as mail, birth date, password state, and admin flags.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Public user profile found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUserProfileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /cities:
+    get:
+      tags:
+        - Cities
+      operationId: listCities
+      summary: List cities with neighborhoods
+      description: Anyone can access this endpoint. It returns the platform-managed city and neighborhood catalog used during signup and profile neighborhood selection.
+      responses:
+        '200':
+          description: City catalog.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CityResponse'
     post:
       tags:
         - Cities
       operationId: createCity
       summary: Insert a city with neighborhoods
-      description: Creates a platform-managed city with its neighborhoods. Only admin users can perform this operation.
+      description: Only authenticated administrators can access this endpoint. It creates a city and its neighborhoods for location selection.
       security:
         - bearerAuth: []
       requestBody:
@@ -151,9 +194,7 @@ paths:
         - Cities
       operationId: getCity
       summary: Get a city with neighborhoods
-      description: Only admin users can perform this operation.
-      security:
-        - bearerAuth: []
+      description: Anyone can access this endpoint. It returns public city and neighborhood names for location selection.
       parameters:
         - $ref: '#/components/parameters/CityId'
       responses:
@@ -165,10 +206,6 @@ paths:
                 $ref: '#/components/schemas/CityResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
     delete:
@@ -176,7 +213,7 @@ paths:
         - Cities
       operationId: removeCity
       summary: Remove a city with neighborhoods
-      description: Removes a platform-managed city with its neighborhoods. Only admin users can perform this operation, and removal is rejected while users belong to any of the city's neighborhoods.
+      description: Only authenticated administrators can access this endpoint. It removes a platform-managed city with its neighborhoods, and removal is rejected while users belong to any of the city's neighborhoods.
       security:
         - bearerAuth: []
       parameters:
@@ -245,6 +282,40 @@ paths:
       responses:
         '200':
           description: Minimal profiles matching username, name, or surname.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDirectoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /internal/users/profiles:
+    get:
+      tags:
+        - Users
+      operationId: getUserProfilesForService
+      summary: Resolve minimal user profiles for an internal service
+      description: Internal service-to-service endpoint. Requires a service JWT with ROLE_SERVICE and audience user-service.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+              minimum: 1
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: Minimal user profiles.
           content:
             application/json:
               schema:
@@ -339,6 +410,36 @@ components:
           type: integer
           format: int64
           example: 10
+    PublicUserProfileResponse:
+      type: object
+      required:
+        - id
+        - name
+        - surname
+        - username
+        - neighborhoodId
+        - bio
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 2
+        name:
+          type: string
+          example: Grace
+        surname:
+          type: string
+          example: Hopper
+        username:
+          type: string
+          example: grace
+        neighborhoodId:
+          type: integer
+          format: int64
+          example: 10
+        bio:
+          type: string
+          example: I help neighbours with local computer club activities.
     SignUpRequest:
       type: object
       required:

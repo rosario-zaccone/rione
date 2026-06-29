@@ -9,6 +9,8 @@ public interface CityService {
 
 	CityResponse createCity(CreateCityCommand command);
 
+	List<CityResponse> listCities();
+
 	CityResponse getCity(Long cityId);
 
 	void removeCity(RemoveCityCommand command);

@@ -4,7 +4,13 @@ import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
-export function NeighbourSearchResultCard({ currentUser, loading, onSendRequest, person }) {
+export function NeighbourSearchResultCard({
+  currentUser,
+  loading,
+  onOpenUserProfile,
+  onSendRequest,
+  person,
+}) {
   const isSelf = person.id === currentUser?.id;
 
   return (
@@ -12,8 +18,10 @@ export function NeighbourSearchResultCard({ currentUser, loading, onSendRequest,
       <div className="person-heading">
         <Avatar user={person} />
         <div>
-          <h3>{fullName(person)}</h3>
-          <p>{username(person)}</p>
+          <button className="profile-link" type="button" onClick={() => onOpenUserProfile(person)}>
+            @{person.username}
+          </button>
+          <p>{fullName(person)}</p>
         </div>
       </div>
       <Badge tone="aqua">Visible neighbour</Badge>

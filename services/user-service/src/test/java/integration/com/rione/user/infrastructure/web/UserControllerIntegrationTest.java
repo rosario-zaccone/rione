@@ -117,10 +117,18 @@ class UserControllerIntegrationTest {
 	}
 
 	@Test
-	void removedCrossUserRoutesReturnNotFound() throws Exception {
-		mockMvc.perform(get("/users/2")).andExpect(status().isNotFound());
-		mockMvc.perform(put("/users/2/profile").contentType(MediaType.APPLICATION_JSON).content("{}"))
-			.andExpect(status().isNotFound());
+	void getsPublicProfileWithoutPrivateAccountFields() throws Exception {
+		when(userService.getPublicUserProfile(2L)).thenReturn(new UserService.PublicUserProfileResponse(2L, "Grace",
+				"Hopper", "grace", 10L, "I help neighbours with local computer club activities."));
+
+		mockMvc.perform(get("/users/2/public-profile"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.username").value("grace"))
+			.andExpect(jsonPath("$.mail").doesNotExist())
+			.andExpect(jsonPath("$.birthDate").doesNotExist())
+			.andExpect(jsonPath("$.admin").doesNotExist());
+
+		verify(userService).getPublicUserProfile(2L);
 	}
 
 	@Test

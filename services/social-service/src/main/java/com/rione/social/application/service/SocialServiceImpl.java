@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 
 import org.springframework.stereotype.Service;
 
@@ -163,6 +164,19 @@ public class SocialServiceImpl implements SocialService {
 	}
 
 	@Override
+	public PostVisibilityResponse checkPostVisibility(PostVisibilityQuery query) {
+		UserId viewer = new UserId(query.viewerId());
+		UserId author = new UserId(query.authorId());
+		if (viewer.equals(author)) {
+			return new PostVisibilityResponse(true, true, false);
+		}
+		boolean blocked = blocks.existsBetween(viewer, author) || blocks.existsBetween(author, viewer);
+		boolean sameNeighborhood = !blocked && neighborhoodMembership.sameNeighborhood(viewer, author);
+		boolean activeNeighborship = !blocked && neighborships.existsBetween(viewer, author);
+		return new PostVisibilityResponse(sameNeighborhood, activeNeighborship, blocked);
+	}
+
+	@Override
 	public void unblockUser(UnblockUserCommand command) {
 		UserId blocker = new UserId(command.blockerId());
 		UserId blocked = new UserId(command.blockedId());
@@ -216,15 +230,31 @@ public class SocialServiceImpl implements SocialService {
 	}
 
 	private NeighborRequestResponse toResponse(NeighborRequest request) {
+		Map<UserId, UserDirectory.UserProfile> profiles = profilesById(List.of(request.sender(), request.receiver()));
 		return new NeighborRequestResponse(request.id().value(), request.sender().value(), request.receiver().value(),
-				request.date(), request.status().name());
+				request.date(), request.status().name(), toProfileResponse(profiles.get(request.sender())),
+				toProfileResponse(profiles.get(request.receiver())));
 	}
 
 	private NeighborResponse toNeighborResponse(Neighborship neighborship, UserId user, UserId neighbor) {
-		return new NeighborResponse(neighborship.id().value(), user.value(), neighbor.value(), neighborship.date());
+		UserDirectory.UserProfile profile = profilesById(List.of(neighbor)).get(neighbor);
+		return new NeighborResponse(neighborship.id().value(), user.value(), neighbor.value(), neighborship.date(),
+				toProfileResponse(profile));
 	}
 
 	private BlockResponse toResponse(Block block) {
-		return new BlockResponse(block.id().value(), block.blocker().value(), block.blocked().value());
+		UserDirectory.UserProfile profile = profilesById(List.of(block.blocked())).get(block.blocked());
+		return new BlockResponse(block.id().value(), block.blocker().value(), block.blocked().value(),
+				toProfileResponse(profile));
+	}
+
+	private Map<UserId, UserDirectory.UserProfile> profilesById(Collection<UserId> userIds) {
+		Map<UserId, UserDirectory.UserProfile> profiles = userDirectory.findByIds(userIds);
+		return profiles == null ? Map.of() : profiles;
+	}
+
+	private UserProfileResponse toProfileResponse(UserDirectory.UserProfile profile) {
+		return profile == null ? null
+				: new UserProfileResponse(profile.id().value(), profile.name(), profile.surname(), profile.username());
 	}
 }

@@ -7,6 +7,12 @@ export function Icon({ name }) {
         <path d="m14 14 4 4" />
       </>
     ),
+    mapPin: (
+      <>
+        <path d="M12 21s6-5.2 6-11a6 6 0 0 0-12 0c0 5.8 6 11 6 11Z" />
+        <circle cx="12" cy="10" r="2" />
+      </>
+    ),
     requests: (
       <>
         <path d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
@@ -52,6 +58,13 @@ export function Icon({ name }) {
         <path d="M5 20V8l7-4 7 4v12" />
         <path d="M9 20v-7h6v7" />
         <path d="M9 9h.01M12 9h.01M15 9h.01" />
+      </>
+    ),
+    logout: (
+      <>
+        <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
+        <path d="M15 8l4 4-4 4" />
+        <path d="M19 12H9" />
       </>
     ),
   };

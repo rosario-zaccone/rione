@@ -39,3 +39,4 @@ rione:
       secret: ${RIONE_JWT_SECRET:change-this-demo-secret-key-1234567890}
   messaging:
     social-topic: ${RIONE_SOCIAL_TOPIC:social}
+    post-topic: ${RIONE_POST_TOPIC:post}

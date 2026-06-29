@@ -7,6 +7,7 @@ export function NeighbourSearch({
   currentUser,
   error,
   loading,
+  onOpenUserProfile,
   onQueryChange,
   onSendRequest,
   query,
@@ -19,8 +20,7 @@ export function NeighbourSearch({
         <p className="eyebrow">Find Neighbours</p>
         <h1>Discover visible people in your neighborhood</h1>
         <p>
-          Search by username, name, or surname. Eligibility, duplicate pending requests, and
-          blocking are enforced by the backend.
+          Search by username, name, or surname and send a request to connect.
         </p>
         <SearchInput
           label="Search visible neighbours"
@@ -35,7 +35,7 @@ export function NeighbourSearch({
       ) : searchLoading ? (
         <Skeleton lines={4} />
       ) : results.length === 0 ? (
-        <EmptyState title="No visible neighbours">No backend results matched this search.</EmptyState>
+        <EmptyState title="No visible neighbours">No neighbours matched this search.</EmptyState>
       ) : (
         <div className="people-grid">
           {results.map((person) => (
@@ -43,6 +43,7 @@ export function NeighbourSearch({
               currentUser={currentUser}
               key={person.id}
               loading={loading}
+              onOpenUserProfile={onOpenUserProfile}
               person={person}
               onSendRequest={onSendRequest}
             />

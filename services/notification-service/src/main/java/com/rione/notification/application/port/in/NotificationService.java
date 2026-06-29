@@ -11,6 +11,8 @@ public interface NotificationService {
 
 	NotificationResponse recordNeighborRequestEvent(NeighborRequestEventCommand command);
 
+	NotificationResponse recordPostEvent(PostEventCommand command);
+
 	List<NotificationResponse> getNotifications(Long recipientId);
 
 	NotificationResponse markNotificationRead(MarkNotificationReadCommand command);
@@ -19,10 +21,14 @@ public interface NotificationService {
 			LocalDateTime occurredAt) {
 	}
 
+	record PostEventCommand(NotificationType type, Long recipientId, Long actorId, Long postId,
+			LocalDateTime occurredAt) {
+	}
+
 	record MarkNotificationReadCommand(Long recipientId, Long notificationId) {
 	}
 
-	record NotificationResponse(Long id, Long recipientId, Long actorId, Long requestId, String type, String title,
-			String message, LocalDateTime occurredAt, LocalDateTime readAt) {
+	record NotificationResponse(Long id, Long recipientId, Long actorId, Long requestId, Long postId, String type,
+			String title, String message, LocalDateTime occurredAt, LocalDateTime readAt) {
 	}
 }

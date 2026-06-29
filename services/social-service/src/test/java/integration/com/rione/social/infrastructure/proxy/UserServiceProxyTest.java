@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import java.util.List;
 
 import com.rione.social.domain.model.UserId;
 import com.rione.social.infrastructure.config.JwtService;
@@ -99,6 +100,29 @@ class UserServiceProxyTest {
 		assertThat(proxy.searchInNeighborhood(new UserId(1L), "Ada Lovelace"))
 			.extracting(profile -> profile.id().value(), profile -> profile.username())
 			.containsExactly(org.assertj.core.groups.Tuple.tuple(2L, "ada"));
+		server.verify();
+	}
+
+	@Test
+	void resolvesMinimalProfilesByIds() {
+		String url = UriComponentsBuilder.fromUriString("http://user-service.test/internal/users/profiles")
+			.queryParam("ids", "2,3")
+			.build()
+			.encode()
+			.toUriString();
+		server.expect(once(), requestTo(url))
+			.andExpect(header("Authorization", "Bearer service-token"))
+			.andRespond(withSuccess("""
+					[
+					  {"id":2,"name":"Ada","surname":"Lovelace","username":"ada"},
+					  {"id":3,"name":"Grace","surname":"Hopper","username":"grace"}
+					]
+					""", MediaType.APPLICATION_JSON));
+
+		assertThat(proxy.findByIds(List.of(new UserId(2L), new UserId(3L))).values())
+			.extracting(profile -> profile.id().value(), profile -> profile.username())
+			.containsExactly(org.assertj.core.groups.Tuple.tuple(2L, "ada"),
+					org.assertj.core.groups.Tuple.tuple(3L, "grace"));
 		server.verify();
 	}
 

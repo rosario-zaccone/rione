@@ -59,6 +59,34 @@ class NotificationServiceImplTest {
 	}
 
 	@Test
+	void postCommentEventCreatesNotificationForPostAuthor() {
+		NotificationService.NotificationResponse response = service
+			.recordPostEvent(new NotificationService.PostEventCommand(NotificationType.POST_COMMENT_ADDED, 1L, 2L, 10L,
+					LocalDateTime.of(2026, 1, 1, 10, 0)));
+
+		assertThat(response)
+			.extracting(NotificationService.NotificationResponse::recipientId,
+					NotificationService.NotificationResponse::actorId,
+					NotificationService.NotificationResponse::requestId, NotificationService.NotificationResponse::postId,
+					NotificationService.NotificationResponse::type)
+			.containsExactly(1L, 2L, null, 10L, "POST_COMMENT_ADDED");
+	}
+
+	@Test
+	void postReactionEventCreatesNotificationForPostAuthor() {
+		NotificationService.NotificationResponse response = service
+			.recordPostEvent(new NotificationService.PostEventCommand(NotificationType.POST_REACTION_ADDED, 1L, 2L, 10L,
+					LocalDateTime.of(2026, 1, 1, 10, 0)));
+
+		assertThat(response)
+			.extracting(NotificationService.NotificationResponse::recipientId,
+					NotificationService.NotificationResponse::actorId,
+					NotificationService.NotificationResponse::requestId, NotificationService.NotificationResponse::postId,
+					NotificationService.NotificationResponse::type)
+			.containsExactly(1L, 2L, null, 10L, "POST_REACTION_ADDED");
+	}
+
+	@Test
 	void marksNotificationReadForRecipient() {
 		NotificationService.NotificationResponse created = service
 			.recordNeighborRequestEvent(new NotificationService.NeighborRequestEventCommand(

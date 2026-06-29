@@ -1,0 +1,60 @@
+@startuml
+
+' Version: 1.0.0
+' Last modified: 2026-06-25
+' Post domain references users by identifier only
+
+skinparam classAttributeIconSize 0
+
+class Post <<aggregate root>> {
+  -id
+  -date: LocalDateTime
+  -type: PostType
+  -score: int
+  -private: Bool
+  --
+  +update(content: PostContent)
+}
+
+class PostContent <<value object>> {
+  -content: String
+}
+
+class Place <<value object>> {
+  -longitude: double
+  -latitude: double
+}
+
+class Comment <<entity>> {
+  -id
+  --
+  +update(content: CommentContent)
+}
+
+class CommentContent <<value object>> {
+  -content: String
+}
+
+class Reaction <<entity>> {
+  -type: ReactionType
+  -id
+  --
+  +update(type: ReactionType)
+}
+
+class UserId {
+  -id: Long
+}
+
+Post "1" --> "1" PostContent : content
+Post --> Place : place
+Post --> "*" Comment : comments
+Post --> "*" Reaction : reactions
+Post --> UserId : author
+
+Comment --> CommentContent : content
+Comment --> UserId : author
+
+Reaction --> UserId : author
+
+@enduml

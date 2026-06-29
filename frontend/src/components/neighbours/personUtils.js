@@ -1,12 +1,12 @@
 export function fullName(user, fallbackId) {
-  if (!user) {
-    return `User ${fallbackId}`;
-  }
-  return `${user.name} ${user.surname}`;
+	if (!user) {
+		return "Profilo in caricamento";
+	}
+	return `${user.name} ${user.surname}`;
 }
 
 export function username(user, fallbackId) {
-  return user?.username ? `@${user.username}` : `ID ${fallbackId}`;
+	return user?.username ? `@${user.username}` : "Profilo in caricamento";
 }
 
 export function formatDate(value) {

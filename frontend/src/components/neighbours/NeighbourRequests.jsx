@@ -6,6 +6,7 @@ export function NeighbourRequests({
   loading,
   onAccept,
   onDecline,
+  onOpenUserProfile,
   received,
   sent,
   tab,
@@ -14,12 +15,7 @@ export function NeighbourRequests({
   const active = tab === "sent" ? sent : received;
 
   return (
-    <section className="page-grid">
-      <div className="page-intro card">
-        <p className="eyebrow">Requests</p>
-        <h1>Neighbour requests</h1>
-        <p>Users can list only requests they sent or received. Invalid operations are rejected by the backend.</p>
-      </div>
+    <div className="page-grid">
       <div className="tabs" role="tablist" aria-label="Neighbour request views">
         <button className={tab === "received" ? "tab active" : "tab"} onClick={() => onTabChange("received")} type="button">
           Received requests
@@ -30,12 +26,13 @@ export function NeighbourRequests({
       </div>
       {active.length === 0 ? (
         <EmptyState title={tab === "sent" ? "No sent requests" : "No received requests"}>
-          Requests from the backend will appear here.
+          Your neighbour requests will appear here.
         </EmptyState>
       ) : (
         <div className="card-list">
           {active.map((request) => {
             const userId = tab === "sent" ? request.receiverId : request.senderId;
+            const profile = tab === "sent" ? request.receiver : request.sender;
             return (
               <RequestCard
                 key={request.id}
@@ -43,14 +40,15 @@ export function NeighbourRequests({
                 loading={loading}
                 mode={tab}
                 request={request}
-                user={knownUsers.get(userId)}
+                user={profile ?? knownUsers.get(userId)}
                 onAccept={onAccept}
                 onDecline={onDecline}
+                onOpenUserProfile={onOpenUserProfile}
               />
             );
           })}
         </div>
       )}
-    </section>
+    </div>
   );
 }

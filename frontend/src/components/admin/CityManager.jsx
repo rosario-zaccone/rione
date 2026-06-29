@@ -20,10 +20,7 @@ export function CityManager({ error, locations, loading, onCreate, onLoadCity, o
       <Card className="page-intro">
         <p className="eyebrow">Admin Locations</p>
         <h1>City and neighborhood management</h1>
-        <p>
-          Only admin users can create or remove platform-managed locations. Removal is rejected by
-          the backend while users still belong to the city neighborhoods.
-        </p>
+        <p>Manage the cities and neighbourhoods available to residents.</p>
         {error ? <p className="form-error">{error}</p> : null}
       </Card>
       <div className="two-col align-start">
@@ -33,7 +30,7 @@ export function CityManager({ error, locations, loading, onCreate, onLoadCity, o
             <p className="eyebrow">Real lookup</p>
             <h2>Load city by ID</h2>
             <p className="muted">
-              The current backend does not expose a full GET /cities catalog endpoint.
+              Search by city ID to review an existing location.
             </p>
           </div>
           <FormField

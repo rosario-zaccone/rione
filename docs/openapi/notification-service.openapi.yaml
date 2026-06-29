@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-24
+x-last-modified: 2026-06-29
 info:
   title: Rione Notification Service API
-  version: v0.2.0
+  version: v0.3.0
   description: Notification read-side API for authenticated users.
 servers:
   - url: http://localhost:8084
@@ -19,7 +19,7 @@ paths:
         - Notifications
       operationId: getMyNotifications
       summary: List my notifications
-      description: The recipient is resolved from the authenticated bearer token.
+      description: Only authenticated users can access this endpoint. The recipient is resolved from the authenticated bearer token. It returns request notifications with request identifiers and post comment/reaction notifications with post identifiers.
       security:
         - bearerAuth: []
       responses:
@@ -39,7 +39,7 @@ paths:
         - Notifications
       operationId: markMyNotificationRead
       summary: Mark one of my notifications as read
-      description: The recipient is resolved from the authenticated bearer token. Notifications owned by another user are returned as not found.
+      description: Only authenticated users can access this endpoint. Only the recipient of the notification can mark it as read. Notifications owned by another user are returned as not found, and the operation updates notification read state.
       security:
         - bearerAuth: []
       parameters:
@@ -99,7 +99,6 @@ components:
         - id
         - recipientId
         - actorId
-        - requestId
         - type
         - title
         - message
@@ -120,12 +119,22 @@ components:
         requestId:
           type: integer
           format: int64
+          nullable: true
           example: 10
+          description: Related neighbor request identifier for request notifications.
+        postId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 42
+          description: Related post identifier for post comment and reaction notifications.
         type:
           type: string
           enum:
             - REQUEST_RECEIVED
             - REQUEST_ACCEPTED
+            - POST_COMMENT_ADDED
+            - POST_REACTION_ADDED
         title:
           type: string
           example: Neighbor request received

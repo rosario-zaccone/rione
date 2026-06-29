@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rione.user.application.port.in.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +37,8 @@ public class UserController {
 	}
 
 	@PostMapping
+	@Operation(summary = "Register a user",
+			description = "Anyone can access this endpoint. It creates a new user account with unique mail and username and stores private account data for authenticated account operations.")
 	ResponseEntity<UserService.UserResponse> signUp(@Valid @RequestBody SignUpRequest request) {
 		UserService.UserResponse response = userService.signUp(new UserService.SignUpCommand(request.name(),
 				request.surname(), request.username(), request.mail(), request.password(), request.neighborhoodId(),
@@ -44,23 +47,38 @@ public class UserController {
 	}
 
 	@PostMapping("/login")
+	@Operation(summary = "Log in",
+			description = "Anyone can access this endpoint. It authenticates user credentials and returns a JWT for subsequent authenticated requests; failed credentials do not reveal whether the mail exists.")
 	LogInResponse logIn(@Valid @RequestBody LogInRequest request) {
 		UserService.UserResponse user = userService.logIn(new UserService.LogInCommand(request.mail(), request.password()));
 		return new LogInResponse(jwtService.createToken(user.id(), user.admin()), user);
 	}
 
 	@PostMapping("/logout")
+	@Operation(summary = "Log out",
+			description = "Only authenticated users can access this endpoint. It revokes the current bearer token so it can no longer be used.")
 	ResponseEntity<Void> logOut() {
 		jwtService.revoke(currentUser.token());
 		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/me")
+	@Operation(summary = "Get current user",
+			description = "Only authenticated users can access this endpoint. It returns the authenticated user's own profile, including private account fields needed by the owner.")
 	UserService.UserResponse getCurrentUser() {
 		return userService.getUser(currentUser.id());
 	}
 
+	@GetMapping("/{userId}/public-profile")
+	@Operation(summary = "Get public user profile",
+			description = "Only authenticated users can access this endpoint. It returns public profile information for the selected user and excludes private account data such as mail, birth date, password state, and admin flags.")
+	UserService.PublicUserProfileResponse getPublicUserProfile(@PathVariable @Positive Long userId) {
+		return userService.getPublicUserProfile(userId);
+	}
+
 	@PutMapping("/me/profile")
+	@Operation(summary = "Update current user profile",
+			description = "Only authenticated users can access this endpoint. Users can update only their own profile; username uniqueness is enforced and private account ownership is resolved from the bearer token.")
 	UserService.UserResponse updateCurrentUserProfile(@Valid @RequestBody UpdateProfileRequest request) {
 		Long userId = currentUser.id();
 		return userService.updateProfile(new UserService.UpdateProfileCommand(userId, request.name(), request.surname(),

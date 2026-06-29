@@ -1,6 +1,27 @@
 server:
   port: ${POST_SERVICE_PORT:8080}
 
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  datasource:
+    url: jdbc:postgresql://${POST_SERVICE_DB_HOST:localhost}:${POST_SERVICE_DB_PORT:5435}/${POST_SERVICE_DB_NAME:rione-post}
+    username: ${POST_SERVICE_DB_USERNAME:postgres}
+    password: ${POST_SERVICE_DB_PASSWORD:banana}
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
 management:
   metrics:
     tags:
@@ -9,3 +30,18 @@ management:
     web:
       exposure:
         include: health,metrics,prometheus
+
+rione:
+  security:
+    jwt:
+      secret: ${RIONE_JWT_SECRET:change-this-demo-secret-key-1234567890}
+      service-secret: ${RIONE_SERVICE_JWT_SECRET:change-this-demo-service-secret-key-1234567890}
+      service-expiration-ms: ${RIONE_SERVICE_JWT_EXPIRATION_MS:300000}
+      service-name: ${RIONE_SERVICE_NAME:post-service}
+  messaging:
+    post-topic: ${RIONE_POST_TOPIC:post}
+  clients:
+    social-service:
+      base-url: ${RIONE_SOCIAL_SERVICE_URL:http://localhost:8082}
+    user-service:
+      base-url: ${RIONE_USER_SERVICE_URL:http://localhost:8081}

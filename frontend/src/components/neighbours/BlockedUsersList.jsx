@@ -1,7 +1,7 @@
 import { BlockedUserCard } from "./BlockedUserCard";
 import { EmptyState } from "../ui/EmptyState";
 
-export function BlockedUsersList({ blocks, knownUsers, loading, onUnblock }) {
+export function BlockedUsersList({ blocks, knownUsers, loading, onOpenUserProfile, onUnblock }) {
   return (
     <section className="page-grid">
       <div className="page-intro card">
@@ -21,7 +21,8 @@ export function BlockedUsersList({ blocks, knownUsers, loading, onUnblock }) {
               block={block}
               key={block.id}
               loading={loading}
-              user={knownUsers.get(block.blockedId)}
+              user={block.blocked ?? knownUsers.get(block.blockedId)}
+              onOpenUserProfile={onOpenUserProfile}
               onUnblock={onUnblock}
             />
           ))}

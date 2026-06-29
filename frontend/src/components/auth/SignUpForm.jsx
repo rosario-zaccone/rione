@@ -96,7 +96,7 @@ export function SignUpForm({
       <div className="two-col">
         <FormField
           autoComplete="email"
-          help="The backend enforces unique email addresses."
+          help="Used only for account access."
           label="Email"
           name="mail"
           required
@@ -105,7 +105,7 @@ export function SignUpForm({
           onChange={(event) => update("mail", event.target.value)}
         />
         <FormField
-          help="The backend enforces unique usernames."
+          help="Choose a name neighbours can recognize."
           label="Username"
           minLength="3"
           name="username"
@@ -152,7 +152,7 @@ export function SignUpForm({
         />
       </div>
       <FormField
-        error={invalidBio ? "Biography must contain at least 20 non-whitespace characters." : ""}
+        error={invalidBio ? "Tell neighbours a little more about yourself." : ""}
         label="Bio"
         maxLength="500"
         minLength="20"

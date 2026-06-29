@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-24
+x-last-modified: 2026-06-29
 info:
   title: Rione API Gateway
-  version: v0.5.0
+  version: v0.7.0
   description: Public gateway contract for Rione service routes.
 servers:
   - url: http://localhost:8080
@@ -100,6 +100,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '400':
+          $ref: '#/components/responses/UserBadRequest'
+  /cities:
+    get:
+      tags:
+        - Users
+      operationId: gatewayListCities
+      summary: List cities with neighborhoods
+      description: Anyone can access this endpoint. Proxies GET /cities to the user service and returns the public location catalog used during signup and profile neighborhood selection.
+      responses:
+        '200':
+          description: City catalog.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CityResponse'
+    post:
+      tags:
+        - Users
+      operationId: gatewayCreateCity
+      summary: Create a city with neighborhoods
+      description: Only authenticated administrators can access this endpoint. Proxies POST /cities to the user service and creates platform-managed locations.
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: City created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CityResponse'
+        '403':
+          $ref: '#/components/responses/UserBadRequest'
+  /cities/{cityId}:
+    get:
+      tags:
+        - Users
+      operationId: gatewayGetCity
+      summary: Get a city with neighborhoods
+      description: Anyone can access this endpoint. Proxies GET /cities/{cityId} to the user service and returns public city and neighborhood names for location selection.
+      parameters:
+        - name: cityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: City found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CityResponse'
+    delete:
+      tags:
+        - Users
+      operationId: gatewayRemoveCity
+      summary: Remove a city with neighborhoods
+      description: Only authenticated administrators can access this endpoint. Proxies DELETE /cities/{cityId} to the user service and rejects removal while users belong to any of the city's neighborhoods.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: City removed.
+        '403':
           $ref: '#/components/responses/UserBadRequest'
   /social/neighbor-requests:
     post:
@@ -296,7 +372,7 @@ paths:
         - Notifications
       operationId: gatewayGetMyNotifications
       summary: List my notifications
-      description: Proxies GET /notifications/me to the notification service.
+      description: Only authenticated users can access this endpoint. Proxies GET /notifications/me to the notification service and returns notifications owned by the authenticated recipient, including request identifiers for request notifications and post identifiers for comment/reaction notifications.
       security:
         - bearerAuth: []
       responses:
@@ -316,7 +392,7 @@ paths:
         - Notifications
       operationId: gatewayMarkMyNotificationRead
       summary: Mark one of my notifications as read
-      description: Proxies PATCH /notifications/me/{notificationId}/read to the notification service.
+      description: Only authenticated users can access this endpoint. Proxies PATCH /notifications/me/{notificationId}/read to the notification service. Only the recipient of the notification can mark it as read; notifications owned by another user are hidden as not found.
       security:
         - bearerAuth: []
       parameters:
@@ -568,6 +644,33 @@ components:
           description: JWT bearer token.
         user:
           $ref: '#/components/schemas/UserResponse'
+    CityResponse:
+      type: object
+      required:
+        - id
+        - name
+        - neighborhoods
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        neighborhoods:
+          type: array
+          items:
+            $ref: '#/components/schemas/NeighborhoodResponse'
+    NeighborhoodResponse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
     SendNeighborRequestRequest:
       type: object
       required:
@@ -645,7 +748,6 @@ components:
         - id
         - recipientId
         - actorId
-        - requestId
         - type
         - title
         - message
@@ -663,11 +765,20 @@ components:
         requestId:
           type: integer
           format: int64
+          nullable: true
+          description: Related neighbor request identifier for request notifications.
+        postId:
+          type: integer
+          format: int64
+          nullable: true
+          description: Related post identifier for post comment and reaction notifications.
         type:
           type: string
           enum:
             - REQUEST_RECEIVED
             - REQUEST_ACCEPTED
+            - POST_COMMENT_ADDED
+            - POST_REACTION_ADDED
         title:
           type: string
         message:

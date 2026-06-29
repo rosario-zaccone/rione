@@ -36,7 +36,7 @@ class NotificationControllerIntegrationTest {
 	@Test
 	void listsUserNotificationsThroughHttpContract() throws Exception {
 		when(notificationService.getNotifications(2L))
-			.thenReturn(List.of(new NotificationService.NotificationResponse(1L, 2L, 1L, 10L, "REQUEST_RECEIVED",
+			.thenReturn(List.of(new NotificationService.NotificationResponse(1L, 2L, 1L, 10L, null, "REQUEST_RECEIVED",
 					"Neighbor request received", "User 1 sent you a neighbor request",
 					LocalDateTime.of(2026, 1, 1, 10, 0), null)));
 
@@ -51,7 +51,7 @@ class NotificationControllerIntegrationTest {
 	@Test
 	void marksNotificationReadThroughHttpContract() throws Exception {
 		when(notificationService.markNotificationRead(new NotificationService.MarkNotificationReadCommand(2L, 1L)))
-			.thenReturn(new NotificationService.NotificationResponse(1L, 2L, 1L, 10L, "REQUEST_RECEIVED",
+			.thenReturn(new NotificationService.NotificationResponse(1L, 2L, 1L, 10L, null, "REQUEST_RECEIVED",
 					"Neighbor request received", "User 1 sent you a neighbor request",
 					LocalDateTime.of(2026, 1, 1, 10, 0), LocalDateTime.of(2026, 1, 1, 10, 1)));
 

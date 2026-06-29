@@ -1,10 +1,406 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-17
+x-last-modified: 2026-06-29
 info:
   title: Rione Post Service API
-  version: v0.1.0
-  description: The post service currently exposes no public business HTTP endpoints.
+  version: v0.2.0
+  description: Post, comment, and reaction HTTP API for the Rione neighbourhood feed.
 servers:
   - url: http://localhost:8080
     description: Service container port
-paths: {}
+paths:
+  /posts:
+    get:
+      summary: List visible posts
+      description: Only authenticated users can access this endpoint. It returns posts visible to the requester according to ownership, neighborhood, neighborship, block, and post privacy rules.
+      responses:
+        "200":
+          description: Visible posts for the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+    post:
+      summary: Create a post
+      description: Only authenticated users can access this endpoint. It creates a post owned by the authenticated user; future visibility is controlled by the selected post privacy.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostRequest"
+      responses:
+        "201":
+          description: Post created.
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+  /me/posts:
+    get:
+      summary: List posts authored by the authenticated user
+      description: Only authenticated users can access this endpoint. It returns posts authored by the authenticated user, including private posts because the requester is the owner.
+      responses:
+        "200":
+          description: Authenticated user's posts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+  /users/{authorId}/posts:
+    get:
+      summary: List visible posts by author
+      description: Only authenticated users can access this endpoint. It returns the author's posts that the requester is authorized to view; private posts are included only for the author or authorized neighbours.
+      parameters:
+        - $ref: "#/components/parameters/AuthorId"
+      responses:
+        "200":
+          description: Visible posts by the requested author.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+  /users/{authorId}/public-posts:
+    get:
+      summary: List public posts by author
+      description: Only authenticated users can access this endpoint. It returns only public posts for the author and never exposes private posts or private-only post data.
+      parameters:
+        - $ref: "#/components/parameters/AuthorId"
+      responses:
+        "200":
+          description: Public posts by the requested author.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+  /posts/{postId}:
+    get:
+      summary: Get a post
+      description: Only authenticated users can access this endpoint. It returns the post only when the requester is authorized by ownership, neighborhood, neighborship, block, and privacy rules.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "200":
+          description: Visible post.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          description: Post is absent or hidden.
+    patch:
+      summary: Update a post
+      description: Only authenticated users can access this endpoint. Only the owner of the post can edit it; the operation modifies post content state.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentRequest"
+      responses:
+        "200":
+          description: Updated post.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+    delete:
+      summary: Delete a post
+      description: Only authenticated users can access this endpoint. Only the owner of the post can delete it; deleted posts are removed from visible post read models according to the event-sourced deletion strategy.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "204":
+          description: Post deleted.
+  /posts/{postId}/comments:
+    get:
+      summary: List comments
+      description: Only authenticated users can access this endpoint. Comments are returned only when the requester is authorized to view the parent post.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "200":
+          description: Comments on the post.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+    post:
+      summary: Add a comment
+      description: Only authenticated users can access this endpoint. A user can comment only on posts they are authorized to view. Creating a comment records comment state and creates a notification for the post owner when the commenter is not the owner.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentRequest"
+      responses:
+        "201":
+          description: Comment created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+  /posts/{postId}/comments/{commentId}:
+    patch:
+      summary: Update a comment
+      description: Only authenticated users can access this endpoint. Only the owner of the comment can edit it; the operation modifies comment state without changing the parent post visibility rules.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+        - $ref: "#/components/parameters/CommentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentRequest"
+      responses:
+        "200":
+          description: Updated comment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "403":
+          description: Only the owner of the comment can edit it.
+    delete:
+      summary: Delete a comment
+      description: Only authenticated users can access this endpoint. Only the owner of the comment can delete it unless broader moderator permissions are introduced later; deletion follows the service event-sourced comment removal strategy.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+        - $ref: "#/components/parameters/CommentId"
+      responses:
+        "204":
+          description: Comment deleted.
+        "403":
+          description: Only the owner of the comment can delete it.
+  /posts/{postId}/reactions:
+    get:
+      summary: List reactions
+      description: Only authenticated users can access this endpoint. Reactions are returned only when the requester is authorized to view the parent post.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "200":
+          description: Reactions on the post.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reaction"
+    post:
+      summary: Create or update the authenticated user's reaction
+      description: Only authenticated users can access this endpoint. A user can react only to posts they are authorized to view; creating a new reaction creates a notification for the post owner when the reactor is not the owner.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReactionRequest"
+      responses:
+        "200":
+          description: Reaction state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reaction"
+    delete:
+      summary: Remove the authenticated user's reaction
+      description: Only authenticated users can access this endpoint. Users can delete only their own reaction from the post, modifying reaction state without affecting post content.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "204":
+          description: Reaction removed.
+  /posts/{postId}/reactions/me:
+    get:
+      summary: Get the authenticated user's reaction
+      description: Only authenticated users can access this endpoint. It returns the authenticated user's reaction only when the requester is authorized to view the parent post.
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "200":
+          description: Reaction state or null when absent.
+          content:
+            application/json:
+              schema:
+                nullable: true
+                $ref: "#/components/schemas/Reaction"
+components:
+  parameters:
+    AuthorId:
+      name: authorId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    PostId:
+      name: postId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    CommentId:
+      name: commentId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+  schemas:
+    CreatePostRequest:
+      type: object
+      required: [neighborhoodId, content, type, visibility]
+      properties:
+        neighborhoodId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        type:
+          type: string
+          enum: [EVENT, DISCUSSION, WARNING, HELP]
+        visibility:
+          type: string
+          enum: [PUBLIC, PRIVATE]
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+    ContentRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+    ReactionRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [UPVOTE, DOWNVOTE]
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        authorId:
+          type: integer
+          format: int64
+        neighborhoodId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        type:
+          type: string
+        visibility:
+          type: string
+        place:
+          $ref: "#/components/schemas/Place"
+        score:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        author:
+          nullable: true
+          $ref: "#/components/schemas/UserProfile"
+    Place:
+      type: object
+      nullable: true
+      properties:
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        postId:
+          type: integer
+          format: int64
+        authorId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        author:
+          nullable: true
+          $ref: "#/components/schemas/UserProfile"
+    Reaction:
+      type: object
+      properties:
+        postId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        type:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user:
+          nullable: true
+          $ref: "#/components/schemas/UserProfile"
+    UserProfile:
+      type: object
+      required: [id, name, surname, username]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        surname:
+          type: string
+        username:
+          type: string

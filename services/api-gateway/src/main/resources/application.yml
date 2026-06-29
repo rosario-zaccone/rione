@@ -7,6 +7,7 @@ rione:
       user-service-uri: ${RIONE_GATEWAY_ROUTES_USER_SERVICE_URI:http://localhost:8081}
       social-service-uri: ${RIONE_GATEWAY_ROUTES_SOCIAL_SERVICE_URI:http://localhost:8082}
       notification-service-uri: ${RIONE_GATEWAY_ROUTES_NOTIFICATION_SERVICE_URI:http://localhost:8084}
+      post-service-uri: ${RIONE_GATEWAY_ROUTES_POST_SERVICE_URI:http://localhost:8083}
 
 management:
   metrics:
@@ -28,3 +29,5 @@ springdoc:
         url: /social/v3/api-docs
       - name: notification-service
         url: /notifications/v3/api-docs
+      - name: post-service
+        url: /posts/v3/api-docs

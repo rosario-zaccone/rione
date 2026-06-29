@@ -30,6 +30,8 @@ public interface SocialService {
 
 	List<BlockResponse> getBlocks(Long userId);
 
+	PostVisibilityResponse checkPostVisibility(PostVisibilityQuery query);
+
 	void unblockUser(UnblockUserCommand command);
 
 	void reconcileRelationshipsAfterNeighborhoodChange(NeighborhoodChangedCommand command);
@@ -55,16 +57,26 @@ public interface SocialService {
 	record SearchUsersQuery(Long requesterId, String query) {
 	}
 
-	record NeighborRequestResponse(Long id, Long senderId, Long receiverId, LocalDateTime date, String status) {
+	record PostVisibilityQuery(Long viewerId, Long authorId) {
 	}
 
-	record NeighborResponse(Long id, Long userId, Long neighborId, LocalDateTime date) {
+	record UserProfileResponse(Long id, String name, String surname, String username) {
 	}
 
-	record BlockResponse(Long id, Long blockerId, Long blockedId) {
+	record NeighborRequestResponse(Long id, Long senderId, Long receiverId, LocalDateTime date, String status,
+			UserProfileResponse sender, UserProfileResponse receiver) {
+	}
+
+	record NeighborResponse(Long id, Long userId, Long neighborId, LocalDateTime date, UserProfileResponse neighbor) {
+	}
+
+	record BlockResponse(Long id, Long blockerId, Long blockedId, UserProfileResponse blocked) {
 	}
 
 	record UserSearchResponse(Long id, String name, String surname, String username) {
+	}
+
+	record PostVisibilityResponse(boolean sameNeighborhood, boolean activeNeighborship, boolean blocked) {
 	}
 
 	record BlockOperationResult(BlockResponse block, boolean created) {

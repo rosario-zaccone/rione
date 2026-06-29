@@ -1,5 +1,7 @@
 package com.rione.user.application.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.rione.user.application.port.in.CityService;
@@ -26,6 +28,11 @@ public class CityServiceImpl implements CityService {
 	public CityResponse createCity(CreateCityCommand command) {
 		requireAdmin(command.actingUserId(), "insert a city");
 		return toResponse(cityRepository.save(City.create(command.name(), command.neighborhoods())));
+	}
+
+	@Override
+	public List<CityResponse> listCities() {
+		return cityRepository.findAll().stream().map(this::toResponse).toList();
 	}
 
 	@Override

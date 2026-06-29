@@ -8,8 +8,7 @@ export function AuthLayout({ children, mode }) {
           {mode === "signup" ? "Join your neighbourhood with clarity." : "Welcome back to Rione."}
         </h1>
         <p>
-          Manage your profile, discover eligible neighbours, handle requests, and stay informed
-          without public feeds or noisy engagement features.
+          Meet people nearby, share useful updates, and keep neighbourhood conversations close to home.
         </p>
       </section>
       <section className="auth-card">{children}</section>

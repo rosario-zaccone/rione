@@ -3,6 +3,7 @@ import { NeighbourSearch } from "../components/neighbours/NeighbourSearch";
 export function FindNeighboursPage({
   currentUser,
   neighbours,
+  onOpenUserProfile,
   onQueryChange,
   onSendRequest,
   query,
@@ -15,6 +16,7 @@ export function FindNeighboursPage({
       query={query}
       results={neighbours.searchResults}
       searchLoading={neighbours.searchLoading}
+      onOpenUserProfile={onOpenUserProfile}
       onQueryChange={onQueryChange}
       onSendRequest={onSendRequest}
     />

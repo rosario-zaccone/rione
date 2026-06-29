@@ -21,6 +21,7 @@ import com.rione.social.application.port.in.SocialService.BlockUserCommand;
 import com.rione.social.application.port.in.SocialService.RemoveNeighborshipCommand;
 import com.rione.social.application.port.in.SocialService.NeighborhoodChangedCommand;
 import com.rione.social.application.port.in.SocialService.NeighborRequestResponse;
+import com.rione.social.application.port.in.SocialService.PostVisibilityQuery;
 import com.rione.social.application.port.in.SocialService.SendNeighborRequestCommand;
 import com.rione.social.application.port.in.SocialService.UnblockUserCommand;
 import com.rione.social.application.port.out.BlockRepository;
@@ -87,6 +88,23 @@ class SocialServiceImplTest {
 		assertThat(service.searchUsers(new com.rione.social.application.port.in.SocialService.SearchUsersQuery(1L, "  ")))
 			.isEmpty();
 		verify(userDirectory, never()).searchInNeighborhood(any(), any());
+	}
+
+	@Test
+	void checksPostVisibilityRelationshipForSameNeighborhoodNeighborshipAndBlocks() {
+		when(neighborships.existsBetween(new UserId(1L), new UserId(2L))).thenReturn(true);
+
+		assertThat(service.checkPostVisibility(new PostVisibilityQuery(1L, 2L)))
+			.extracting(response -> response.sameNeighborhood(), response -> response.activeNeighborship(),
+					response -> response.blocked())
+			.containsExactly(true, true, false);
+
+		when(blocks.existsBetween(new UserId(2L), new UserId(1L))).thenReturn(true);
+
+		assertThat(service.checkPostVisibility(new PostVisibilityQuery(1L, 2L)))
+			.extracting(response -> response.sameNeighborhood(), response -> response.activeNeighborship(),
+					response -> response.blocked())
+			.containsExactly(false, false, true);
 	}
 
 	@Test

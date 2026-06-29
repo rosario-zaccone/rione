@@ -48,7 +48,8 @@ class SocialControllerIntegrationTest {
 	@Test
 	void createsNeighborRequestThroughHttpContract() throws Exception {
 		when(socialService.sendNeighborRequest(any()))
-			.thenReturn(new NeighborRequestResponse(1L, 10L, 20L, LocalDateTime.of(2026, 1, 1, 0, 0), "PENDING"));
+			.thenReturn(new NeighborRequestResponse(1L, 10L, 20L, LocalDateTime.of(2026, 1, 1, 0, 0), "PENDING",
+					null, null));
 
 		mockMvc.perform(post("/neighbor-requests").contentType(MediaType.APPLICATION_JSON)
 			.content("{\"receiverId\":20}"))
@@ -69,7 +70,7 @@ class SocialControllerIntegrationTest {
 	void listsCurrentUsersSentNeighborRequestsThroughHttpContract() throws Exception {
 		when(socialService.getSentNeighborRequests(10L))
 			.thenReturn(List.of(new NeighborRequestResponse(1L, 10L, 20L, LocalDateTime.of(2026, 1, 1, 0, 0),
-					"PENDING")));
+					"PENDING", null, new SocialService.UserProfileResponse(20L, "Ada", "Lovelace", "ada"))));
 
 		mockMvc.perform(get("/me/neighbor-requests/sent"))
 			.andExpect(status().isOk())
@@ -97,7 +98,7 @@ class SocialControllerIntegrationTest {
 	void listsCurrentUsersReceivedNeighborRequestsThroughHttpContract() throws Exception {
 		when(socialService.getReceivedNeighborRequests(10L))
 			.thenReturn(List.of(new NeighborRequestResponse(1L, 20L, 10L, LocalDateTime.of(2026, 1, 1, 0, 0),
-					"PENDING")));
+					"PENDING", new SocialService.UserProfileResponse(20L, "Ada", "Lovelace", "ada"), null)));
 
 		mockMvc.perform(get("/me/neighbor-requests/received"))
 			.andExpect(status().isOk())
@@ -121,7 +122,8 @@ class SocialControllerIntegrationTest {
 
 	@Test
 	void listsBlockedUsersThroughHttpContract() throws Exception {
-		when(socialService.getBlocks(10L)).thenReturn(List.of(new BlockResponse(1L, 10L, 20L)));
+		when(socialService.getBlocks(10L)).thenReturn(List.of(new BlockResponse(1L, 10L, 20L,
+				new SocialService.UserProfileResponse(20L, "Ada", "Lovelace", "ada"))));
 
 		mockMvc.perform(get("/me/blocks"))
 			.andExpect(status().isOk())
@@ -134,7 +136,8 @@ class SocialControllerIntegrationTest {
 	@Test
 	void listsCurrentUsersNeighborsThroughHttpContract() throws Exception {
 		when(socialService.getNeighbors(10L))
-			.thenReturn(List.of(new NeighborResponse(1L, 10L, 20L, LocalDateTime.of(2026, 1, 1, 0, 0))));
+			.thenReturn(List.of(new NeighborResponse(1L, 10L, 20L, LocalDateTime.of(2026, 1, 1, 0, 0),
+					new SocialService.UserProfileResponse(20L, "Ada", "Lovelace", "ada"))));
 
 		mockMvc.perform(get("/me/neighborships"))
 			.andExpect(status().isOk())
@@ -165,7 +168,7 @@ class SocialControllerIntegrationTest {
 	@Test
 	void createsBlockThroughRestfulEndpoint() throws Exception {
 		when(socialService.putBlock(any()))
-			.thenReturn(new BlockOperationResult(new BlockResponse(1L, 10L, 20L), true));
+			.thenReturn(new BlockOperationResult(new BlockResponse(1L, 10L, 20L, null), true));
 
 		mockMvc.perform(put("/me/blocks/20")).andExpect(status().isCreated())
 			.andExpect(jsonPath("$.blockedId").value(20L));
@@ -174,7 +177,7 @@ class SocialControllerIntegrationTest {
 	@Test
 	void returnsExistingBlockThroughIdempotentPut() throws Exception {
 		when(socialService.putBlock(any()))
-			.thenReturn(new BlockOperationResult(new BlockResponse(1L, 10L, 20L), false));
+			.thenReturn(new BlockOperationResult(new BlockResponse(1L, 10L, 20L, null), false));
 
 		mockMvc.perform(put("/me/blocks/20")).andExpect(status().isOk())
 			.andExpect(jsonPath("$.id").value(1L));

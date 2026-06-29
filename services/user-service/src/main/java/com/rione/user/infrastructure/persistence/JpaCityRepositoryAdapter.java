@@ -1,5 +1,7 @@
 package com.rione.user.infrastructure.persistence;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -24,6 +26,15 @@ class JpaCityRepositoryAdapter implements CityRepository {
 	@Override
 	public City save(City city) {
 		return toDomain(repository.save(toEntity(city)));
+	}
+
+	@Override
+	public List<City> findAll() {
+		return repository.findAll()
+			.stream()
+			.map(this::toDomain)
+			.sorted(Comparator.comparing(City::name))
+			.toList();
 	}
 
 	@Override
