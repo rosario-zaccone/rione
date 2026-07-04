@@ -10,12 +10,12 @@ import com.rione.notification.domain.NotificationType;
 
 import tools.jackson.databind.ObjectMapper;
 
-class PostEventListenerTest {
+class KafkaPostEventListenerTest {
 
 	@Test
 	void mapsPostCommentEventToPostNotification() {
 		NotificationService service = org.mockito.Mockito.mock(NotificationService.class);
-		PostEventListener listener = new PostEventListener(service, new ObjectMapper());
+		KafkaPostEventListener listener = new KafkaPostEventListener(service, new ObjectMapper());
 
 		listener.listen("""
 				{"type":"POST_COMMENT_ADDED","postId":10,"recipientId":1,"actorId":2,"occurredAt":"2026-01-01T10:00:00"}
@@ -33,7 +33,7 @@ class PostEventListenerTest {
 	@Test
 	void mapsPostReactionEventToPostNotification() {
 		NotificationService service = org.mockito.Mockito.mock(NotificationService.class);
-		PostEventListener listener = new PostEventListener(service, new ObjectMapper());
+		KafkaPostEventListener listener = new KafkaPostEventListener(service, new ObjectMapper());
 
 		listener.listen("""
 				{"type":"POST_REACTION_ADDED","postId":10,"recipientId":1,"actorId":2,"reactionType":"UPVOTE","occurredAt":"2026-01-01T10:00:00"}

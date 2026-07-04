@@ -6,23 +6,25 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.rione.notification.application.port.in.NotificationService;
+import com.rione.notification.application.port.out.PostEventListener;
 import com.rione.notification.domain.NotificationType;
 
 import tools.jackson.databind.ObjectMapper;
 
 @Component
-class PostEventListener {
+class KafkaPostEventListener implements PostEventListener {
 
 	private final NotificationService notificationService;
 	private final ObjectMapper objectMapper;
 
-	PostEventListener(NotificationService notificationService, ObjectMapper objectMapper) {
+	KafkaPostEventListener(NotificationService notificationService, ObjectMapper objectMapper) {
 		this.notificationService = notificationService;
 		this.objectMapper = objectMapper;
 	}
 
+	@Override
 	@KafkaListener(topics = "${rione.messaging.post-topic:post}")
-	void listen(String payload) {
+	public void listen(String payload) {
 		PostEvent event = read(payload);
 		notificationService.recordPostEvent(new NotificationService.PostEventCommand(NotificationType.valueOf(event.type()),
 				event.recipientId(), event.actorId(), event.postId(), event.occurredAt()));

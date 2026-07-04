@@ -10,12 +10,12 @@ import com.rione.notification.domain.NotificationType;
 
 import tools.jackson.databind.ObjectMapper;
 
-class SocialEventListenerTest {
+class KafkaSocialEventListenerTest {
 
 	@Test
 	void mapsRequestReceivedEventToReceiverNotification() {
 		NotificationService service = org.mockito.Mockito.mock(NotificationService.class);
-		SocialEventListener listener = new SocialEventListener(service, new ObjectMapper());
+		KafkaSocialEventListener listener = new KafkaSocialEventListener(service, new ObjectMapper());
 
 		listener.listen("""
 				{"type":"REQUEST_RECEIVED","requestId":10,"senderId":1,"receiverId":2,"occurredAt":"2026-01-01T10:00:00"}
@@ -35,7 +35,7 @@ class SocialEventListenerTest {
 	@Test
 	void mapsRequestAcceptedEventToSenderNotification() {
 		NotificationService service = org.mockito.Mockito.mock(NotificationService.class);
-		SocialEventListener listener = new SocialEventListener(service, new ObjectMapper());
+		KafkaSocialEventListener listener = new KafkaSocialEventListener(service, new ObjectMapper());
 
 		listener.listen("""
 				{"type":"REQUEST_ACCEPTED","requestId":10,"senderId":1,"receiverId":2,"occurredAt":"2026-01-01T10:00:00"}
