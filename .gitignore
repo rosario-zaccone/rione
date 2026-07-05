@@ -47,3 +47,7 @@ services/examples/
 # Frontend
 node_modules/
 dist/
+
+# Report build output
+docs/report/*
+!docs/report/report.pdf
