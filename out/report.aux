@@ -13,23 +13,57 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}CI/CD Pipeline}{5}{subsection.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4}Domain-Driven Design Approach}{6}{section.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Strategic Design}{6}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Bounded Contexts}{6}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Ubiquitous Language}{6}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Requirements}{6}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}User Stories}{6}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Requirements Tables}{7}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Business Rules}{7}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Application Architecture and Deployment}{7}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Main Microservices}{7}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}API Gateway}{8}{subsection.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}User Service}{8}{subsection.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Social Service}{8}{subsection.7.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Post Service}{8}{subsection.7.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Notification Service}{8}{subsection.7.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Additional Patterns and Monitoring}{8}{section.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Health API}{8}{subsection.8.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Application Metrics}{8}{subsection.8.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {9}Implementation}{8}{section.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Use of AI During Coding}{8}{subsection.9.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusions}{8}{section.10}\protected@file@percent }
-\gdef \@abspage@last{8}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}Bounded Contexts}{6}{subsubsection.4.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Ubiquitous Language}{6}{subsubsection.4.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Tactical Design}{7}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Requirements}{7}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}User Stories}{7}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Requirements Tables}{8}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Business Rules}{8}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Implementation and Deployment Architecture}{8}{section.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Deployment architecture of the Rione system.}}{9}{figure.1}\protected@file@percent }
+\newlabel{fig:deployment-architecture}{{1}{9}{Deployment architecture of the Rione system}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Clean and Hexagonal Service Structure}{9}{subsection.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Clean Architecture dependency direction adapted to the Rione service structure.}}{10}{figure.2}\protected@file@percent }
+\newlabel{fig:clean-architecture}{{2}{10}{Clean Architecture dependency direction adapted to the Rione service structure}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Event-Driven Communication}{10}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Application Security}{10}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Main Microservices}{11}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}API Gateway}{11}{subsection.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces API Gateway OpenAPI diagram.}}{12}{figure.3}\protected@file@percent }
+\newlabel{fig:api-gateway-openapi}{{3}{12}{API Gateway OpenAPI diagram}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}User Service}{13}{subsection.7.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces User Service OpenAPI diagram.}}{14}{figure.4}\protected@file@percent }
+\newlabel{fig:user-service-openapi}{{4}{14}{User Service OpenAPI diagram}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces User Service domain model.}}{14}{figure.5}\protected@file@percent }
+\newlabel{fig:user-service-domain}{{5}{14}{User Service domain model}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces User Service component-and-connector diagram.}}{14}{figure.6}\protected@file@percent }
+\newlabel{fig:user-service-cc}{{6}{14}{User Service component-and-connector diagram}{figure.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Social Service}{15}{subsection.7.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Social Service OpenAPI diagram.}}{16}{figure.7}\protected@file@percent }
+\newlabel{fig:social-service-openapi}{{7}{16}{Social Service OpenAPI diagram}{figure.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Social Service domain model.}}{17}{figure.8}\protected@file@percent }
+\newlabel{fig:social-service-domain}{{8}{17}{Social Service domain model}{figure.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Social Service component-and-connector diagram.}}{17}{figure.9}\protected@file@percent }
+\newlabel{fig:social-service-cc}{{9}{17}{Social Service component-and-connector diagram}{figure.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Post Service}{18}{subsection.7.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Post Service OpenAPI diagram.}}{19}{figure.10}\protected@file@percent }
+\newlabel{fig:post-service-openapi}{{10}{19}{Post Service OpenAPI diagram}{figure.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Post Service domain model.}}{19}{figure.11}\protected@file@percent }
+\newlabel{fig:post-service-domain}{{11}{19}{Post Service domain model}{figure.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Post Service component-and-connector diagram.}}{20}{figure.12}\protected@file@percent }
+\newlabel{fig:post-service-cc}{{12}{20}{Post Service component-and-connector diagram}{figure.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Notification Service}{21}{subsection.7.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Notification Service OpenAPI diagram.}}{22}{figure.13}\protected@file@percent }
+\newlabel{fig:notification-service-openapi}{{13}{22}{Notification Service OpenAPI diagram}{figure.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Notification Service domain model.}}{22}{figure.14}\protected@file@percent }
+\newlabel{fig:notification-service-domain}{{14}{22}{Notification Service domain model}{figure.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Notification Service component-and-connector diagram.}}{23}{figure.15}\protected@file@percent }
+\newlabel{fig:notification-service-cc}{{15}{23}{Notification Service component-and-connector diagram}{figure.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Additional Patterns and Monitoring}{24}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Health API}{24}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Application Metrics}{24}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Implementation}{24}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Use of AI During Coding}{25}{subsection.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusions}{25}{section.10}\protected@file@percent }
+\gdef \@abspage@last{25}
