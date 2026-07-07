@@ -5,15 +5,15 @@ export function BlockedUsersList({ blocks, knownUsers, loading, onOpenUserProfil
   return (
     <section className="page-grid">
       <div className="page-intro card">
-        <p className="eyebrow">Blocking</p>
-        <h1>Blocked users</h1>
+        <p className="eyebrow">Blocco</p>
+        <h1>Utenti bloccati</h1>
         <p>
-          Unblocking removes the block but does not restore previous neighbour connections or
-          pending requests.
+          Sbloccare rimuove il blocco ma non ripristina le precedenti connessioni con i vicini o le
+          richieste in sospeso.
         </p>
       </div>
       {blocks.length === 0 ? (
-        <EmptyState title="No blocked users">Blocks created by the current user will appear here.</EmptyState>
+        <EmptyState title="Nessun utente bloccato">I blocchi creati dall'utente corrente appariranno qui.</EmptyState>
       ) : (
         <div className="card-list">
           {blocks.map((block) => (

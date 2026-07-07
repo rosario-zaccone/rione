@@ -6,7 +6,7 @@ function initials(user) {
 
 export function Avatar({ user, label, size = "md" }) {
   return (
-    <span className={`avatar ${size}`} aria-label={label ?? "User avatar"} role="img">
+    <span className={`avatar ${size}`} aria-label={label ?? "Avatar utente"} role="img">
       {initials(user)}
     </span>
   );

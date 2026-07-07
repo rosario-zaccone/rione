@@ -46,7 +46,7 @@ export function PublicProfilePage({
         <div className="profile-public-header card aero-panel">
           <Avatar user={profile} size="lg" />
           <div>
-            <p className="eyebrow">Public profile</p>
+            <p className="eyebrow">Profilo pubblico</p>
             <h1>
               {profile.name} {profile.surname}
             </h1>
@@ -56,18 +56,18 @@ export function PublicProfilePage({
           </div>
         </div>
       ) : (
-        <EmptyState title="Profile unavailable.">This user profile could not be loaded.</EmptyState>
+        <EmptyState title="Profilo non disponibile.">Non è stato possibile caricare questo profilo utente.</EmptyState>
       )}
 
       <section className="profile-posts">
         <div>
-          <p className="eyebrow">Public posts</p>
-          <h2>Shared publicly</h2>
+          <p className="eyebrow">Post pubblici</p>
+          <h2>Condivisi pubblicamente</h2>
         </div>
         {loading && publicPosts.length === 0 ? (
           <Skeleton lines={3} />
         ) : publicPosts.length === 0 ? (
-          <EmptyState title="No public posts.">This profile has no public posts to show.</EmptyState>
+          <EmptyState title="Nessun post pubblico.">Questo profilo non ha post pubblici da mostrare.</EmptyState>
         ) : (
           <div className="post-list">
             {publicPosts.map((post) => (

@@ -1,4 +1,4 @@
-export function SearchInput({ label = "Search", value, onChange, placeholder, ...props }) {
+export function SearchInput({ label = "Cerca", value, onChange, placeholder, ...props }) {
   return (
     <label className="search-field">
       <span className="sr-only">{label}</span>

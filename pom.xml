@@ -31,7 +31,20 @@
 	<properties>
 		<java.version>21</java.version>
 		<springdoc.version>3.0.3</springdoc.version>
+		<spring-cloud-circuitbreaker.version>5.0.2</spring-cloud-circuitbreaker.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-circuitbreaker-dependencies</artifactId>
+				<version>${spring-cloud-circuitbreaker.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<pluginManagement>

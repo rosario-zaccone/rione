@@ -21,7 +21,7 @@ export function useProfile(token, onUserChange) {
         bio: form.bio.trim(),
       });
       onUserChange(updated);
-      setSuccess("Profile updated.");
+      setSuccess("Profilo aggiornato.");
       return updated;
     } catch (profileError) {
       setError(profileError.message);

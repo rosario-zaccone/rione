@@ -32,7 +32,7 @@ function errorMessage(data, status) {
     data?.detail ??
     data?.error ??
     data?.title ??
-    `Request failed with status ${status}`
+    `Richiesta fallita con stato ${status}`
   );
 }
 

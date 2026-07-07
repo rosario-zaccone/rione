@@ -19,13 +19,13 @@ export function MyNeighboursPage({
 
   return (
     <section className="page-grid">
-      <h2 className="section-title">Neighbours</h2>
-      <div className="tabs primary-tabs" role="tablist" aria-label="Neighbour views">
+      <h2 className="section-title">Vicini</h2>
+      <div className="tabs primary-tabs" role="tablist" aria-label="Visualizzazioni vicini">
         <button className={tab === "list" ? "tab active" : "tab"} onClick={() => setTab("list")} type="button">
-          My Neighbours
+          I miei vicini
         </button>
         <button className={tab === "requests" ? "tab active" : "tab"} onClick={() => setTab("requests")} type="button">
-          Requests
+          Richieste
           {receivedCount > 0 ? <span className="tab-badge">{receivedCount}</span> : null}
         </button>
       </div>

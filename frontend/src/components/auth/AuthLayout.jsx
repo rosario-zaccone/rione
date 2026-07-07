@@ -5,10 +5,11 @@ export function AuthLayout({ children, mode }) {
         <span className="brand-orb">R</span>
         <p className="eyebrow">Rione</p>
         <h1 id="auth-title">
-          {mode === "signup" ? "Join your neighbourhood with clarity." : "Welcome back to Rione."}
+          {mode === "signup" ? "Entra nel tuo quartiere, in modo chiaro." : "Bentornato su Rione."}
         </h1>
         <p>
-          Meet people nearby, share useful updates, and keep neighbourhood conversations close to home.
+          Incontra le persone vicine a te, condividi aggiornamenti utili e mantieni le conversazioni
+          del quartiere vicine a casa.
         </p>
       </section>
       <section className="auth-card">{children}</section>

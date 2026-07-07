@@ -20,21 +20,21 @@ export function TopNav({
         <span className="brand-orb small">R</span>
         <div>
           <strong>Rione</strong>
-          <span>Safe neighbourhood discovery</span>
+          <span>Scopri il tuo vicinato in sicurezza</span>
         </div>
       </div>
       <SearchInput
-        label="Search neighbours"
-        placeholder="Search neighbours"
+        label="Cerca vicini"
+        placeholder="Cerca vicini"
         value={searchValue}
         onChange={onSearch}
       />
       <div className="top-nav-actions">
         <Button variant="secondary" onClick={onFindNeighbours}>
-          Find neighbours
+          Trova vicini
         </Button>
         <NotificationBell unreadCount={unreadCount} onClick={onOpenNotifications} />
-        <button className="profile-shortcut" type="button" aria-label="Open profile" onClick={onOpenProfile}>
+        <button className="profile-shortcut" type="button" aria-label="Apri profilo" onClick={onOpenProfile}>
           <Avatar user={currentUser} />
           <span>{currentUser?.username}</span>
         </button>

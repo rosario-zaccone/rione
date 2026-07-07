@@ -13,7 +13,7 @@ export function NeighbourConnections({
   return (
     <div className="page-grid">
       {neighbors.length === 0 ? (
-        <EmptyState title="No neighbours yet">Accepted connections will appear here.</EmptyState>
+        <EmptyState title="Ancora nessun vicino">Le connessioni accettate appariranno qui.</EmptyState>
       ) : (
         <div className="people-grid">
           {neighbors.map((neighbor) => {

@@ -47,7 +47,7 @@ export function usePosts(token) {
         longitude: form.longitude === "" ? null : Number(form.longitude),
         latitude: form.latitude === "" ? null : Number(form.latitude),
       });
-      setSuccess("Post published.");
+      setSuccess("Post pubblicato.");
       await loadFeed();
     } catch (postError) {
       setError(postError.message);
@@ -65,7 +65,7 @@ export function usePosts(token) {
           post.id === postId ? { ...post, comments: [...(post.comments ?? []), comment] } : post,
         ),
       );
-      setSuccess("Comment added.");
+      setSuccess("Commento aggiunto.");
       return comment;
     } catch (postError) {
       setError(postError.message);
@@ -90,7 +90,7 @@ export function usePosts(token) {
             : post,
         ),
       );
-      setSuccess("Comment updated.");
+      setSuccess("Commento aggiornato.");
       return updated;
     } catch (postError) {
       setError(postError.message);
@@ -113,7 +113,7 @@ export function usePosts(token) {
             : post,
         ),
       );
-      setSuccess("Comment deleted.");
+      setSuccess("Commento eliminato.");
     } catch (postError) {
       setError(postError.message);
       throw postError;

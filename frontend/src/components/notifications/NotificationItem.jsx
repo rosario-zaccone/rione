@@ -5,18 +5,18 @@ import { Card } from "../ui/Card";
 
 function typeLabel(type) {
   if (type === "REQUEST_RECEIVED") {
-    return "Neighbour request";
+    return "Richiesta di vicinato";
   }
   if (type === "REQUEST_ACCEPTED") {
-    return "Request accepted";
+    return "Richiesta accettata";
   }
   if (type === "POST_COMMENT_ADDED") {
-    return "New comment";
+    return "Nuovo commento";
   }
   if (type === "POST_REACTION_ADDED") {
-    return "New reaction";
+    return "Nuova reazione";
   }
-  return "Update";
+  return "Aggiornamento";
 }
 
 function relatedPostId(notification) {
@@ -65,22 +65,22 @@ export function NotificationItem({
         <div className="button-row">
           {isPostNotification(notification) && postId ? (
             <Button variant="ghost" type="button" onClick={() => onOpenPost(postId)}>
-              Open post
+              Apri post
             </Button>
           ) : null}
           {isRequestNotification(notification) && notification.requestId ? (
             <Button variant="ghost" type="button" onClick={() => onOpenRequest(notification)}>
-              Open request
+              Apri richiesta
             </Button>
           ) : null}
         </div>
       </div>
       {unread ? (
         <Button variant="secondary" loading={loading} onClick={() => onMarkRead(notification.id)}>
-          Mark as read
+          Segna come letta
         </Button>
       ) : (
-        <span className="read-label">Read {formatDate(notification.readAt)}</span>
+        <span className="read-label">Letta il {formatDate(notification.readAt)}</span>
       )}
     </Card>
   );

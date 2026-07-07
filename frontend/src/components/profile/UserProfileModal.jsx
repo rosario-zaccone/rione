@@ -25,7 +25,7 @@ export function UserProfileModal({ neighborhoodLabel, onClose, user }) {
         {user.bio ? <p>{user.bio}</p> : null}
         <div className="button-row end">
           <Button variant="ghost" onClick={onClose}>
-            Close
+            Chiudi
           </Button>
         </div>
       </section>

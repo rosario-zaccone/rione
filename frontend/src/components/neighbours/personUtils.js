@@ -11,10 +11,10 @@ export function username(user, fallbackId) {
 
 export function formatDate(value) {
   if (!value) {
-    return "Unknown date";
+    return "Data sconosciuta";
   }
 
-  return new Date(value).toLocaleDateString("en-GB", {
+  return new Date(value).toLocaleDateString("it-IT", {
     day: "2-digit",
     month: "short",
     year: "numeric",

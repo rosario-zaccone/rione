@@ -1,6 +1,6 @@
 import { Button } from "./Button";
 
-export function Modal({ cancelLabel = "Cancel", confirmLabel = "Confirm", message, onCancel, onConfirm, title }) {
+export function Modal({ cancelLabel = "Annulla", confirmLabel = "Conferma", message, onCancel, onConfirm, title }) {
   if (!title) {
     return null;
   }

@@ -16,6 +16,7 @@ export function FindNeighboursPage({
       query={query}
       results={neighbours.searchResults}
       searchLoading={neighbours.searchLoading}
+      onDismissError={() => neighbours.setError("")}
       onOpenUserProfile={onOpenUserProfile}
       onQueryChange={onQueryChange}
       onSendRequest={onSendRequest}

@@ -21,14 +21,14 @@ export function ProfilePage({
       <ProfileCard neighborhoodLabel={neighborhoodLabel} user={user} />
       <section className="profile-posts">
         <div>
-          <p className="eyebrow">Your posts</p>
-          <h2>Shared by you</h2>
+          <p className="eyebrow">I tuoi post</p>
+          <h2>Condivisi da te</h2>
         </div>
         {posts.loading && ownPosts.length === 0 ? (
           <Skeleton lines={3} />
         ) : ownPosts.length === 0 ? (
-          <EmptyState title="No posts on your profile yet.">
-            Posts you publish from the home feed will also appear here.
+          <EmptyState title="Ancora nessun post sul tuo profilo.">
+            I post che pubblichi dalla home appariranno anche qui.
           </EmptyState>
         ) : (
           <div className="post-list">
@@ -57,6 +57,9 @@ export function ProfilePage({
         locationsError={locationsError}
         success={profile.success}
         user={user}
+        onDismissError={() => profile.setError("")}
+        onDismissLocationsError={() => locations.setError("")}
+        onDismissSuccess={() => profile.setSuccess("")}
         onSubmit={profile.updateProfile}
       />
     </div>

@@ -4,8 +4,9 @@ import { EmptyState } from "../components/ui/EmptyState";
 export function AdminLocationsPage({ currentUser, locations, onCreate, onLoadCity, onRemove }) {
   if (!currentUser?.admin) {
     return (
-      <EmptyState title="Access denied">
-        Only admin users can insert or remove platform-managed cities and neighborhoods.
+      <EmptyState title="Accesso negato">
+        Solo gli utenti amministratori possono inserire o rimuovere città e quartieri gestiti dalla
+        piattaforma.
       </EmptyState>
     );
   }
@@ -16,6 +17,7 @@ export function AdminLocationsPage({ currentUser, locations, onCreate, onLoadCit
       loading={locations.loading}
       locations={locations}
       onCreate={onCreate}
+      onDismissError={() => locations.setError("")}
       onLoadCity={onLoadCity}
       onRemove={onRemove}
     />

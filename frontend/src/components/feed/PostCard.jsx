@@ -5,9 +5,25 @@ import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
 
 const reactions = [
-  { label: "Useful", type: "UPVOTE" },
-  { label: "Not for me", type: "DOWNVOTE" },
+  { label: "Utile", type: "UPVOTE" },
+  { label: "Non fa per me", type: "DOWNVOTE" },
 ];
+
+function typeLabel(type) {
+  if (type === "DISCUSSION") {
+    return "Discussione";
+  }
+  if (type === "HELP") {
+    return "Aiuto";
+  }
+  if (type === "EVENT") {
+    return "Evento";
+  }
+  if (type === "WARNING") {
+    return "Avviso";
+  }
+  return type;
+}
 
 function formatDate(value) {
   if (!value) {
@@ -112,16 +128,16 @@ export function PostCard({
           <p>{neighborhoodLabel(post.neighborhoodId)} / {formatDate(post.createdAt)}</p>
         </div>
         <div className="post-badges">
-          <Badge tone="aqua">{post.type}</Badge>
+          <Badge tone="aqua">{typeLabel(post.type)}</Badge>
           <Badge tone={post.visibility === "PRIVATE" ? "warning" : "neutral"}>
-            {post.visibility === "PRIVATE" ? "Neighbours" : "Public"}
+            {post.visibility === "PRIVATE" ? "Vicini" : "Pubblico"}
           </Badge>
         </div>
       </header>
 
       <p className="post-content">{post.content}</p>
 
-      <div className="reaction-row" aria-label="Reactions">
+      <div className="reaction-row" aria-label="Reazioni">
         {reactions.map((reaction) => (
           <button
             className={`reaction-button ${ownReaction === reaction.type ? "active" : ""}`}
@@ -133,10 +149,10 @@ export function PostCard({
             {reaction.label}
           </button>
         ))}
-        <span className="reaction-count">{post.score} points</span>
+        <span className="reaction-count">{post.score} punti</span>
       </div>
 
-      <section className="comment-list" aria-label="Comments">
+      <section className="comment-list" aria-label="Commenti">
         {(post.comments ?? []).map((item) => (
           <div className="comment-item" key={item.id}>
             {item.author ?? knownUsers.get(item.authorId) ? (
@@ -149,14 +165,14 @@ export function PostCard({
             {editingCommentId === item.id ? (
               <form className="comment-edit-form" onSubmit={(event) => submitEditedComment(event, item)}>
                 <FormField
-                  label="Edit comment"
+                  label="Modifica commento"
                   name={`edit-comment-${item.id}`}
                   value={editingContent}
                   onChange={(event) => setEditingContent(event.target.value)}
                 />
                 <div className="button-row">
                   <Button disabled={editingContent.trim().replaceAll(/\s/g, "").length < 10} loading={busy} type="submit">
-                    Save
+                    Salva
                   </Button>
                   <Button
                     variant="ghost"
@@ -166,7 +182,7 @@ export function PostCard({
                       setEditingContent("");
                     }}
                   >
-                    Cancel
+                    Annulla
                   </Button>
                 </div>
               </form>
@@ -176,10 +192,10 @@ export function PostCard({
                 {item.authorId === currentUser?.id ? (
                   <div className="comment-actions">
                     <Button variant="ghost" type="button" onClick={() => startEditingComment(item)}>
-                      Edit
+                      Modifica
                     </Button>
                     <Button variant="ghost" loading={busy} type="button" onClick={() => deleteComment(item)}>
-                      Delete
+                      Elimina
                     </Button>
                   </div>
                 ) : null}
@@ -191,14 +207,14 @@ export function PostCard({
 
       <form className="comment-form" onSubmit={submitComment}>
         <FormField
-          label="Comment"
+          label="Commento"
           name={`comment-${post.id}`}
-          placeholder="Add a comment"
+          placeholder="Aggiungi un commento"
           value={comment}
           onChange={(event) => setComment(event.target.value)}
         />
         <Button disabled={comment.trim().replaceAll(/\s/g, "").length < 10} loading={busy} type="submit">
-          Comment
+          Commenta
         </Button>
       </form>
     </article>

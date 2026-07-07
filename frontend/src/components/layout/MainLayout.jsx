@@ -4,16 +4,16 @@ import { Toast } from "../ui/Toast";
 
 const pageTitles = {
   home: "Home",
-  find: "Search Neighbors",
-  requests: "Requests",
-  neighbours: "Neighbours",
-  notifications: "Notifications",
-  profile: "My Profile",
-  blocked: "Blocked Users",
-  admin: "Admin Locations",
-  settings: "Settings",
-  "post-detail": "Conversation",
-  "public-profile": "Public Profile",
+  find: "Cerca vicini",
+  requests: "Richieste",
+  neighbours: "Vicini",
+  notifications: "Notifiche",
+  profile: "Il mio profilo",
+  blocked: "Utenti bloccati",
+  admin: "Gestione località",
+  settings: "Impostazioni",
+  "post-detail": "Conversazione",
+  "public-profile": "Profilo pubblico",
 };
 
 export function MainLayout({

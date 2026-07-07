@@ -6,7 +6,7 @@
 
 html {
   min-width: 320px;
-  background: #b9b5aa;
+  background: #efe7d8;
 }
 
 body {
@@ -15,42 +15,8 @@ body {
   min-width: 320px;
   color: var(--color-ink);
   background: var(--gradient-page);
+  background-size: 20px 20px, cover;
   font-family: var(--font-main);
-}
-
-body::before,
-body::after {
-  position: fixed;
-  pointer-events: none;
-  content: "";
-}
-
-body::before {
-  inset: 0;
-  z-index: 0;
-  opacity: 0.42;
-  background:
-    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.22), transparent 0.14rem),
-    radial-gradient(circle at 70% 64%, rgba(17, 16, 13, 0.16), transparent 0.1rem),
-    radial-gradient(circle at 36% 78%, rgba(17, 16, 13, 0.1), transparent 0.08rem),
-    radial-gradient(circle at 83% 30%, rgba(255, 255, 255, 0.18), transparent 0.12rem);
-  background-size: 18px 18px, 23px 23px, 31px 31px, 27px 27px;
-}
-
-body::after {
-  right: clamp(1rem, 7vw, 6rem);
-  bottom: 8vh;
-  z-index: 0;
-  color: rgba(226, 111, 14, 0.22);
-  content: "RIONE";
-  font-family: Impact, "Arial Black", sans-serif;
-  font-size: clamp(4rem, 14vw, 10rem);
-  letter-spacing: 0.08em;
-  line-height: 1;
-  text-shadow:
-    0.08em 0.06em 0 rgba(255, 176, 0, 0.2),
-    -0.04em 0.04em 0 rgba(52, 77, 24, 0.12);
-  transform: rotate(-9deg);
 }
 
 button,
@@ -124,41 +90,6 @@ small {
   display: block;
   min-height: 100vh;
   padding: 0;
-}
-
-.app-shell::before,
-.app-shell::after {
-  position: fixed;
-  pointer-events: none;
-  content: "";
-}
-
-.app-shell::before {
-  left: 15.5rem;
-  top: 0;
-  z-index: 2;
-  width: 7rem;
-  height: 100vh;
-  background:
-    radial-gradient(circle at 25% 18%, rgba(61, 91, 24, 0.36) 0 0.42rem, transparent 0.48rem),
-    radial-gradient(circle at 72% 54%, rgba(81, 118, 32, 0.3) 0 0.32rem, transparent 0.38rem),
-    radial-gradient(circle at 42% 84%, rgba(43, 73, 18, 0.34) 0 0.48rem, transparent 0.54rem),
-    linear-gradient(90deg, rgba(52, 77, 24, 0.3), transparent 72%);
-  filter: blur(0.4px);
-}
-
-.app-shell::after {
-  left: 18rem;
-  top: 11vh;
-  z-index: 0;
-  width: min(22rem, 36vw);
-  height: 9rem;
-  border: 0.28rem solid rgba(17, 16, 13, 0.09);
-  border-radius: 46% 54% 48% 52%;
-  background:
-    linear-gradient(17deg, transparent 43%, rgba(255, 176, 0, 0.2) 44% 49%, transparent 50%),
-    linear-gradient(-11deg, transparent 50%, rgba(226, 111, 14, 0.2) 51% 57%, transparent 58%);
-  transform: rotate(-7deg);
 }
 
 .center-shell {
@@ -1121,6 +1052,12 @@ small {
 .toast.success {
   color: var(--color-green-dark);
   background: #effbf4;
+}
+
+.toast.warning {
+  color: var(--color-ink);
+  border: 1px solid rgba(185, 133, 34, 0.24);
+  background: #ffe08a;
 }
 
 .toast button {

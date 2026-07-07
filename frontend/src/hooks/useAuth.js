@@ -71,7 +71,7 @@ export function useAuth() {
       writeSession(nextSession);
       return response.user;
     } catch (loginError) {
-      setError("Invalid credentials or inactive account.");
+      setError("Credenziali non valide o account non attivo.");
       throw loginError;
     } finally {
       setLoading(false);
@@ -118,6 +118,7 @@ export function useAuth() {
       isAuthenticated: Boolean(session?.token),
       loading,
       error,
+      setError,
       logIn,
       signUp,
       logOut,

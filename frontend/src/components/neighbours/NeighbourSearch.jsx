@@ -2,11 +2,13 @@ import { NeighbourSearchResultCard } from "./NeighbourSearchResultCard";
 import { EmptyState } from "../ui/EmptyState";
 import { SearchInput } from "../ui/SearchInput";
 import { Skeleton } from "../ui/Skeleton";
+import { Toast } from "../ui/Toast";
 
 export function NeighbourSearch({
   currentUser,
   error,
   loading,
+  onDismissError,
   onOpenUserProfile,
   onQueryChange,
   onSendRequest,
@@ -17,25 +19,25 @@ export function NeighbourSearch({
   return (
     <section className="page-grid">
       <div className="page-intro card">
-        <p className="eyebrow">Find Neighbours</p>
-        <h1>Discover visible people in your neighborhood</h1>
+        <p className="eyebrow">Trova vicini</p>
+        <h1>Scopri le persone visibili nel tuo quartiere</h1>
         <p>
-          Search by username, name, or surname and send a request to connect.
+          Cerca per username, nome o cognome e invia una richiesta di connessione.
         </p>
         <SearchInput
-          label="Search visible neighbours"
-          placeholder="Type a name or username"
+          label="Cerca vicini visibili"
+          placeholder="Digita un nome o uno username"
           value={query}
           onChange={onQueryChange}
         />
       </div>
-      {error ? <p className="form-error">{error}</p> : null}
+      <Toast message={error} tone="error" onClose={onDismissError} />
       {!query.trim() ? (
-        <EmptyState title="Start a search">Search visible neighbours in your current neighborhood.</EmptyState>
+        <EmptyState title="Inizia una ricerca">Cerca i vicini visibili nel tuo quartiere attuale.</EmptyState>
       ) : searchLoading ? (
         <Skeleton lines={4} />
       ) : results.length === 0 ? (
-        <EmptyState title="No visible neighbours">No neighbours matched this search.</EmptyState>
+        <EmptyState title="Nessun vicino visibile">Nessun vicino corrisponde a questa ricerca.</EmptyState>
       ) : (
         <div className="people-grid">
           {results.map((person) => (

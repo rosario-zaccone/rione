@@ -3,6 +3,7 @@ import { toApiDate } from "../../api/client";
 import { NeighborhoodSelector } from "../profile/NeighborhoodSelector";
 import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
+import { Toast } from "../ui/Toast";
 
 const initialForm = {
   mail: "",
@@ -25,6 +26,9 @@ export function SignUpForm({
   loading,
   locations,
   locationsError,
+  onDismissError,
+  onDismissLocationsError,
+  onDismissSuccess,
   onSubmit,
   onSwitch,
   success,
@@ -69,16 +73,16 @@ export function SignUpForm({
   return (
     <form className="form-card" onSubmit={handleSubmit}>
       <div>
-        <p className="eyebrow">New account</p>
-        <h2>Sign up</h2>
-        <p className="muted">Passwords stay masked and are never displayed back to you.</p>
+        <p className="eyebrow">Nuovo account</p>
+        <h2>Registrati</h2>
+        <p className="muted">Le password restano mascherate e non vengono mai mostrate.</p>
       </div>
-      {success ? <p className="form-success">{success}</p> : null}
-      {error ? <p className="form-error">{error}</p> : null}
+      <Toast message={success} tone="success" onClose={onDismissSuccess} />
+      <Toast message={error} tone="error" onClose={onDismissError} />
       <div className="two-col">
         <FormField
           autoComplete="given-name"
-          label="Name"
+          label="Nome"
           name="name"
           required
           value={form.name}
@@ -86,7 +90,7 @@ export function SignUpForm({
         />
         <FormField
           autoComplete="family-name"
-          label="Surname"
+          label="Cognome"
           name="surname"
           required
           value={form.surname}
@@ -96,7 +100,7 @@ export function SignUpForm({
       <div className="two-col">
         <FormField
           autoComplete="email"
-          help="Used only for account access."
+          help="Usata solo per l'accesso all'account."
           label="Email"
           name="mail"
           required
@@ -105,7 +109,7 @@ export function SignUpForm({
           onChange={(event) => update("mail", event.target.value)}
         />
         <FormField
-          help="Choose a name neighbours can recognize."
+          help="Scegli un nome che i vicini possano riconoscere."
           label="Username"
           minLength="3"
           name="username"
@@ -126,8 +130,8 @@ export function SignUpForm({
         />
         <FormField
           autoComplete="new-password"
-          error={passwordMismatch ? "Passwords do not match." : ""}
-          label="Confirm password"
+          error={passwordMismatch ? "Le password non coincidono." : ""}
+          label="Conferma password"
           name="confirmPassword"
           required
           type="password"
@@ -137,7 +141,7 @@ export function SignUpForm({
       </div>
       <div className="two-col">
         <FormField
-          label="Birth date"
+          label="Data di nascita"
           name="birthDate"
           required
           type="date"
@@ -149,10 +153,11 @@ export function SignUpForm({
           neighborhoods={locations.neighborhoods}
           value={form.neighborhoodId}
           onChange={(value) => update("neighborhoodId", value)}
+          onDismissLocationsError={onDismissLocationsError}
         />
       </div>
       <FormField
-        error={invalidBio ? "Tell neighbours a little more about yourself." : ""}
+        error={invalidBio ? "Racconta qualcosa in più di te ai tuoi vicini." : ""}
         label="Bio"
         maxLength="500"
         minLength="20"
@@ -164,10 +169,10 @@ export function SignUpForm({
         onChange={(event) => update("bio", event.target.value)}
       />
       <Button disabled={!canSubmit} loading={loading} type="submit">
-        Create account
+        Crea account
       </Button>
       <button className="link-button" type="button" onClick={onSwitch}>
-        Back to login
+        Torna al login
       </button>
     </form>
   );

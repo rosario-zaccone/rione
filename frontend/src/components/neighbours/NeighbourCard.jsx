@@ -29,13 +29,13 @@ export function NeighbourCard({
           <p>{user ? fullName(user) : username(user, counterpartId)}</p>
         </div>
       </div>
-      <p className="muted">Connected {formatDate(neighbor.date)}</p>
+      <p className="muted">Connesso il {formatDate(neighbor.date)}</p>
       <div className="button-row">
         <Button variant="ghost" loading={loading} onClick={() => onRemove(counterpartId)}>
-          Remove neighbour
+          Rimuovi vicino
         </Button>
         <Button variant="danger" loading={loading} onClick={() => onBlock(counterpartId)}>
-          Block user
+          Blocca utente
         </Button>
       </div>
     </Card>

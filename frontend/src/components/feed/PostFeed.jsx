@@ -29,7 +29,7 @@ export function PostFeed({
       {loading && posts.length === 0 ? (
         <Skeleton lines={4} />
       ) : posts.length === 0 ? (
-        <EmptyState title="No posts yet.">Be the first to share something with your neighbourhood.</EmptyState>
+        <EmptyState title="Ancora nessun post.">Sii il primo a condividere qualcosa con il tuo quartiere.</EmptyState>
       ) : (
         <div className="post-list">
           {posts.map((post) => (

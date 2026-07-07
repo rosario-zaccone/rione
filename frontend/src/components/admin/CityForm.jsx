@@ -22,11 +22,11 @@ export function CityForm({ loading, onCreate }) {
   return (
     <form className="form-card compact-card" onSubmit={handleSubmit}>
       <div>
-        <p className="eyebrow">Admin</p>
-        <h2>Insert city</h2>
+        <p className="eyebrow">Amministrazione</p>
+        <h2>Inserisci città</h2>
       </div>
       <FormField
-        label="City name"
+        label="Nome città"
         maxLength="120"
         name="cityName"
         required
@@ -34,8 +34,8 @@ export function CityForm({ loading, onCreate }) {
         onChange={(event) => setName(event.target.value)}
       />
       <FormField
-        help="One neighborhood per line. At least one is required."
-        label="Neighborhoods"
+        help="Un quartiere per riga. Ne è richiesto almeno uno."
+        label="Quartieri"
         maxLength="500"
         name="neighborhoods"
         required
@@ -45,7 +45,7 @@ export function CityForm({ loading, onCreate }) {
         onChange={(event) => setNeighborhoods(event.target.value)}
       />
       <Button disabled={!canSubmit} loading={loading} type="submit">
-        Create city
+        Crea città
       </Button>
     </form>
   );

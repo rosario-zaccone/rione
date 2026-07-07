@@ -5,8 +5,8 @@ import { EmptyState } from "../ui/EmptyState";
 export function CityList({ cities, loading, onRemove }) {
   if (cities.length === 0) {
     return (
-      <EmptyState title="No loaded cities">
-        Created or loaded cities will appear here.
+      <EmptyState title="Nessuna città caricata">
+        Le città create o caricate appariranno qui.
       </EmptyState>
     );
   }
@@ -17,7 +17,7 @@ export function CityList({ cities, loading, onRemove }) {
         <Card className="city-card" key={city.id}>
           <div>
             <h3>{city.name}</h3>
-            <p className="muted">{city.neighborhoods?.length ?? 0} neighborhoods</p>
+            <p className="muted">{city.neighborhoods?.length ?? 0} quartieri</p>
           </div>
           <ul className="chip-list">
             {(city.neighborhoods ?? []).map((neighborhood) => (
@@ -25,7 +25,7 @@ export function CityList({ cities, loading, onRemove }) {
             ))}
           </ul>
           <Button variant="danger" loading={loading} onClick={() => onRemove(city)}>
-            Remove city
+            Rimuovi città
           </Button>
         </Card>
       ))}

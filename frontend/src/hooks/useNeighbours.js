@@ -103,32 +103,32 @@ export function useNeighbours(token) {
     sendRequest(receiverId) {
       return runAction(
         () => socialApi.sendNeighborRequest(token, receiverId),
-        "Neighbour request sent.",
+        "Richiesta di vicinato inviata.",
       );
     },
     acceptRequest(requestId) {
       return runAction(
         () => socialApi.acceptNeighborRequest(token, requestId),
-        "Neighbour request accepted.",
+        "Richiesta di vicinato accettata.",
       );
     },
     declineRequest(requestId) {
       return runAction(
         () => socialApi.rejectNeighborRequest(token, requestId),
-        "Neighbour request declined.",
+        "Richiesta di vicinato rifiutata.",
       );
     },
     removeNeighbor(neighborId) {
       return runAction(
         () => socialApi.removeNeighbor(token, neighborId),
-        "Neighbour connection removed.",
+        "Connessione con il vicino rimossa.",
       );
     },
     blockUser(blockedId) {
-      return runAction(() => socialApi.blockUser(token, blockedId), "User blocked.");
+      return runAction(() => socialApi.blockUser(token, blockedId), "Utente bloccato.");
     },
     unblockUser(blockedId) {
-      return runAction(() => socialApi.unblockUser(token, blockedId), "User unblocked.");
+      return runAction(() => socialApi.unblockUser(token, blockedId), "Utente sbloccato.");
     },
   };
 

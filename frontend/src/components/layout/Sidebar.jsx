@@ -3,11 +3,11 @@ import { Avatar } from "../ui/Avatar";
 
 export const navItems = [
   { id: "home", label: "Home", icon: "home" },
-  { id: "profile", label: "Profile", icon: "profile" },
-  { id: "find", label: "Search Neighbors", icon: "search" },
-  { id: "neighbours", label: "Neighbours", icon: "neighbours" },
-  { id: "blocked", label: "Blocked Users", icon: "blocked" },
-  { id: "notifications", label: "Notifications", icon: "bell" },
+  { id: "profile", label: "Profilo", icon: "profile" },
+  { id: "find", label: "Cerca vicini", icon: "search" },
+  { id: "neighbours", label: "Vicini", icon: "neighbours" },
+  { id: "blocked", label: "Utenti bloccati", icon: "blocked" },
+  { id: "notifications", label: "Notifiche", icon: "bell" },
 ];
 
 function navBadge(item, metrics) {
@@ -21,17 +21,17 @@ function navBadge(item, metrics) {
 }
 
 export function Sidebar({ activePage, currentUser, isAdmin, metrics, onLogout, onNavigate }) {
-  const items = isAdmin ? [...navItems, { id: "admin", label: "Admin Locations", icon: "admin" }] : navItems;
+  const items = isAdmin ? [...navItems, { id: "admin", label: "Gestione località", icon: "admin" }] : navItems;
   const location = [currentUser?.neighborhoodName, currentUser?.city].filter(Boolean).join(" · ");
 
   return (
-    <aside className="sidebar" aria-label="Main navigation">
+    <aside className="sidebar" aria-label="Navigazione principale">
       <div className="brand-lockup">
         <div>
           <strong>Rione</strong>
           <span className="brand-location">
             <Icon name="mapPin" />
-            {location || "Neighbour network"}
+            {location || "Rete di vicinato"}
           </span>
         </div>
       </div>
@@ -63,7 +63,7 @@ export function Sidebar({ activePage, currentUser, isAdmin, metrics, onLogout, o
       <div className="sidebar-footer">
         <button className="nav-link logout-link" onClick={onLogout} type="button">
           <Icon name="logout" />
-          <span>Log out</span>
+          <span>Esci</span>
         </button>
       </div>
     </aside>

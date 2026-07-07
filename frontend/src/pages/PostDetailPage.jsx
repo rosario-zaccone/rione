@@ -42,9 +42,9 @@ export function PostDetailPage({
     <section className="page-grid">
       <div className="page-intro card aero-panel">
         <p className="eyebrow">Post</p>
-        <h1>Conversation</h1>
+        <h1>Conversazione</h1>
         <Button variant="ghost" onClick={onBack}>
-          Back
+          Indietro
         </Button>
       </div>
       {loading && !currentPost ? (
@@ -63,8 +63,8 @@ export function PostDetailPage({
           onSetReaction={posts.setReaction}
         />
       ) : (
-        <EmptyState title="Post unavailable.">
-          The post may have been deleted or you may not be authorized to view it.
+        <EmptyState title="Post non disponibile.">
+          Il post potrebbe essere stato eliminato oppure non sei autorizzato a visualizzarlo.
         </EmptyState>
       )}
     </section>

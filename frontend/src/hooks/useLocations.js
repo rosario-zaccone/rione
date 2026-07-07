@@ -23,7 +23,7 @@ export function useLocations(token) {
       setCities(Array.isArray(result) ? result : []);
     } catch (locationsError) {
       setCities([]);
-      setError(`${locationsError.message}. Locations are temporarily unavailable.`);
+      setError(`${locationsError.message}. Le località non sono temporaneamente disponibili.`);
     } finally {
       setLoading(false);
     }

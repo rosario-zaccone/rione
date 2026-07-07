@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
+import { Toast } from "../ui/Toast";
 
-export function LoginForm({ error, loading, onSubmit, onSwitch }) {
+export function LoginForm({ error, loading, onDismissError, onSubmit, onSwitch }) {
   const [form, setForm] = useState({ mail: "", password: "" });
 
   function update(field, value) {
@@ -17,11 +18,11 @@ export function LoginForm({ error, loading, onSubmit, onSwitch }) {
   return (
     <form className="form-card" onSubmit={handleSubmit}>
       <div>
-        <p className="eyebrow">Account access</p>
-        <h2>Log in</h2>
-        <p className="muted">Use your registered email and password.</p>
+        <p className="eyebrow">Accesso all'account</p>
+        <h2>Accedi</h2>
+        <p className="muted">Usa la tua email e password registrate.</p>
       </div>
-      {error ? <p className="form-error">{error}</p> : null}
+      <Toast message={error} tone="error" onClose={onDismissError} />
       <FormField
         autoComplete="email"
         label="Email"
@@ -41,10 +42,10 @@ export function LoginForm({ error, loading, onSubmit, onSwitch }) {
         onChange={(event) => update("password", event.target.value)}
       />
       <Button loading={loading} type="submit">
-        Log in
+        Accedi
       </Button>
       <button className="link-button" type="button" onClick={onSwitch}>
-        Create an account
+        Crea un account
       </button>
     </form>
   );

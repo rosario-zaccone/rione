@@ -1,5 +1,6 @@
 package com.rione.gateway;
 
+import static org.springframework.cloud.gateway.server.mvc.filter.CircuitBreakerFilterFunctions.circuitBreaker;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
 import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
@@ -25,6 +26,7 @@ class GatewayRoutesConfiguration {
 			.route(path("/users/v3/api-docs"), http())
 			.before(stripPrefix(1))
 			.before(uri(userServiceUri))
+			.filter(circuitBreaker("user-service"))
 			.build();
 	}
 
@@ -37,6 +39,7 @@ class GatewayRoutesConfiguration {
 			.route(path("/cities"), http())
 			.route(path("/cities/**"), http())
 			.before(uri(userServiceUri))
+			.filter(circuitBreaker("user-service"))
 			.build();
 	}
 
@@ -48,6 +51,7 @@ class GatewayRoutesConfiguration {
 			.route(path("/neighbor-requests/**"), http())
 			.route(path("/me/**"), http())
 			.before(uri(socialServiceUri))
+			.filter(circuitBreaker("social-service"))
 			.build();
 	}
 
@@ -58,6 +62,7 @@ class GatewayRoutesConfiguration {
 			.route(path("/social/**"), http())
 			.before(stripPrefix(1))
 			.before(uri(socialServiceUri))
+			.filter(circuitBreaker("social-service"))
 			.build();
 	}
 
@@ -67,6 +72,7 @@ class GatewayRoutesConfiguration {
 		return route("notification-service")
 			.route(path("/notifications/**"), http())
 			.before(uri(notificationServiceUri))
+			.filter(circuitBreaker("notification-service"))
 			.build();
 	}
 
@@ -78,6 +84,7 @@ class GatewayRoutesConfiguration {
 			.route(path("/posts/v3/api-docs"), http())
 			.before(stripPrefix(1))
 			.before(uri(postServiceUri))
+			.filter(circuitBreaker("post-service"))
 			.build();
 	}
 
@@ -92,6 +99,7 @@ class GatewayRoutesConfiguration {
 			.route(path("/users/{authorId}/posts"), http())
 			.route(path("/users/{authorId}/public-posts"), http())
 			.before(uri(postServiceUri))
+			.filter(circuitBreaker("post-service"))
 			.build();
 	}
 }

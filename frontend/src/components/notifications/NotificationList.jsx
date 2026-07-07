@@ -14,15 +14,15 @@ export function NotificationList({
   return (
     <section className="page-grid">
       <div className="page-intro card">
-        <p className="eyebrow">Notifications</p>
-        <h1>Updates from your neighbourhood</h1>
-        <p>Requests, comments, and reactions from your neighbours are collected here.</p>
+        <p className="eyebrow">Notifiche</p>
+        <h1>Aggiornamenti dal tuo quartiere</h1>
+        <p>Qui trovi richieste, commenti e reazioni dei tuoi vicini.</p>
       </div>
       {loading ? (
         <Skeleton lines={4} />
       ) : notifications.length === 0 ? (
-        <EmptyState title="You have no notifications yet.">
-          New activity around your profile, requests, and posts will appear here.
+        <EmptyState title="Non hai ancora notifiche.">
+          Le nuove attività relative al tuo profilo, alle richieste e ai post appariranno qui.
         </EmptyState>
       ) : (
         <div className="card-list">

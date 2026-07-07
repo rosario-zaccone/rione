@@ -16,10 +16,10 @@ export function BlockedUserCard({ block, loading, onOpenUserProfile, onUnblock, 
           <h3>{fullName(user, block.blockedId)}</h3>
         )}
         <p>{user ? fullName(user) : username(user, block.blockedId)}</p>
-        <small>Only blocks created by you are listed.</small>
+        <small>Sono elencati solo i blocchi creati da te.</small>
       </div>
       <Button variant="ghost" loading={loading} onClick={() => onUnblock(block.blockedId)}>
-        Unblock
+        Sblocca
       </Button>
     </Card>
   );

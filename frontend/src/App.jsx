@@ -55,6 +55,26 @@ function App() {
   }, [auth.token, neighbours.loadAll, notifications.loadNotifications, posts.loadFeed]);
 
   useEffect(() => {
+    if (!auth.token) {
+      return undefined;
+    }
+
+    function pollNotifications() {
+      if (document.visibilityState === "visible") {
+        notifications.loadNotifications({ silent: true });
+      }
+    }
+
+    const interval = window.setInterval(pollNotifications, 20000);
+    window.addEventListener("focus", pollNotifications);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", pollNotifications);
+    };
+  }, [auth.token, notifications.loadNotifications]);
+
+  useEffect(() => {
     if (!auth.token || activePage !== "find") {
       return undefined;
     }
@@ -72,7 +92,7 @@ function App() {
 
   async function handleSignUp(payload) {
     await auth.signUp(payload);
-    setSignUpSuccess("Account created. You can log in now.");
+    setSignUpSuccess("Account creato. Ora puoi accedere.");
     setAuthMode("login");
   }
 
@@ -183,6 +203,7 @@ function App() {
     notifications.error ? { message: notifications.error, tone: "error" } : null,
     posts.error ? { message: posts.error, tone: "error" } : null,
     profileBase.error ? { message: profileBase.error, tone: "error" } : null,
+    locations.error ? { message: locations.error, tone: "error" } : null,
     neighbours.success ? { message: neighbours.success, tone: "success" } : null,
     notifications.success ? { message: notifications.success, tone: "success" } : null,
     posts.success ? { message: posts.success, tone: "success" } : null,
@@ -198,6 +219,9 @@ function App() {
           locations={locations}
           locationsError={locations.error}
           success={signUpSuccess}
+          onDismissError={() => auth.setError("")}
+          onDismissLocationsError={() => locations.setError("")}
+          onDismissSuccess={() => setSignUpSuccess("")}
           onSignUp={handleSignUp}
           onSwitch={() => setAuthMode("login")}
         />
@@ -208,6 +232,7 @@ function App() {
       <LoginPage
         error={auth.error}
         loading={auth.loading}
+        onDismissError={() => auth.setError("")}
         onLogin={auth.logIn}
         onSwitch={() => {
           setSignUpSuccess("");
@@ -220,7 +245,7 @@ function App() {
   if (auth.loading && !auth.user) {
     return (
       <div className="center-shell">
-        <EmptyState title="Loading session">Checking your authenticated session.</EmptyState>
+        <EmptyState title="Caricamento sessione">Verifica della sessione autenticata in corso.</EmptyState>
       </div>
     );
   }
@@ -266,18 +291,18 @@ function App() {
           onRequestTabChange={setRequestTab}
           onBlock={(userId) =>
             requestConfirmation({
-              title: "Block this user?",
+              title: "Bloccare questo utente?",
               message:
-                "Blocking prevents direct social interactions and removes the user from active social flows.",
-              confirmLabel: "Block user",
+                "Il blocco impedisce le interazioni social dirette e rimuove l'utente dai flussi social attivi.",
+              confirmLabel: "Blocca utente",
               action: () => neighbours.actions.blockUser(userId),
             })
           }
           onRemove={(userId) =>
             requestConfirmation({
-              title: "Remove neighbour?",
-              message: "You can reconnect later by sending a new request.",
-              confirmLabel: "Remove neighbour",
+              title: "Rimuovere il vicino?",
+              message: "Potrai riconnetterti in seguito inviando una nuova richiesta.",
+              confirmLabel: "Rimuovi vicino",
               action: () => neighbours.actions.removeNeighbor(userId),
             })
           }
@@ -348,10 +373,10 @@ function App() {
           onOpenUserProfile={openPublicProfile}
           onUnblock={(userId) =>
             requestConfirmation({
-              title: "Unblock this user?",
+              title: "Sbloccare questo utente?",
               message:
-                "Unblocking removes the block but does not restore previous neighbour connections or pending requests.",
-              confirmLabel: "Unblock",
+                "Sbloccare rimuove il blocco ma non ripristina le precedenti connessioni con i vicini o le richieste in sospeso.",
+              confirmLabel: "Sblocca",
               action: () => neighbours.actions.unblockUser(userId),
             })
           }
@@ -368,9 +393,9 @@ function App() {
           onLoadCity={locations.loadCityById}
           onRemove={(city) =>
             requestConfirmation({
-              title: `Remove ${city.name}?`,
-              message: "Cities with active residents cannot be removed.",
-              confirmLabel: "Remove city",
+              title: `Rimuovere ${city.name}?`,
+              message: "Le città con residenti attivi non possono essere rimosse.",
+              confirmLabel: "Rimuovi città",
               action: () => locations.removeCity(city.id),
             })
           }
@@ -380,8 +405,8 @@ function App() {
 
     if (activePage === "settings") {
       return (
-        <EmptyState title="Settings">
-          Account preferences will appear here as they become available.
+        <EmptyState title="Impostazioni">
+          Le preferenze dell'account appariranno qui non appena saranno disponibili.
         </EmptyState>
       );
     }
@@ -407,9 +432,9 @@ function App() {
         onDismissToast={dismissToast}
         onLogout={() =>
           requestConfirmation({
-            title: "Log out?",
-            message: "You will need to log in again on this device.",
-            confirmLabel: "Log out",
+            title: "Vuoi uscire?",
+            message: "Dovrai effettuare nuovamente l'accesso su questo dispositivo.",
+            confirmLabel: "Esci",
             action: auth.logOut,
           })
         }

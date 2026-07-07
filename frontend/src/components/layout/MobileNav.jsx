@@ -2,15 +2,15 @@ import { Icon } from "../ui/Icons";
 
 const mobileItems = [
   { id: "home", label: "Home", icon: "home" },
-  { id: "find", label: "Find", icon: "search" },
-  { id: "requests", label: "Requests", icon: "requests" },
-  { id: "notifications", label: "Alerts", icon: "bell" },
-  { id: "profile", label: "Profile", icon: "profile" },
+  { id: "find", label: "Cerca", icon: "search" },
+  { id: "requests", label: "Richieste", icon: "requests" },
+  { id: "notifications", label: "Avvisi", icon: "bell" },
+  { id: "profile", label: "Profilo", icon: "profile" },
 ];
 
 export function MobileNav({ activePage, onNavigate }) {
   return (
-    <nav className="mobile-nav" aria-label="Mobile navigation">
+    <nav className="mobile-nav" aria-label="Navigazione mobile">
       {mobileItems.map((item) => (
         <button
           className={activePage === item.id ? "mobile-nav-link active" : "mobile-nav-link"}

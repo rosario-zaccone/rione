@@ -16,11 +16,8 @@
   --color-sidebar-muted: rgba(17, 16, 13, 0.68);
   --color-sidebar-active: #11100d;
   --gradient-page:
-    radial-gradient(circle at 14% 92%, rgba(70, 98, 32, 0.28), transparent 23%),
-    radial-gradient(circle at 88% 18%, rgba(226, 111, 14, 0.24), transparent 22%),
-    repeating-linear-gradient(0deg, rgba(17, 16, 13, 0.035) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(90deg, rgba(17, 16, 13, 0.03) 0 1px, transparent 1px 9px),
-    linear-gradient(135deg, #b9b5aa 0%, #d7d0c1 42%, #aaa498 100%);
+    radial-gradient(rgba(17, 16, 13, 0.055) 1px, transparent 1px),
+    linear-gradient(160deg, #f4ede1 0%, #e9dfcb 100%);
   --gradient-card: linear-gradient(145deg, rgba(255, 249, 230, 0.96), rgba(255, 229, 138, 0.9));
   --gradient-primary: linear-gradient(135deg, #ffb000, #e86d0d);
   --shadow-soft: 0 14px 34px rgba(17, 16, 13, 0.14);

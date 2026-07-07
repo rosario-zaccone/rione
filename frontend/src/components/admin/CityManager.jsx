@@ -4,8 +4,9 @@ import { CityList } from "./CityList";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { FormField } from "../ui/FormField";
+import { Toast } from "../ui/Toast";
 
-export function CityManager({ error, locations, loading, onCreate, onLoadCity, onRemove }) {
+export function CityManager({ error, locations, loading, onCreate, onDismissError, onLoadCity, onRemove }) {
   const [cityId, setCityId] = useState("");
 
   function handleLoad(event) {
@@ -18,23 +19,23 @@ export function CityManager({ error, locations, loading, onCreate, onLoadCity, o
   return (
     <div className="page-grid">
       <Card className="page-intro">
-        <p className="eyebrow">Admin Locations</p>
-        <h1>City and neighborhood management</h1>
-        <p>Manage the cities and neighbourhoods available to residents.</p>
-        {error ? <p className="form-error">{error}</p> : null}
+        <p className="eyebrow">Gestione località</p>
+        <h1>Gestione città e quartieri</h1>
+        <p>Gestisci le città e i quartieri disponibili per i residenti.</p>
+        <Toast message={error} tone="error" onClose={onDismissError} />
       </Card>
       <div className="two-col align-start">
         <CityForm loading={loading} onCreate={onCreate} />
         <form className="form-card compact-card" onSubmit={handleLoad}>
           <div>
-            <p className="eyebrow">Real lookup</p>
-            <h2>Load city by ID</h2>
+            <p className="eyebrow">Ricerca città</p>
+            <h2>Carica città per ID</h2>
             <p className="muted">
-              Search by city ID to review an existing location.
+              Cerca per ID città per rivedere una località esistente.
             </p>
           </div>
           <FormField
-            label="City ID"
+            label="ID città"
             min="1"
             name="cityId"
             required
@@ -43,7 +44,7 @@ export function CityManager({ error, locations, loading, onCreate, onLoadCity, o
             onChange={(event) => setCityId(event.target.value)}
           />
           <Button loading={loading} type="submit">
-            Load city
+            Carica città
           </Button>
         </form>
       </div>

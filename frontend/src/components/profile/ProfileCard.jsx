@@ -6,7 +6,7 @@ export function ProfileCard({ neighborhoodLabel, user }) {
     <Card className="profile-card">
       <Avatar user={user} size="lg" />
       <div>
-        <p className="eyebrow">Profile</p>
+        <p className="eyebrow">Profilo</p>
         <h1>
           {user?.name} {user?.surname}
         </h1>

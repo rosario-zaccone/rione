@@ -3,8 +3,11 @@ package com.rione.post.infrastructure.proxy;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -19,12 +22,14 @@ class UserServiceProfileProxy implements PostUserDirectory {
 
 	private final RestClient restClient;
 	private final JwtService jwtService;
+	private final CircuitBreaker userServiceCircuitBreaker;
 
 	UserServiceProfileProxy(RestClient.Builder restClientBuilder,
 			@Value("${rione.clients.user-service.base-url:http://localhost:8081}") String userServiceBaseUrl,
-			JwtService jwtService) {
+			JwtService jwtService, CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
 		this.restClient = restClientBuilder.baseUrl(userServiceBaseUrl).build();
 		this.jwtService = jwtService;
+		this.userServiceCircuitBreaker = circuitBreakerFactory.create("user-service");
 	}
 
 	@Override
@@ -36,7 +41,7 @@ class UserServiceProfileProxy implements PostUserDirectory {
 			.map(userId -> userId.value().toString())
 			.distinct()
 			.collect(java.util.stream.Collectors.joining(","));
-		try {
+		return runWithUserServiceCircuitBreaker(() -> {
 			UserProfileResponse[] response = restClient.get()
 				.uri(uri -> uri.path("/internal/users/profiles").queryParam("ids", ids).build())
 				.header("Authorization", "Bearer " + jwtService.createServiceToken("user-service"))
@@ -49,10 +54,20 @@ class UserServiceProfileProxy implements PostUserDirectory {
 				.collect(java.util.stream.Collectors.toMap(user -> new UserId(user.id()),
 						user -> new UserProfile(new UserId(user.id()), user.name(), user.surname(), user.username()),
 						(first, ignored) -> first, LinkedHashMap::new));
-		}
-		catch (RestClientException exception) {
-			throw new IllegalStateException("User profiles could not be resolved", exception);
-		}
+		}, "User profiles could not be resolved");
+	}
+
+	private <T> T runWithUserServiceCircuitBreaker(Supplier<T> remoteCall, String failureMessage) {
+		return userServiceCircuitBreaker.run(remoteCall, exception -> {
+			if (exception instanceof IllegalStateException illegalStateException
+					&& failureMessage.equals(illegalStateException.getMessage())) {
+				throw illegalStateException;
+			}
+			if (exception instanceof RestClientException) {
+				throw new IllegalStateException(failureMessage, exception);
+			}
+			throw new IllegalStateException(failureMessage, exception);
+		});
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)

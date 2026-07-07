@@ -1,12 +1,14 @@
 import { SelectField } from "../ui/SelectField";
+import { Toast } from "../ui/Toast";
 
 export function NeighborhoodSelector({
   disabled = false,
   error,
-  label = "Neighborhood",
+  label = "Quartiere",
   locationsError,
   neighborhoods,
   onChange,
+  onDismissLocationsError,
   value,
 }) {
   return (
@@ -16,8 +18,8 @@ export function NeighborhoodSelector({
         error={error}
         help={
           neighborhoods.length === 0
-            ? "A real location catalog is required before choosing a neighborhood."
-            : "You can belong to one neighborhood at a time."
+            ? "È necessario un catalogo di località reale prima di scegliere un quartiere."
+            : "Puoi appartenere a un solo quartiere alla volta."
         }
         label={label}
         name="neighborhoodId"
@@ -25,14 +27,14 @@ export function NeighborhoodSelector({
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
-        <option value="">Select a managed neighborhood</option>
+        <option value="">Seleziona un quartiere gestito</option>
         {neighborhoods.map((neighborhood) => (
           <option key={neighborhood.id} value={neighborhood.id}>
             {neighborhood.name}, {neighborhood.cityName}
           </option>
         ))}
       </SelectField>
-      {locationsError ? <p className="inline-warning">{locationsError}</p> : null}
+      <Toast message={locationsError} tone="warning" onClose={onDismissLocationsError} />
     </div>
   );
 }

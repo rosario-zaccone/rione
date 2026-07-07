@@ -7,7 +7,7 @@ export function Toast({ message, tone = "info", onClose }) {
     <div className={`toast ${tone}`} role={tone === "error" ? "alert" : "status"}>
       <span>{message}</span>
       {onClose ? (
-        <button aria-label="Dismiss message" type="button" onClick={onClose}>
+        <button aria-label="Chiudi messaggio" type="button" onClick={onClose}>
           x
         </button>
       ) : null}

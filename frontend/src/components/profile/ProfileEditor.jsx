@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NeighborhoodSelector } from "./NeighborhoodSelector";
 import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
+import { Toast } from "../ui/Toast";
 
 function toDateInput(value) {
   return value ? value.slice(0, 10) : "";
@@ -16,6 +17,9 @@ export function ProfileEditor({
   loading,
   locations,
   locationsError,
+  onDismissError,
+  onDismissLocationsError,
+  onDismissSuccess,
   onSubmit,
   success,
   user,
@@ -63,27 +67,27 @@ export function ProfileEditor({
   return (
     <form className="form-card" onSubmit={handleSubmit}>
       <div>
-        <p className="eyebrow">Profile management</p>
-        <h2>Edit profile</h2>
+        <p className="eyebrow">Gestione profilo</p>
+        <h2>Modifica profilo</h2>
       </div>
-      {success ? <p className="form-success">{success}</p> : null}
-      {error ? <p className="form-error">{error}</p> : null}
+      <Toast message={success} tone="success" onClose={onDismissSuccess} />
+      <Toast message={error} tone="error" onClose={onDismissError} />
       {neighborhoodChanged ? (
         <p className="inline-warning">
-          Changing your neighborhood may remove neighbour connections and pending requests with
-          users outside your new neighborhood.
+          Cambiare quartiere potrebbe rimuovere le connessioni con i vicini e le richieste in
+          sospeso con utenti al di fuori del nuovo quartiere.
         </p>
       ) : null}
       <div className="two-col">
         <FormField
-          label="Name"
+          label="Nome"
           name="name"
           required
           value={form.name}
           onChange={(event) => update("name", event.target.value)}
         />
         <FormField
-          label="Surname"
+          label="Cognome"
           name="surname"
           required
           value={form.surname}
@@ -92,7 +96,7 @@ export function ProfileEditor({
       </div>
       <div className="two-col">
         <FormField
-          help="This is how neighbours find you."
+          help="È così che i vicini ti troveranno."
           label="Username"
           minLength="3"
           name="username"
@@ -101,7 +105,7 @@ export function ProfileEditor({
           onChange={(event) => update("username", event.target.value)}
         />
         <FormField
-          label="Birth date"
+          label="Data di nascita"
           name="birthDate"
           required
           type="date"
@@ -114,9 +118,10 @@ export function ProfileEditor({
         neighborhoods={locations.neighborhoods}
         value={form.neighborhoodId}
         onChange={(value) => update("neighborhoodId", value)}
+        onDismissLocationsError={onDismissLocationsError}
       />
       <FormField
-        error={invalidBio ? "Tell neighbours a little more about yourself." : ""}
+        error={invalidBio ? "Racconta qualcosa in più di te ai tuoi vicini." : ""}
         label="Bio"
         maxLength="500"
         name="bio"
@@ -127,7 +132,7 @@ export function ProfileEditor({
         onChange={(event) => update("bio", event.target.value)}
       />
       <Button disabled={invalidBio || !form.neighborhoodId} loading={loading} type="submit">
-        Save profile
+        Salva profilo
       </Button>
     </form>
   );

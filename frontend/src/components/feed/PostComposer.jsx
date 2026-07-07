@@ -55,16 +55,16 @@ export function PostComposer({ currentUser, loading, neighborhoodLabel, onCreate
       <div className="composer-prompt">
         <Avatar user={currentUser} />
         <button className="composer-trigger" type="button" onClick={() => setOpen(true)}>
-          What&apos;s happening in {locationName}?
+          Cosa succede a {locationName}?
         </button>
       </div>
 
       {open ? (
         <div className="composer-body">
           <FormField
-            label="Post content"
+            label="Contenuto del post"
             name="content"
-            placeholder="Share an update, request, event, or warning with your neighbourhood."
+            placeholder="Condividi un aggiornamento, una richiesta, un evento o un avviso con il tuo quartiere."
             rows={4}
             textarea
             value={form.content}
@@ -72,31 +72,31 @@ export function PostComposer({ currentUser, loading, neighborhoodLabel, onCreate
           />
           <div className="composer-controls">
             <SelectField
-              label="Post type"
+              label="Tipo di post"
               name="postType"
               value={form.type}
               onChange={(event) => update("type", event.target.value)}
             >
-              <option value="DISCUSSION">Discussion</option>
-              <option value="HELP">Help</option>
-              <option value="EVENT">Event</option>
-              <option value="WARNING">Warning</option>
+              <option value="DISCUSSION">Discussione</option>
+              <option value="HELP">Aiuto</option>
+              <option value="EVENT">Evento</option>
+              <option value="WARNING">Avviso</option>
             </SelectField>
             <SelectField
-              label="Visibility"
+              label="Visibilità"
               name="visibility"
               value={form.visibility}
               onChange={(event) => update("visibility", event.target.value)}
             >
-              <option value="PUBLIC">Same neighbourhood</option>
-              <option value="PRIVATE">Neighbours only</option>
+              <option value="PUBLIC">Stesso quartiere</option>
+              <option value="PRIVATE">Solo vicini</option>
             </SelectField>
           </div>
           <details className="composer-location">
-            <summary>Location details</summary>
+            <summary>Dettagli posizione</summary>
             <div className="two-col">
               <FormField
-                help="Optional."
+                help="Facoltativo."
                 label="Longitudine"
                 name="longitude"
                 placeholder="12.4964"
@@ -106,7 +106,7 @@ export function PostComposer({ currentUser, loading, neighborhoodLabel, onCreate
                 onChange={(event) => update("longitude", event.target.value)}
               />
               <FormField
-                help="Optional."
+                help="Facoltativo."
                 label="Latitudine"
                 name="latitude"
                 placeholder="41.9028"
@@ -129,10 +129,10 @@ export function PostComposer({ currentUser, loading, neighborhoodLabel, onCreate
                 setOpen(false);
               }}
             >
-              Cancel
+              Annulla
             </Button>
             <Button disabled={!canSubmit} loading={loading || submitting} type="submit">
-              Publish
+              Pubblica
             </Button>
           </div>
         </div>

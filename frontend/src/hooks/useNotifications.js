@@ -7,22 +7,31 @@ export function useNotifications(token) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const loadNotifications = useCallback(async () => {
-    if (!token) {
-      return;
-    }
+  const loadNotifications = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!token) {
+        return;
+      }
 
-    setLoading(true);
-    setError("");
-    try {
-      const result = await notificationApi.getNotifications(token);
-      setNotifications(result);
-    } catch (notificationError) {
-      setError(notificationError.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+      if (!silent) {
+        setLoading(true);
+        setError("");
+      }
+      try {
+        const result = await notificationApi.getNotifications(token);
+        setNotifications(result);
+      } catch (notificationError) {
+        if (!silent) {
+          setError(notificationError.message);
+        }
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [token],
+  );
 
   async function markRead(notificationId) {
     setError("");
@@ -32,7 +41,7 @@ export function useNotifications(token) {
       setNotifications((items) =>
         items.map((item) => (item.id === updated.id ? updated : item)),
       );
-      setSuccess("Notification marked as read.");
+      setSuccess("Notifica segnata come letta.");
       return updated;
     } catch (notificationError) {
       setError(notificationError.message);

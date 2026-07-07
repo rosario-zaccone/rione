@@ -14,7 +14,7 @@ export function Button({
       type={type}
       {...props}
     >
-      {loading ? "Loading..." : children}
+      {loading ? "Caricamento..." : children}
     </button>
   );
 }

@@ -2,6 +2,7 @@ package com.rione.social.infrastructure.proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
@@ -13,12 +14,16 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.rione.social.domain.model.UserId;
 import com.rione.social.infrastructure.config.JwtService;
@@ -34,7 +39,12 @@ class UserServiceProxyTest {
 		server = MockRestServiceServer.bindTo(builder).build();
 		JwtService jwtService = mock(JwtService.class);
 		when(jwtService.createServiceToken()).thenReturn("service-token");
-		proxy = new UserServiceProxy(builder, "http://user-service.test", jwtService);
+		CircuitBreaker circuitBreaker = mock(CircuitBreaker.class);
+		CircuitBreakerFactory<?, ?> circuitBreakerFactory = mock(CircuitBreakerFactory.class);
+		when(circuitBreakerFactory.create("user-service")).thenReturn(circuitBreaker);
+		when(circuitBreaker.run(any(Supplier.class), any(Function.class)))
+			.thenAnswer(invocation -> invocation.<Supplier<?>>getArgument(0).get());
+		proxy = new UserServiceProxy(builder, "http://user-service.test", jwtService, circuitBreakerFactory);
 	}
 
 	@Test
