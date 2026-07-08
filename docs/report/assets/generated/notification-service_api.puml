@@ -1,0 +1,18 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+  BorderColor #555555
+  FontSize 13
+}
+title Rione Notification Service API - OpenAPI endpoints
+left to right direction
+rectangle "Rione Notification Service API" as root #F7F7F7 {
+  package "Notifications" as g1 #EEF3FA {
+    rectangle "GET /notifications/me" as g1_1 #D9EAF7
+    rectangle "PATCH /notifications/me/{notificationId}/read" as g1_2 #FCE4D6
+  }
+}
+@enduml

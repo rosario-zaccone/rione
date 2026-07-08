@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+  BorderColor #555555
+  FontSize 13
+}
+title Rione User Service API - OpenAPI endpoints
+left to right direction
+rectangle "Rione User Service API" as root #F7F7F7 {
+  package "Users" as g1 #EEF3FA {
+    rectangle "POST /users" as g1_1 #DFF3E3
+    rectangle "POST /users/login" as g1_2 #DFF3E3
+    rectangle "GET /users/me" as g1_3 #D9EAF7
+    rectangle "POST /users/logout" as g1_4 #DFF3E3
+    rectangle "PUT /users/me/profile" as g1_5 #FFF2CC
+    rectangle "GET /users/{userId}/public-profile" as g1_6 #D9EAF7
+    rectangle "GET /internal/users/{userId}/neighborhood" as g1_7 #D9EAF7
+    rectangle "GET /internal/users/search" as g1_8 #D9EAF7
+    rectangle "GET /internal/users/profiles" as g1_9 #D9EAF7
+  }
+  package "Cities" as g2 #EEF3FA {
+    rectangle "GET /cities" as g2_1 #D9EAF7
+    rectangle "POST /cities" as g2_2 #DFF3E3
+    rectangle "GET /cities/{cityId}" as g2_3 #D9EAF7
+    rectangle "DELETE /cities/{cityId}" as g2_4 #F4CCCC
+  }
+}
+@enduml

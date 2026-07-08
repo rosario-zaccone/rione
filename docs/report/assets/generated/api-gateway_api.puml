@@ -1,0 +1,58 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+  BorderColor #555555
+  FontSize 13
+}
+title Rione API Gateway - OpenAPI endpoints
+left to right direction
+rectangle "Rione API Gateway" as root #F7F7F7 {
+  package "Users" as g1 #EEF3FA {
+    rectangle "POST /users" as g1_1 #DFF3E3
+    rectangle "POST /users/login" as g1_2 #DFF3E3
+    rectangle "GET /users/me" as g1_3 #D9EAF7
+    rectangle "PUT /users/me/profile" as g1_4 #FFF2CC
+    rectangle "GET /cities" as g1_5 #D9EAF7
+    rectangle "POST /cities" as g1_6 #DFF3E3
+    rectangle "GET /cities/{cityId}" as g1_7 #D9EAF7
+    rectangle "DELETE /cities/{cityId}" as g1_8 #F4CCCC
+  }
+  package "Social" as g2 #EEF3FA {
+    rectangle "POST /social/neighbor-requests" as g2_1 #DFF3E3
+    rectangle "POST /social/neighbor-requests/{requestId}/acceptance" as g2_2 #DFF3E3
+    rectangle "POST /social/neighbor-requests/{requestId}/rejection" as g2_3 #DFF3E3
+    rectangle "GET /social/me/neighbor-requests/sent" as g2_4 #D9EAF7
+    rectangle "GET /social/me/neighbor-requests/received" as g2_5 #D9EAF7
+    rectangle "GET /social/me/neighborships" as g2_6 #D9EAF7
+    rectangle "DELETE /social/me/neighborships/{neighborId}" as g2_7 #F4CCCC
+    rectangle "GET /social/me/blocks" as g2_8 #D9EAF7
+    rectangle "PUT /social/me/blocks/{blockedId}" as g2_9 #FFF2CC
+    rectangle "DELETE /social/me/blocks/{blockedId}" as g2_10 #F4CCCC
+  }
+  package "Posts" as g3 #EEF3FA {
+    rectangle "GET /posts" as g3_1 #D9EAF7
+    rectangle "POST /posts" as g3_2 #DFF3E3
+    rectangle "GET /me/posts" as g3_3 #D9EAF7
+    rectangle "GET /users/{authorId}/posts" as g3_4 #D9EAF7
+    rectangle "GET /users/{authorId}/public-posts" as g3_5 #D9EAF7
+    rectangle "GET /posts/{postId}" as g3_6 #D9EAF7
+    rectangle "PATCH /posts/{postId}" as g3_7 #FCE4D6
+    rectangle "DELETE /posts/{postId}" as g3_8 #F4CCCC
+    rectangle "GET /posts/{postId}/comments" as g3_9 #D9EAF7
+    rectangle "POST /posts/{postId}/comments" as g3_10 #DFF3E3
+    rectangle "PATCH /posts/{postId}/comments/{commentId}" as g3_11 #FCE4D6
+    rectangle "DELETE /posts/{postId}/comments/{commentId}" as g3_12 #F4CCCC
+    rectangle "GET /posts/{postId}/reactions" as g3_13 #D9EAF7
+    rectangle "POST /posts/{postId}/reactions" as g3_14 #DFF3E3
+    rectangle "DELETE /posts/{postId}/reactions" as g3_15 #F4CCCC
+    rectangle "GET /posts/{postId}/reactions/me" as g3_16 #D9EAF7
+  }
+  package "Notifications" as g4 #EEF3FA {
+    rectangle "GET /notifications/me" as g4_1 #D9EAF7
+    rectangle "PATCH /notifications/me/{notificationId}/read" as g4_2 #FCE4D6
+  }
+}
+@enduml

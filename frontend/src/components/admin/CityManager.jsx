@@ -6,7 +6,16 @@ import { Card } from "../ui/Card";
 import { FormField } from "../ui/FormField";
 import { Toast } from "../ui/Toast";
 
-export function CityManager({ error, locations, loading, onCreate, onDismissError, onLoadCity, onRemove }) {
+export function CityManager({
+  error,
+  locations,
+  loading,
+  onAddNeighborhood,
+  onCreate,
+  onDismissError,
+  onLoadCity,
+  onRemove,
+}) {
   const [cityId, setCityId] = useState("");
 
   function handleLoad(event) {
@@ -27,7 +36,7 @@ export function CityManager({ error, locations, loading, onCreate, onDismissErro
       <div className="two-col align-start">
         <CityForm loading={loading} onCreate={onCreate} />
         <form className="form-card compact-card" onSubmit={handleLoad}>
-          <div>
+          <div className="section-header">
             <p className="eyebrow">Ricerca città</p>
             <h2>Carica città per ID</h2>
             <p className="muted">
@@ -48,7 +57,12 @@ export function CityManager({ error, locations, loading, onCreate, onDismissErro
           </Button>
         </form>
       </div>
-      <CityList cities={locations.cities} loading={loading} onRemove={onRemove} />
+      <CityList
+        cities={locations.cities}
+        loading={loading}
+        onAddNeighborhood={onAddNeighborhood}
+        onRemove={onRemove}
+      />
     </div>
   );
 }

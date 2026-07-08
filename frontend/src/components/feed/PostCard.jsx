@@ -5,8 +5,8 @@ import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
 
 const reactions = [
-  { label: "Utile", type: "UPVOTE" },
-  { label: "Non fa per me", type: "DOWNVOTE" },
+  { className: "upvote", label: "Mi piace", type: "UPVOTE" },
+  { className: "downvote", label: "Non mi piace", type: "DOWNVOTE" },
 ];
 
 function typeLabel(type) {
@@ -23,6 +23,22 @@ function typeLabel(type) {
     return "Avviso";
   }
   return type;
+}
+
+function typeTone(type) {
+  if (type === "EVENT") {
+    return "post-event";
+  }
+  if (type === "DISCUSSION") {
+    return "post-discussion";
+  }
+  if (type === "WARNING") {
+    return "post-warning";
+  }
+  if (type === "HELP") {
+    return "post-help";
+  }
+  return "neutral";
 }
 
 function formatDate(value) {
@@ -128,7 +144,7 @@ export function PostCard({
           <p>{neighborhoodLabel(post.neighborhoodId)} / {formatDate(post.createdAt)}</p>
         </div>
         <div className="post-badges">
-          <Badge tone="aqua">{typeLabel(post.type)}</Badge>
+          <Badge tone={typeTone(post.type)}>{typeLabel(post.type)}</Badge>
           <Badge tone={post.visibility === "PRIVATE" ? "warning" : "neutral"}>
             {post.visibility === "PRIVATE" ? "Vicini" : "Pubblico"}
           </Badge>
@@ -140,7 +156,7 @@ export function PostCard({
       <div className="reaction-row" aria-label="Reazioni">
         {reactions.map((reaction) => (
           <button
-            className={`reaction-button ${ownReaction === reaction.type ? "active" : ""}`}
+            className={`reaction-button ${reaction.className} ${ownReaction === reaction.type ? "active" : ""}`}
             disabled={busy}
             key={reaction.type}
             type="button"

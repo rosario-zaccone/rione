@@ -21,7 +21,7 @@ export function CityForm({ loading, onCreate }) {
 
   return (
     <form className="form-card compact-card" onSubmit={handleSubmit}>
-      <div>
+      <div className="section-header">
         <p className="eyebrow">Amministrazione</p>
         <h2>Inserisci città</h2>
       </div>

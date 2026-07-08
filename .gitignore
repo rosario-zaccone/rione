@@ -38,6 +38,9 @@ replay_pid*
 AGENTS.md
 .agents/
 .agents/**
+
+# Local Claude Code instructions
+CLAUDE.md
 .codex/
 .codex/**
 .env
@@ -49,5 +52,9 @@ node_modules/
 dist/
 
 # Report build output
-docs/report/*
-!docs/report/report.pdf
+docs/report/*.aux
+docs/report/*.fdb_latexmk
+docs/report/*.fls
+docs/report/*.log
+docs/report/*.out
+docs/report/*.toc

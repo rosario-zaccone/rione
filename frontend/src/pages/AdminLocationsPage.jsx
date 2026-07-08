@@ -1,7 +1,14 @@
 import { CityManager } from "../components/admin/CityManager";
 import { EmptyState } from "../components/ui/EmptyState";
 
-export function AdminLocationsPage({ currentUser, locations, onCreate, onLoadCity, onRemove }) {
+export function AdminLocationsPage({
+  currentUser,
+  locations,
+  onAddNeighborhood,
+  onCreate,
+  onLoadCity,
+  onRemove,
+}) {
   if (!currentUser?.admin) {
     return (
       <EmptyState title="Accesso negato">
@@ -16,6 +23,7 @@ export function AdminLocationsPage({ currentUser, locations, onCreate, onLoadCit
       error={locations.error}
       loading={locations.loading}
       locations={locations}
+      onAddNeighborhood={onAddNeighborhood}
       onCreate={onCreate}
       onDismissError={() => locations.setError("")}
       onLoadCity={onLoadCity}

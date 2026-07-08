@@ -52,6 +52,15 @@ public class CityServiceImpl implements CityService {
 		cityRepository.delete(city);
 	}
 
+	@Override
+	public CityResponse addNeighborhood(AddNeighborhoodCommand command) {
+		requireAdmin(command.actingUserId(), "add a neighborhood");
+		City city = cityRepository.findById(new CityId(command.cityId()))
+			.orElseThrow(() -> new UserApplicationException("City not found"));
+		City updatedCity = city.withNeighborhood(Neighborhood.create(command.neighborhoodName()));
+		return toResponse(cityRepository.save(updatedCity));
+	}
+
 	private void requireAdmin(Long actingUserId, String action) {
 		User actingUser = userRepository.findById(new UserId(actingUserId))
 			.orElseThrow(() -> new UserApplicationException("Acting user not found"));

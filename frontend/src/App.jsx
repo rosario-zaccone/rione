@@ -90,6 +90,11 @@ function App() {
     };
   }, [activePage, auth.token, searchQuery]);
 
+  async function handleLogin(credentials) {
+    const loggedInUser = await auth.logIn(credentials);
+    setActivePage(loggedInUser?.admin ? "admin" : "home");
+  }
+
   async function handleSignUp(payload) {
     await auth.signUp(payload);
     setSignUpSuccess("Account creato. Ora puoi accedere.");
@@ -233,7 +238,7 @@ function App() {
         error={auth.error}
         loading={auth.loading}
         onDismissError={() => auth.setError("")}
-        onLogin={auth.logIn}
+        onLogin={handleLogin}
         onSwitch={() => {
           setSignUpSuccess("");
           setAuthMode("signup");
@@ -342,6 +347,7 @@ function App() {
           currentUser={auth.user}
           knownUsers={knownUsers}
           neighborhoodLabel={neighborhoodLabel}
+          neighbours={neighbours}
           posts={posts}
           token={auth.token}
           userId={publicProfileUserId}
@@ -389,6 +395,7 @@ function App() {
         <AdminLocationsPage
           currentUser={auth.user}
           locations={locations}
+          onAddNeighborhood={locations.addNeighborhood}
           onCreate={locations.createCity}
           onLoadCity={locations.loadCityById}
           onRemove={(city) =>

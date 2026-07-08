@@ -82,21 +82,33 @@ class CityControllerSecurityIntegrationTest {
 			.andExpect(status().isForbidden());
 		mockMvc.perform(delete("/cities/10").header("Authorization", "Bearer user-token"))
 			.andExpect(status().isForbidden());
+		mockMvc.perform(post("/cities/10/neighborhoods").header("Authorization", "Bearer user-token")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content("{\"name\":\"Trastevere\"}"))
+			.andExpect(status().isForbidden());
 	}
 
 	@Test
 	void allowsAdminToUseCityWriteOperations() throws Exception {
 		when(jwtService.parse("admin-token")).thenReturn(new AuthenticatedPrincipal("1", true, false));
 		when(cityService.createCity(any())).thenReturn(new CityResponse(10L, "Rome", List.of()));
+		when(cityService.addNeighborhood(any()))
+			.thenReturn(new CityResponse(10L, "Rome", List.of(new CityService.NeighborhoodResponse(20L, "Trastevere"))));
 
 		mockMvc.perform(post("/cities").header("Authorization", "Bearer admin-token")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("{\"name\":\"Rome\",\"neighborhoods\":[\"Trastevere\"]}"))
 			.andExpect(status().isCreated());
+		mockMvc.perform(post("/cities/10/neighborhoods").header("Authorization", "Bearer admin-token")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content("{\"name\":\"Trastevere\"}"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.neighborhoods[0].name").value("Trastevere"));
 		mockMvc.perform(delete("/cities/10").header("Authorization", "Bearer admin-token"))
 			.andExpect(status().isNoContent());
 
 		verify(cityService).createCity(any());
+		verify(cityService).addNeighborhood(any());
 		verify(cityService).removeCity(any());
 	}
 

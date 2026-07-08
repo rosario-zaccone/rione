@@ -72,7 +72,7 @@ export function SignUpForm({
 
   return (
     <form className="form-card" onSubmit={handleSubmit}>
-      <div>
+      <div className="section-header">
         <p className="eyebrow">Nuovo account</p>
         <h2>Registrati</h2>
         <p className="muted">Le password restano mascherate e non vengono mai mostrate.</p>

@@ -36,7 +36,9 @@ class LocalPostSeedDataInitializer implements ApplicationRunner {
 	@Override
 	@Transactional
 	public void run(ApplicationArguments args) {
-		resetPostStore();
+		if (!isPostStoreEmpty()) {
+			return;
+		}
 		for (SeedPost seed : seedPosts()) {
 			PostId postId = eventStore.nextPostId();
 			PostCreated event = new PostCreated(postId, new UserId(seed.authorId()),
@@ -46,11 +48,9 @@ class LocalPostSeedDataInitializer implements ApplicationRunner {
 		}
 	}
 
-	private void resetPostStore() {
-		entityManager
-			.createNativeQuery(
-					"TRUNCATE TABLE post_events, post_id_sequence, comment_id_sequence, reaction_id_sequence RESTART IDENTITY")
-			.executeUpdate();
+	private boolean isPostStoreEmpty() {
+		Number eventCount = (Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM post_events").getSingleResult();
+		return eventCount.longValue() == 0;
 	}
 
 	private static List<SeedPost> seedPosts() {

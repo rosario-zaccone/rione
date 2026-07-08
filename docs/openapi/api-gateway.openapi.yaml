@@ -1,8 +1,8 @@
 openapi: 3.0.3
-x-last-modified: 2026-06-29
+x-last-modified: 2026-07-09
 info:
   title: Rione API Gateway
-  version: v0.7.0
+  version: v0.8.0
   description: Public gateway contract for Rione service routes.
 servers:
   - url: http://localhost:8080
@@ -12,6 +12,8 @@ tags:
     description: Proxied user service operations
   - name: Social
     description: Proxied social service operations under the /social prefix
+  - name: Posts
+    description: Proxied post service operations
   - name: Notifications
     description: Proxied notification service operations
 paths:
@@ -366,6 +368,412 @@ paths:
           description: User is unblocked.
         '400':
           $ref: '#/components/responses/SocialBadRequest'
+  /posts:
+    get:
+      tags:
+        - Posts
+      operationId: gatewayListVisiblePosts
+      summary: List visible posts
+      description: Only authenticated users can access this endpoint. Proxies GET /posts to the post service and returns posts visible to the requester according to ownership, neighborhood, neighborship, block, and post privacy rules.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Visible posts for the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+    post:
+      tags:
+        - Posts
+      operationId: gatewayCreatePost
+      summary: Create a post
+      description: Only authenticated users can access this endpoint. Proxies POST /posts to the post service and creates a post owned by the authenticated user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Post created.
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+  /me/posts:
+    get:
+      tags:
+        - Posts
+      operationId: gatewayListMyPosts
+      summary: List posts authored by the authenticated user
+      description: Only authenticated users can access this endpoint. Proxies GET /me/posts to the post service and returns posts authored by the authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Authenticated user's posts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+  /users/{authorId}/posts:
+    get:
+      tags:
+        - Posts
+      operationId: gatewayListVisiblePostsByAuthor
+      summary: List visible posts by author
+      description: Only authenticated users can access this endpoint. Proxies GET /users/{authorId}/posts to the post service and returns the author's posts that the requester is authorized to view.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AuthorId'
+      responses:
+        '200':
+          description: Visible posts by the requested author.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+  /users/{authorId}/public-posts:
+    get:
+      tags:
+        - Posts
+      operationId: gatewayListPublicPostsByAuthor
+      summary: List public posts by author
+      description: Only authenticated users can access this endpoint. Proxies GET /users/{authorId}/public-posts to the post service and returns only public posts for the requested author.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AuthorId'
+      responses:
+        '200':
+          description: Public posts by the requested author.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+  /posts/{postId}:
+    get:
+      tags:
+        - Posts
+      operationId: gatewayGetPost
+      summary: Get a post
+      description: Only authenticated users can access this endpoint. Proxies GET /posts/{postId} to the post service and returns the post only when the requester is authorized to view it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Visible post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+    patch:
+      tags:
+        - Posts
+      operationId: gatewayUpdatePost
+      summary: Update a post
+      description: Only authenticated users can access this endpoint. Proxies PATCH /posts/{postId} to the post service. Only the owner of the post can edit it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentRequest'
+      responses:
+        '200':
+          description: Updated post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '403':
+          $ref: '#/components/responses/PostForbidden'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+    delete:
+      tags:
+        - Posts
+      operationId: gatewayDeletePost
+      summary: Delete a post
+      description: Only authenticated users can access this endpoint. Proxies DELETE /posts/{postId} to the post service. Only the owner of the post can delete it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '204':
+          description: Post deleted.
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '403':
+          $ref: '#/components/responses/PostForbidden'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+  /posts/{postId}/comments:
+    get:
+      tags:
+        - Posts
+      operationId: gatewayListPostComments
+      summary: List comments
+      description: Only authenticated users can access this endpoint. Proxies GET /posts/{postId}/comments to the post service and returns comments only when the requester can view the parent post.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Comments on the post.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+    post:
+      tags:
+        - Posts
+      operationId: gatewayAddPostComment
+      summary: Add a comment
+      description: Only authenticated users can access this endpoint. Proxies POST /posts/{postId}/comments to the post service and adds a comment to a visible post.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentRequest'
+      responses:
+        '201':
+          description: Comment created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+  /posts/{postId}/comments/{commentId}:
+    patch:
+      tags:
+        - Posts
+      operationId: gatewayUpdatePostComment
+      summary: Update a comment
+      description: Only authenticated users can access this endpoint. Proxies PATCH /posts/{postId}/comments/{commentId} to the post service. Only the owner of the comment can edit it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+        - $ref: '#/components/parameters/CommentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentRequest'
+      responses:
+        '200':
+          description: Updated comment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '403':
+          $ref: '#/components/responses/PostForbidden'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+    delete:
+      tags:
+        - Posts
+      operationId: gatewayDeletePostComment
+      summary: Delete a comment
+      description: Only authenticated users can access this endpoint. Proxies DELETE /posts/{postId}/comments/{commentId} to the post service. Only the owner of the comment can delete it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+        - $ref: '#/components/parameters/CommentId'
+      responses:
+        '204':
+          description: Comment deleted.
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '403':
+          $ref: '#/components/responses/PostForbidden'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+  /posts/{postId}/reactions:
+    get:
+      tags:
+        - Posts
+      operationId: gatewayListPostReactions
+      summary: List reactions
+      description: Only authenticated users can access this endpoint. Proxies GET /posts/{postId}/reactions to the post service and returns reactions only when the requester can view the parent post.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Reactions on the post.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reaction'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+    post:
+      tags:
+        - Posts
+      operationId: gatewayCreateOrUpdatePostReaction
+      summary: Create or update the authenticated user's reaction
+      description: Only authenticated users can access this endpoint. Proxies POST /posts/{postId}/reactions to the post service and creates or updates the authenticated user's reaction.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactionRequest'
+      responses:
+        '200':
+          description: Reaction state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reaction'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+    delete:
+      tags:
+        - Posts
+      operationId: gatewayDeletePostReaction
+      summary: Remove the authenticated user's reaction
+      description: Only authenticated users can access this endpoint. Proxies DELETE /posts/{postId}/reactions to the post service and removes the authenticated user's reaction.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '204':
+          description: Reaction removed.
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+  /posts/{postId}/reactions/me:
+    get:
+      tags:
+        - Posts
+      operationId: gatewayGetMyPostReaction
+      summary: Get the authenticated user's reaction
+      description: Only authenticated users can access this endpoint. Proxies GET /posts/{postId}/reactions/me to the post service and returns the authenticated user's reaction when present.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Reaction state or null when absent.
+          content:
+            application/json:
+              schema:
+                nullable: true
+                $ref: '#/components/schemas/Reaction'
+        '400':
+          $ref: '#/components/responses/PostBadRequest'
+        '401':
+          $ref: '#/components/responses/PostUnauthorized'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
   /notifications/me:
     get:
       tags:
@@ -442,6 +850,33 @@ components:
         type: integer
         format: int64
         minimum: 1
+    AuthorId:
+      name: authorId
+      in: path
+      required: true
+      description: Post author user identifier.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    PostId:
+      name: postId
+      in: path
+      required: true
+      description: Post identifier.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    CommentId:
+      name: commentId
+      in: path
+      required: true
+      description: Comment identifier.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
     NotificationId:
       name: notificationId
       in: path
@@ -464,6 +899,30 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SocialErrorResponse'
+    PostBadRequest:
+      description: Invalid request or rejected post service rule.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostErrorResponse'
+    PostUnauthorized:
+      description: Authentication is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GatewayErrorResponse'
+    PostForbidden:
+      description: The authenticated user is not allowed to modify the requested post resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostErrorResponse'
+    PostNotFound:
+      description: Post resource is absent or hidden from the authenticated user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostErrorResponse'
     NotificationBadRequest:
       description: Invalid request or rejected notification service rule.
       content:
@@ -742,6 +1201,155 @@ components:
         blockedId:
           type: integer
           format: int64
+    CreatePostRequest:
+      type: object
+      required:
+        - neighborhoodId
+        - content
+        - type
+        - visibility
+      properties:
+        neighborhoodId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        type:
+          type: string
+          enum:
+            - EVENT
+            - DISCUSSION
+            - WARNING
+            - HELP
+        visibility:
+          type: string
+          enum:
+            - PUBLIC
+            - PRIVATE
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+    ContentRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+    ReactionRequest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - UPVOTE
+            - DOWNVOTE
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        authorId:
+          type: integer
+          format: int64
+        neighborhoodId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        type:
+          type: string
+        visibility:
+          type: string
+        place:
+          $ref: '#/components/schemas/Place'
+        score:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        author:
+          nullable: true
+          $ref: '#/components/schemas/UserProfile'
+    Place:
+      type: object
+      nullable: true
+      properties:
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        postId:
+          type: integer
+          format: int64
+        authorId:
+          type: integer
+          format: int64
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        author:
+          nullable: true
+          $ref: '#/components/schemas/UserProfile'
+    Reaction:
+      type: object
+      properties:
+        postId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        type:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user:
+          nullable: true
+          $ref: '#/components/schemas/UserProfile'
+    UserProfile:
+      type: object
+      required:
+        - id
+        - name
+        - surname
+        - username
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        surname:
+          type: string
+        username:
+          type: string
     NotificationResponse:
       type: object
       required:
@@ -802,6 +1410,14 @@ components:
       required:
         - message
         - timestamp
+      properties:
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    PostErrorResponse:
+      type: object
       properties:
         message:
           type: string

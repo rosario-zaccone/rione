@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NeighborhoodSelector } from "./NeighborhoodSelector";
 import { Button } from "../ui/Button";
+import { Card } from "../ui/Card";
 import { FormField } from "../ui/FormField";
 import { Toast } from "../ui/Toast";
 
@@ -65,8 +66,8 @@ export function ProfileEditor({
   const invalidBio = form.bio && !bioIsValid(form.bio);
 
   return (
-    <form className="form-card" onSubmit={handleSubmit}>
-      <div>
+    <Card as="form" className="form-card" onSubmit={handleSubmit}>
+      <div className="section-header">
         <p className="eyebrow">Gestione profilo</p>
         <h2>Modifica profilo</h2>
       </div>
@@ -134,6 +135,6 @@ export function ProfileEditor({
       <Button disabled={invalidBio || !form.neighborhoodId} loading={loading} type="submit">
         Salva profilo
       </Button>
-    </form>
+    </Card>
   );
 }

@@ -29,3 +29,12 @@ export function removeCity(token, cityId) {
     token,
   });
 }
+
+export function addNeighborhood(token, cityId, payload) {
+  return request(`/cities/${cityId}/neighborhoods`, {
+    baseUrl: USER_API_BASE_URL,
+    method: "POST",
+    token,
+    body: payload,
+  });
+}

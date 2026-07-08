@@ -68,7 +68,21 @@ public class CityController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@PostMapping("/{cityId}/neighborhoods")
+	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(summary = "Add a neighborhood to a city",
+			description = "Only authenticated administrators can access this endpoint. It adds a new neighborhood to an existing city.")
+	ResponseEntity<CityService.CityResponse> addNeighborhood(@PathVariable @Positive Long cityId,
+			@Valid @RequestBody AddNeighborhoodRequest request) {
+		CityService.CityResponse response = cityService
+			.addNeighborhood(new CityService.AddNeighborhoodCommand(currentUser.id(), cityId, request.name()));
+		return ResponseEntity.ok(response);
+	}
+
 	record CreateCityRequest(@NotBlank @Size(max = 120) String name,
 			@NotEmpty List<@NotBlank @Size(max = 120) String> neighborhoods) {
+	}
+
+	record AddNeighborhoodRequest(@NotBlank @Size(max = 120) String name) {
 	}
 }

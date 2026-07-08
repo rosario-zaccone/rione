@@ -1,0 +1,33 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+  BorderColor #555555
+  FontSize 13
+}
+title Rione Social Service API - OpenAPI endpoints
+left to right direction
+rectangle "Rione Social Service API" as root #F7F7F7 {
+  package "Users" as g1 #EEF3FA {
+    rectangle "GET /users" as g1_1 #D9EAF7
+  }
+  package "Neighbor Requests" as g2 #EEF3FA {
+    rectangle "POST /neighbor-requests" as g2_1 #DFF3E3
+    rectangle "POST /neighbor-requests/{requestId}/acceptance" as g2_2 #DFF3E3
+    rectangle "POST /neighbor-requests/{requestId}/rejection" as g2_3 #DFF3E3
+    rectangle "GET /me/neighbor-requests/sent" as g2_4 #D9EAF7
+    rectangle "GET /me/neighbor-requests/received" as g2_5 #D9EAF7
+  }
+  package "Neighborships" as g3 #EEF3FA {
+    rectangle "GET /me/neighborships" as g3_1 #D9EAF7
+    rectangle "DELETE /me/neighborships/{neighborId}" as g3_2 #F4CCCC
+  }
+  package "Blocks" as g4 #EEF3FA {
+    rectangle "GET /me/blocks" as g4_1 #D9EAF7
+    rectangle "PUT /me/blocks/{blockedId}" as g4_2 #FFF2CC
+    rectangle "DELETE /me/blocks/{blockedId}" as g4_3 #F4CCCC
+  }
+}
+@enduml

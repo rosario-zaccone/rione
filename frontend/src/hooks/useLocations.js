@@ -78,6 +78,21 @@ export function useLocations(token) {
     }
   }
 
+  async function addNeighborhood(cityId, name) {
+    setLoading(true);
+    setError("");
+    try {
+      const city = await locationsApi.addNeighborhood(token, cityId, { name });
+      setCities((items) => upsertCity(items, city));
+      return city;
+    } catch (neighborhoodError) {
+      setError(neighborhoodError.message);
+      throw neighborhoodError;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const neighborhoods = useMemo(
     () =>
       cities.flatMap((city) =>
@@ -105,6 +120,7 @@ export function useLocations(token) {
     loadCityById,
     createCity,
     removeCity,
+    addNeighborhood,
     neighborhoodLabel,
   };
 }

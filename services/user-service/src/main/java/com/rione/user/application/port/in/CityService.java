@@ -15,10 +15,15 @@ public interface CityService {
 
 	void removeCity(RemoveCityCommand command);
 
+	CityResponse addNeighborhood(AddNeighborhoodCommand command);
+
 	record CreateCityCommand(Long actingUserId, String name, List<String> neighborhoods) {
 	}
 
 	record RemoveCityCommand(Long actingUserId, Long cityId) {
+	}
+
+	record AddNeighborhoodCommand(Long actingUserId, Long cityId, String neighborhoodName) {
 	}
 
 	record CityResponse(Long id, String name, List<NeighborhoodResponse> neighborhoods) {

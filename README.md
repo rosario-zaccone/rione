@@ -99,6 +99,16 @@ By default, the frontend calls the API Gateway at `http://localhost:8080`. To us
 VITE_API_BASE_URL=http://localhost:8080 npm run dev
 ```
 
+### Frontend Screenshots
+
+The React frontend is used as a practical test client for the complete application flow through the API Gateway.
+
+![Frontend neighbour search](docs/report/assets/ui/Screenshot%20from%202026-07-09%2001-22-39.png)
+
+![Frontend neighbour requests](docs/report/assets/ui/Screenshot%20from%202026-07-09%2001-22-55.png)
+
+![Frontend feed](docs/report/assets/ui/Screenshot%20from%202026-07-09%2001-24-05.png)
+
 ## Swagger / OpenAPI
 
 Open the API Gateway Swagger UI:
@@ -112,6 +122,8 @@ The Swagger UI contains the available public API groups:
 ```text
 user-service
 social-service
+post-service
+notification-service
 ```
 
 Raw OpenAPI documents are also available through the gateway:
@@ -119,6 +131,8 @@ Raw OpenAPI documents are also available through the gateway:
 ```text
 http://localhost:8080/users/v3/api-docs
 http://localhost:8080/social/v3/api-docs
+http://localhost:8080/posts/v3/api-docs
+http://localhost:8080/notifications/v3/api-docs
 ```
 
 The static OpenAPI contract files are stored in:
@@ -193,6 +207,12 @@ monitoring/grafana/dashboards/rione-services-dashboard.json
 ```
 
 Open Grafana, go to Dashboards, then open the `Rione / Rione Microservices` dashboard. No manual import is needed when using Docker Compose.
+
+Dashboard examples:
+
+![Grafana dashboard overview](docs/report/assets/dashboard/dash1.png)
+
+![Grafana dashboard detail](docs/report/assets/dashboard/dash2.png)
 
 Prometheus scrapes all local microservices from `monitoring/prometheus/prometheus.yml`. The dashboard visualizes:
 

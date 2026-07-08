@@ -17,7 +17,7 @@ export function LoginForm({ error, loading, onDismissError, onSubmit, onSwitch }
 
   return (
     <form className="form-card" onSubmit={handleSubmit}>
-      <div>
+      <div className="section-header">
         <p className="eyebrow">Accesso all'account</p>
         <h2>Accedi</h2>
         <p className="muted">Usa la tua email e password registrate.</p>

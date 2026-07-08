@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+  BorderColor #555555
+  FontSize 13
+}
+title Rione Post Service API - OpenAPI endpoints
+left to right direction
+rectangle "Rione Post Service API" as root #F7F7F7 {
+  package "API" as g1 #EEF3FA {
+    rectangle "GET /posts" as g1_1 #D9EAF7
+    rectangle "POST /posts" as g1_2 #DFF3E3
+    rectangle "GET /me/posts" as g1_3 #D9EAF7
+    rectangle "GET /users/{authorId}/posts" as g1_4 #D9EAF7
+    rectangle "GET /users/{authorId}/public-posts" as g1_5 #D9EAF7
+    rectangle "GET /posts/{postId}" as g1_6 #D9EAF7
+    rectangle "PATCH /posts/{postId}" as g1_7 #FCE4D6
+    rectangle "DELETE /posts/{postId}" as g1_8 #F4CCCC
+    rectangle "GET /posts/{postId}/comments" as g1_9 #D9EAF7
+    rectangle "POST /posts/{postId}/comments" as g1_10 #DFF3E3
+    rectangle "PATCH /posts/{postId}/comments/{commentId}" as g1_11 #FCE4D6
+    rectangle "DELETE /posts/{postId}/comments/{commentId}" as g1_12 #F4CCCC
+    rectangle "GET /posts/{postId}/reactions" as g1_13 #D9EAF7
+    rectangle "POST /posts/{postId}/reactions" as g1_14 #DFF3E3
+    rectangle "DELETE /posts/{postId}/reactions" as g1_15 #F4CCCC
+    rectangle "GET /posts/{postId}/reactions/me" as g1_16 #D9EAF7
+  }
+}
+@enduml

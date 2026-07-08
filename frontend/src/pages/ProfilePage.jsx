@@ -1,6 +1,7 @@
 import { ProfileCard } from "../components/profile/ProfileCard";
 import { ProfileEditor } from "../components/profile/ProfileEditor";
 import { PostCard } from "../components/feed/PostCard";
+import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Skeleton } from "../components/ui/Skeleton";
 
@@ -20,10 +21,10 @@ export function ProfilePage({
     <div className="page-grid">
       <ProfileCard neighborhoodLabel={neighborhoodLabel} user={user} />
       <section className="profile-posts">
-        <div>
+        <Card as="div" className="section-header">
           <p className="eyebrow">I tuoi post</p>
           <h2>Condivisi da te</h2>
-        </div>
+        </Card>
         {posts.loading && ownPosts.length === 0 ? (
           <Skeleton lines={3} />
         ) : ownPosts.length === 0 ? (
