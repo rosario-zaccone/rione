@@ -1,10 +1,10 @@
 # API Gateway Software Requirements Specification
-**Version:** v0.2.0  
-**Last Updated:** 2026-06-24
+**Version:** v0.2.1  
+**Last Modified:** 2026-07-09
 
 ## 1. Scope
 
-The API Gateway provides the public HTTP entry point for Rione services and routes requests to service APIs.
+The API Gateway is the public HTTP entry point for Rione. It receives client requests and routes them to the right service API.
 
 ## 2. Definitions
 
@@ -16,7 +16,7 @@ The API Gateway provides the public HTTP entry point for Rione services and rout
 
 | Code | Short Description | Origin |
 |------|-------------------|--------|
-| GW-FR-001 | Route public API requests to the appropriate backend service, including user, social, post, and notification APIs. | GW-US-001 |
+| GW-FR-001 | Route public API requests to the correct backend service, including user, social, post, and notification APIs. | GW-US-001 |
 | GW-FR-002 | Apply the configured CORS policy to public API traffic, including preflight requests. | GW-US-002 |
 
 ## 4. Business Rules

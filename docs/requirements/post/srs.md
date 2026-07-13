@@ -1,10 +1,10 @@
 # Post Service Software Requirements Specification
-**Version:** v0.4.0  
-**Last Updated:** 2026-06-25
+**Version:** v0.4.1  
+**Last Modified:** 2026-07-09
 
 ## 1. Scope
 
-The Post Service manages neighborhood posts, reactions, and comments.
+The Post Service manages neighbourhood posts, reactions, and comments.
 
 ## 2. Definitions
 
@@ -29,7 +29,7 @@ The Post Service manages neighborhood posts, reactions, and comments.
 | PST-FR-007 | Allow a registered user to remove comments they authored. | PST-US-007 |
 | PST-FR-008 | Allow a registered user to view public posts from users in the same neighborhood, including users without an active neighborship. | PST-US-008 |
 | PST-FR-009 | Allow a registered user to view their own posts, including public and private posts. | PST-US-009 |
-| PST-FR-010 | Allow a registered user to view posts authored by a specific same-neighborhood user according to public, private, active-neighborship, and blocking rules. | PST-US-010 |
+| PST-FR-010 | Allow a registered user to view posts by a specific same-neighborhood user according to public, private, active-neighborship, and blocking rules. | PST-US-010 |
 
 ## 4. Business Rules
 

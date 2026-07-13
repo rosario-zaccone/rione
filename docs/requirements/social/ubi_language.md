@@ -1,6 +1,6 @@
 # Social Service Ubiquitous Language
-**Version:** v0.2.0  
-**Last Updated:** 2026-06-17
+**Version:** v0.2.1  
+**Last Modified:** 2026-07-09
 
 | Term | Definition | Notes |
 |------|------------|-------|
@@ -13,4 +13,4 @@
 | Blocked user | A user that another user has chosen to prevent from interacting with them. | Blocking overrides social interactions. |
 | Unblock | The action of removing an existing block between two users. | Does not restore prior neighbour connections or requests. |
 | Unblocked user | A user for whom a previous block has been removed. | Normal eligibility and visibility rules apply. |
-| Search visibility | The rule set that determines whether one user can find another user. | |
+| Search visibility | Rules that determine whether one user can find another user. | |

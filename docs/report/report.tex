@@ -33,7 +33,7 @@
 \author{Rosario Zaccone}
 \date{June 2026}
 
-\newcommand{\reportversion}{v0.1.19}
+\newcommand{\reportversion}{v0.1.21}
 \newcommand{\reportlastmodified}{2026-07-09}
 
 \begin{document}
@@ -69,26 +69,28 @@ The platform also introduces deliberate constraints to promote more thoughtful p
 % =========================
 \section{Technological Choices}
 
-This section describes the main technologies and development tools used in the project. Architectural and design decisions are discussed in later sections.
+This section describes the main technologies and development tools used in the project. The stack was chosen to support the main goals of the assignment: a microservices architecture, explicit domain modeling, testable business logic, observable runtime behavior, and a local environment that can be started and inspected easily.
 
 \subsection{Technologies Used}
 
-The project is implemented as a Maven multi-module application. The backend uses Java and Spring Boot, while local execution and infrastructure are provided through Docker Compose.
+The project is implemented as a Maven multi-module application. This structure keeps all services in one repository while preserving separate modules, dependencies, tests, and build targets. It is useful for an academic project because the whole system can be built with one command, but each service can still be developed and verified independently.
+
+The backend uses Java and Spring Boot because they provide a mature ecosystem for REST APIs, validation, security, persistence, testing, and observability. Docker Compose is used for local execution because the system depends on several runtime components, including databases, Kafka, Prometheus, Grafana, and pgAdmin. Running them through Compose makes the deployment reproducible and keeps the local environment close to the architecture described in Figure~\ref{fig:deployment-architecture}.
 
 \begin{itemize}
-    \item \textbf{Java 21}: main programming language for backend services.
-    \item \textbf{Spring Boot 4.1.0}: base framework for the backend microservices.
-    \item \textbf{Spring Web MVC}: implementation of REST APIs exposed by the services.
-    \item \textbf{Spring Data JPA}: persistence layer for relational data.
-    \item \textbf{PostgreSQL}: relational database used by the services that require persistence.
-    \item \textbf{Apache Kafka}: event broker used for asynchronous communication between social, post, and notification workflows.
-    \item \textbf{Spring Security}: authentication and authorization through bearer tokens and service-to-service security rules.
-    \item \textbf{Springdoc OpenAPI}: generation and publication of API documentation.
-    \item \textbf{React and Vite}: frontend implementation and local development environment.
-    \item \textbf{Docker and Docker Compose}: containerization and local orchestration of services, databases, Kafka, Prometheus, Grafana, and pgAdmin.
-    \item \textbf{Prometheus and Grafana}: collection and visualization of technical and business metrics.
-    \item \textbf{Maven}: build, dependency management, and test execution.
-    \item \textbf{GitHub and GitHub Actions}: version control and continuous integration.
+    \item \textbf{Java 21}: used as the main backend language. It was selected because it is strongly typed, works well with DDD-style models, and integrates naturally with Spring Boot.
+    \item \textbf{Spring Boot 4.1.0}: used as the base framework for the backend services. It provides the runtime conventions, dependency injection, configuration model, actuator endpoints, and testing support needed by each service.
+    \item \textbf{Spring Web MVC}: used to expose REST APIs. Controllers are kept in the infrastructure layer and translate HTTP requests into application use case calls.
+    \item \textbf{Spring Data JPA}: used in persistence adapters for relational data. It keeps database access outside the domain model and allows repositories to implement output ports.
+    \item \textbf{PostgreSQL}: used as the relational database for services that own persistent state. Each service has its own schema or database boundary, which supports the database-per-service approach.
+    \item \textbf{Apache Kafka}: used for asynchronous communication when one service must react to another service's event without blocking the original workflow. This is especially important for notifications.
+    \item \textbf{Spring Security}: used for JWT-based user authentication, role-based authorization, and service-to-service protection for internal APIs.
+    \item \textbf{Springdoc OpenAPI}: used to publish API documentation from the implemented controllers. The generated contracts are also used to create the API diagrams shown later in the report.
+    \item \textbf{React and Vite}: used to build a lightweight frontend that exercises the application through the API Gateway. It was mainly used for manual end-to-end testing and demonstration.
+    \item \textbf{Docker and Docker Compose}: used to package and run services, databases, Kafka, Prometheus, Grafana, and pgAdmin in a reproducible local environment.
+    \item \textbf{Prometheus and Grafana}: used to collect and visualize technical and business metrics, making service behavior visible during local execution.
+    \item \textbf{Maven}: used for dependency management, module builds, and test execution. The Maven reactor makes it possible to verify a single service or the whole system.
+    \item \textbf{GitHub and GitHub Actions}: used for version control and continuous integration, so tests and build checks run automatically on relevant branches and pull requests.
 \end{itemize}
 
 % =========================
@@ -96,13 +98,13 @@ The project is implemented as a Maven multi-module application. The backend uses
 % =========================
 \section{Testing Architecture}
 
-The testing strategy is organized around Test-Driven Development and layered verification. Business rules are first expressed in requirements documents and then mapped to executable tests. The goal is not only to check implementation details, but also to keep the code aligned with the expected domain behavior.
+The testing strategy is organized around Test-Driven Development and layered verification. Business rules are first expressed in requirements documents and then mapped to executable tests. This was done to keep tests connected to the documented behavior instead of treating them as an afterthought written only after the code was complete.
 
 The project follows the idea of the testing pyramid. At the base of the pyramid there are many fast unit tests, because they are cheap to execute and give quick feedback on domain and application logic. In the middle there are integration tests, which are fewer because they involve frameworks, adapters, persistence, security, messaging, or HTTP boundaries. At the top there are higher-level acceptance tests, which are more expensive but validate business behavior from the user's point of view. Architecture tests are used as an additional technical guardrail to verify that the intended code structure is preserved.
 
-Each main business service follows the same testing structure under \texttt{src/test}. The project separates acceptance tests, architecture tests, integration tests, and unit tests. This separation keeps each test focused on a specific kind of risk: business correctness, architectural conformance, adapter behavior, or isolated domain and application logic.
+Each main business service follows the same testing structure under \texttt{src/test}. The project separates acceptance tests, architecture tests, integration tests, and unit tests. This separation keeps each test focused on a specific risk: business correctness, architectural conformance, adapter behavior, or isolated domain and application logic.
 
-The test suite is executed with Maven. During continuous integration, GitHub Actions runs \texttt{verify} on each service and then on the full Maven reactor. This means that a change is validated both in its own module and in the context of the whole project.
+The test suite is executed with Maven. During continuous integration, GitHub Actions runs \texttt{verify} on each service and then on the full Maven reactor. This means that a change is validated both in its own module and in the context of the whole project. The approach is intentionally practical: fast tests give immediate feedback while integration and acceptance tests protect the most important service boundaries.
 
 \subsection{Types of Tests}
 
@@ -119,7 +121,7 @@ This combination gives the project broad coverage without relying on a single ki
 
 \subsection{CI/CD Pipeline}
 
-The repository uses GitHub Actions to automatically verify the project. The current pipeline is focused on continuous integration: it checks that the services compile and that their automated tests pass before changes are considered safe to merge.
+The repository uses GitHub Actions to automatically verify the project. The current pipeline is focused on continuous integration: it checks that the services compile and that their automated tests pass before changes are considered safe to merge. This is useful in a multi-service project because a change in one module can still break another module through shared contracts, build configuration, or service integration code.
 
 \begin{itemize}
     \item The workflow runs on pushes to \texttt{feature/**} branches and to \texttt{main}.
@@ -136,17 +138,19 @@ This pipeline supports a test-first and regression-aware workflow. The goal is t
 % 4. Domain-Driven Design Approach
 % =========================
 \section{Domain-Driven Design Approach}
-The project uses Domain-Driven Design as required by the exam assignment. DDD was adopted to keep the software model close to the business domain of a neighbourhood-based social network, where concepts such as users, neighbourhoods, posts, social relationships, and notifications have precise meanings. This approach also helped separate business decisions from technical details such as REST controllers, persistence, messaging, and infrastructure configuration.
+The project uses Domain-Driven Design as required by the exam assignment. DDD was adopted because Rione is not only a CRUD application: it has rules about neighbourhood membership, visibility, social relationships, blocking, post privacy, reactions, comments, and notifications. These rules are easier to understand and protect when the code uses the same concepts as the domain.
+
+In practice, DDD was used to keep business decisions separate from technical details such as REST controllers, persistence, messaging, and infrastructure configuration. The domain model captures the core rules, while adapters translate between the model and external mechanisms.
 
 \subsection{Strategic Design}
 
-Strategic design was used to understand the problem space before defining the implementation structure. The domain was divided into clear business areas, each with its own model, responsibilities, and language. This was useful for identifying service boundaries and for avoiding a single shared model that would mix unrelated concerns.
+Strategic design was used before implementation to understand the problem space and choose service boundaries. The domain was divided into clear business areas, each with its own model, responsibilities, and language. This avoided a single shared model that would mix identity, relationships, posts, and notifications into one large and fragile component.
 
 \subsubsection{Bounded Contexts}
 
 The analysis started from the overall domain and from conceptual sketches of the main domain components. From this view, four bounded contexts were identified: User, Social, Post, and Notification. Each bounded context owns a specific part of the domain: the User context manages user identity and profile information, the Social context manages neighbourhood membership and relationships, the Post context manages publications and interactions with content, and the Notification context manages the delivery of relevant events to users.
 
-These contexts also correspond to the main business microservices of the system. This mapping keeps each service focused on a coherent set of rules and reduces coupling between services.
+These contexts also correspond to the main business microservices of the system. This mapping is deliberate: each service owns a coherent set of rules and can evolve its model without forcing other services to share its internal classes or database tables.
 \subsubsection{Ubiquitous Language}
 
 Each bounded context has its own ubiquitous language, documented in the glossary files. The glossary defines the main terms used in requirements, code, tests, and diagrams, so that the same concept is described consistently across the project. This is especially important because similar words can have different meanings in different contexts: for example, a user profile belongs to the User context, while neighbourhood membership belongs to the Social context.
@@ -160,7 +164,7 @@ Each bounded context has its own ubiquitous language, documented in the glossary
 
 \subsection{Tactical Design}
 
-For each bounded context, a UML domain model was designed and is presented later in the report. These diagrams identify the main aggregates, entities, value objects, and relationships used by the services. They provide a bridge between the requirements documentation and the implementation, making the domain structure easier to inspect before looking at the source code.
+For each bounded context, a UML domain model was designed before implementation and is presented later in the report. These diagrams identify the main aggregates, entities, value objects, and relationships used by the services. They provide a bridge between the requirements documentation and the code, making the domain structure inspectable before reading implementation details.
 
 In the implementation, tactical DDD patterns are used to make the model explicit. Entities represent domain concepts with identity, value objects represent immutable concepts defined by their attributes, and aggregate roots protect consistency boundaries. The code also uses project-specific DDD annotations, such as \texttt{DDDEntity}, \texttt{DDDValueObject}, and \texttt{DDDAggregateRoot}, to make these roles visible and easier to verify.
 
@@ -175,7 +179,9 @@ The same idea is reflected in the application structure. Domain rules are kept i
 % =========================
 \section{Requirements}
 
-The requirements documentation is stored in the following folders: 
+Requirements were written before implementation and were used as the main input for design, testing, and AI-assisted coding. This made the work traceable: user stories describe the expected value, SRS tables turn that value into system responsibilities, and business rules define the constraints that tests and domain logic must enforce.
+
+The requirements documentation is stored in the following folders:
 
 \begin{itemize}
     \item \path{docs/requirements/api-gateway/}
@@ -187,7 +193,7 @@ The requirements documentation is stored in the following folders:
 
 \subsection{User Stories}
 
-User stories are short requirement descriptions written from the perspective of an actor. They describe who needs a capability, what they want to do, and why the capability has value.
+User stories are short requirement descriptions written from the perspective of an actor. They describe who needs a capability, what they want to do, and why the capability has value. In this project they were used to keep implementation decisions connected to actual user goals, instead of starting directly from controllers or database tables.
 
 The user stories are stored in:
 
@@ -201,7 +207,7 @@ The user stories are stored in:
 
 \subsection{Requirements Tables}
 
-Requirement tables translate user stories into structured system responsibilities. They assign stable identifiers to functional requirements, business rules, and non-functional requirements.
+Requirement tables translate user stories into structured system responsibilities. They assign stable identifiers to functional requirements, business rules, and non-functional requirements. These identifiers are useful because they can be referenced by tests, implementation tasks, and report sections without relying on vague descriptions.
 
 The requirement tables are stored in the Software Requirements Specification files:
 
@@ -215,7 +221,7 @@ The requirement tables are stored in the Software Requirements Specification fil
 
 \subsection{Business Rules}
 
-Business rules are domain constraints that must remain true regardless of the technical interface used to execute an operation. They define when an operation is valid, what must be rejected, and which side effects are allowed.
+Business rules are domain constraints that must remain true regardless of the technical interface used to execute an operation. They define when an operation is valid, what must be rejected, and which side effects are allowed. For this reason, they belong close to the domain model and are also reflected in acceptance tests.
 
 The business rules are documented in the same requirements folders as the user stories and SRS files:
 
@@ -233,11 +239,11 @@ The business rules are documented in the same requirements folders as the user s
 % =========================
 \section{Implementation and Deployment Architecture}
 
-The system is implemented as a microservices architecture. Each main bounded context identified during the DDD analysis corresponds to a business microservice: User Service, Social Service, Post Service, and Notification Service. This decomposition keeps each service responsible for a coherent part of the domain and allows each model to evolve without forcing all services to share the same internal representation.
+The system is implemented as a microservices architecture. This choice was made because the domain naturally separates into areas with different responsibilities: user identity, social relationships, posts, and notifications. Each main bounded context identified during the DDD analysis corresponds to a business microservice: User Service, Social Service, Post Service, and Notification Service. This decomposition keeps each service responsible for a coherent part of the domain and allows each model to evolve without forcing all services to share the same internal representation.
 
-Additional services and infrastructure components were added to support cross-cutting architectural patterns. The API Gateway exposes a single entry point for the frontend and routes requests to the backend services. PostgreSQL databases provide persistence for the services that own durable state, while Kafka is used as the event broker for asynchronous communication. Monitoring and operational components, such as Prometheus and Grafana, are deployed together with the application to observe service health and runtime metrics.
+Additional services and infrastructure components were added to support cross-cutting concerns. The API Gateway exposes a single entry point for the frontend and routes requests to the backend services, so clients do not need to know the internal service topology. PostgreSQL databases provide persistence for services that own durable state, while Kafka is used as the event broker for asynchronous communication. Monitoring components, such as Prometheus and Grafana, run with the application to make service health and runtime metrics visible.
 
-Synchronous communication between microservices is implemented through REST APIs. This is used when a service needs immediate information from another service to complete a use case. To keep this dependency explicit and isolated, services use proxy clients in the infrastructure layer. For example, the Social Service may need user information that goes beyond the user identifier; through a User Service proxy, it can retrieve the required user details without directly accessing the User Service database or sharing its internal domain model. The resulting deployment view is shown in Figure~\ref{fig:deployment-architecture}.
+Synchronous communication between microservices is implemented through REST APIs. It is used only when a service needs immediate information from another service to complete a use case. To keep this dependency explicit and isolated, services use proxy clients in the infrastructure layer. For example, the Social Service may need user information that goes beyond the user identifier; through a User Service proxy, it can retrieve the required user details without directly accessing the User Service database or sharing its internal domain model. The resulting deployment view is shown in Figure~\ref{fig:deployment-architecture}.
 
 \begin{figure}[htbp]
     \centering
@@ -248,9 +254,9 @@ Synchronous communication between microservices is implemented through REST APIs
 
 \subsection{Clean and Hexagonal Service Structure}
 
-The business microservices follow a clean and hexagonal organization. Their code is divided into domain, application, and infrastructure layers. The domain layer contains the core business model and rules; the application layer coordinates use cases and defines ports; the infrastructure layer contains adapters for REST APIs, persistence, messaging, configuration, and external integrations.
+The business microservices follow a clean and hexagonal organization. This pattern was used to protect the domain model from framework and infrastructure details. Each service is divided into domain, application, and infrastructure layers. The domain layer contains the core business model and rules; the application layer coordinates use cases and defines ports; the infrastructure layer contains adapters for REST APIs, persistence, messaging, configuration, and external integrations.
 
-This structure keeps dependencies directed toward the inner layers. Controllers, repositories, Kafka consumers, REST proxy clients, and other technical details depend on the application and domain model, while the domain model does not depend on Spring, databases, HTTP, or Kafka. This makes the business logic easier to test and reduces the impact of changing an external technology. Figure~\ref{fig:clean-architecture} summarizes this dependency direction.
+This structure keeps dependencies directed toward the inner layers. Controllers, repositories, Kafka consumers, REST proxy clients, and other technical details depend on the application and domain model, while the domain model does not depend on Spring, databases, HTTP, or Kafka. This makes the business logic easier to test and reduces the impact of changing an external technology. The dependency direction is summarized in Figure~\ref{fig:clean-architecture}.
 
 \begin{figure}[htbp]
     \centering
@@ -261,13 +267,13 @@ This structure keeps dependencies directed toward the inner layers. Controllers,
 
 \subsection{Event-Driven Communication}
 
-An event-driven approach is used where asynchronous communication is more appropriate than direct synchronous calls. In particular, the Notification Service reacts to events produced by other services instead of being called directly by each workflow that may generate a notification.
+An event-driven approach is used where asynchronous communication is more appropriate than direct synchronous calls. This is especially useful for notifications, because a user action such as sending a neighbour request or commenting on a post should not fail only because notification processing is temporarily unavailable. For this reason, the Notification Service reacts to events produced by other services instead of being called directly by each workflow that may generate a notification.
 
-Kafka acts as the event broker. The Post Service and Social Service publish events on Kafka topics when relevant domain actions occur, and the Notification Service consumes those events to create or deliver notifications. This design reduces coupling between the services that produce business events and the service that handles notifications. It also makes the notification workflow more scalable, because event producers do not need to wait for notification processing to complete before finishing their own use cases.
+Kafka acts as the event broker. The Post Service and Social Service publish events on Kafka topics when relevant domain actions occur, and the Notification Service consumes those events to create notifications. This design reduces coupling between the services that produce business events and the service that handles notifications. It also makes the notification workflow more scalable, because event producers do not need to wait for notification processing to complete before finishing their own use cases.
 
 \subsection{Application Security}
 
-Security is managed with Spring Security and JWT-based stateless authentication. The User Service is responsible for user registration and login: credentials are validated there, passwords are stored as hashes rather than plain text, and a JWT is returned after a successful login. Clients then send the token in the \texttt{Authorization: Bearer <token>} header when calling protected APIs. Each backend service validates the token before executing protected operations, so authentication does not depend on server-side HTTP sessions and can work naturally in a distributed microservices deployment.
+Security is managed with Spring Security and JWT-based stateless authentication. This was chosen because the system is distributed: relying on server-side HTTP sessions would make authentication harder to share across services. The User Service is responsible for user registration and login: credentials are validated there, passwords are stored as hashes rather than plain text, and a JWT is returned after a successful login. Clients then send the token in the \texttt{Authorization: Bearer <token>} header when calling protected APIs. Each backend service validates the token before executing protected operations.
 
 The security configuration explicitly separates public, authenticated, administrative, and internal endpoints. Public routes include login, registration, selected read-only resources, health checks, Prometheus scraping, and OpenAPI documentation. Business operations require an authenticated user, and administrative operations such as city management are protected with an admin role. Controllers do not parse tokens directly; instead, JWT validation is handled by a security filter, and controllers retrieve the current user from the Spring Security context. This keeps authentication concerns outside the domain and application logic.
 
@@ -282,7 +288,7 @@ This section presents the main microservices of the system. Each business servic
 
 \subsection{API Gateway}
 
-The API Gateway is the public entry point of the backend. It exposes the routes consumed by the frontend and forwards requests to the internal services, keeping clients independent from the internal service topology. It does not own a domain model; its responsibility is API composition, routing, and boundary-level access to the backend capabilities. Its public API surface is illustrated in Figure~\ref{fig:api-gateway-openapi}.
+The API Gateway is the public entry point of the backend. It was introduced to give clients one stable HTTP boundary instead of exposing each internal service directly. The gateway exposes the routes consumed by the frontend and forwards requests to the internal services, keeping clients independent from the internal service topology. It does not own a domain model; its responsibility is API composition, routing, cross-origin access, and boundary-level access to backend capabilities. Its public API surface is illustrated in Figure~\ref{fig:api-gateway-openapi}.
 
 \begin{figure}[htbp]
     \centering
@@ -295,7 +301,7 @@ The API Gateway is the public entry point of the backend. It exposes the routes 
 
 \subsection{User Service}
 
-The User Service manages identity and profile-related information. Its domain model includes users, cities, neighbourhoods, and value objects such as user identifiers, names, mail addresses, and biographies. The service also exposes internal endpoints used by other services when they need user-related information without accessing the User Service database directly. Its API contract is shown in Figure~\ref{fig:user-service-openapi}, its domain model in Figure~\ref{fig:user-service-domain}, and its component-and-connector view in Figure~\ref{fig:user-service-cc}.
+The User Service manages identity and profile-related information. It owns this data because authentication, profile information, and neighbourhood membership must have one authoritative source. Its domain model includes users, cities, neighbourhoods, and value objects such as user identifiers, names, mail addresses, and biographies. The service also exposes internal endpoints used by other services when they need user-related information without accessing the User Service database directly. Its API contract is shown in Figure~\ref{fig:user-service-openapi}, its domain model in Figure~\ref{fig:user-service-domain}, and its component-and-connector view in Figure~\ref{fig:user-service-cc}.
 
 \begin{figure}[htbp]
     \centering
@@ -322,7 +328,7 @@ The User Service manages identity and profile-related information. Its domain mo
 
 \subsection{Social Service}
 
-The Social Service manages relationships between users inside the local social network. Its domain model focuses on neighbour requests, neighborships, and blocks. It references users by identifier and uses proxy clients when it needs additional user data from the User Service. Its API contract is shown in Figure~\ref{fig:social-service-openapi}, its domain model in Figure~\ref{fig:social-service-domain}, and its component-and-connector view in Figure~\ref{fig:social-service-cc}.
+The Social Service manages relationships between users inside the local social network. It is separated from the User Service because a user's profile and a user's social relationships follow different rules and lifecycles. Its domain model focuses on neighbour requests, neighborships, and blocks. It references users by identifier and uses proxy clients when it needs additional user data from the User Service. This keeps the relationship model independent while still allowing the service to enforce same-neighbourhood and blocking rules. Its API contract is shown in Figure~\ref{fig:social-service-openapi}, its domain model in Figure~\ref{fig:social-service-domain}, and its component-and-connector view in Figure~\ref{fig:social-service-cc}.
 
 \begin{figure}[htbp]
     \centering
@@ -349,9 +355,9 @@ The Social Service manages relationships between users inside the local social n
 
 \subsection{Post Service}
 
-The Post Service manages posts, comments, and reactions. The Post aggregate owns the consistency boundary for content interactions, while comments and reactions are modeled as entities inside the aggregate. The service also publishes events when relevant interactions occur, allowing the Notification Service to react asynchronously through Kafka. Its API contract is shown in Figure~\ref{fig:post-service-openapi}, its domain model in Figure~\ref{fig:post-service-domain}, and its component-and-connector view in Figure~\ref{fig:post-service-cc}.
+The Post Service manages posts, comments, and reactions. It is the most write-intensive part of the system, so its model focuses on preserving content rules and interaction history. The Post aggregate owns the consistency boundary for content interactions, while comments and reactions are modeled as entities inside the aggregate. The service also publishes events when relevant interactions occur, allowing the Notification Service to react asynchronously through Kafka. Its API contract is shown in Figure~\ref{fig:post-service-openapi}, its domain model in Figure~\ref{fig:post-service-domain}, and its component-and-connector view in Figure~\ref{fig:post-service-cc}.
 
-This service implements event sourcing for post state. Instead of storing only the latest snapshot of a post, the service stores an ordered stream of immutable events such as \texttt{PostCreated}, \texttt{PostContentUpdated}, \texttt{PostDeleted}, \texttt{CommentAdded}, \texttt{CommentUpdated}, \texttt{CommentRemoved}, \texttt{ReactionAdded}, \texttt{ReactionUpdated}, and \texttt{ReactionRemoved}. The current state of a post is rebuilt by reading the stream and applying each event in order. This makes the history of changes explicit and allows the service to derive the current post, comments, reactions, score, timestamps, and deleted state from the event sequence.
+This service implements event sourcing for post state because posts can change through several user actions and the history of those actions is meaningful. Instead of storing only the latest snapshot of a post, the service stores an ordered stream of immutable events such as \texttt{PostCreated}, \texttt{PostContentUpdated}, \texttt{PostDeleted}, \texttt{CommentAdded}, \texttt{CommentUpdated}, \texttt{CommentRemoved}, \texttt{ReactionAdded}, \texttt{ReactionUpdated}, and \texttt{ReactionRemoved}. The current state of a post is rebuilt by reading the stream and applying each event in order. This makes the history of changes explicit and allows the service to derive the current post, comments, reactions, score, timestamps, and deleted state from the event sequence.
 
 The event-sourcing boundary is exposed through the \texttt{PostEventStore} output port. The application service loads events with \texttt{read(postId)} or \texttt{readAll()}, reconstructs an in-memory \texttt{PostState}, validates the requested operation against that state, and appends one or more new events. The JPA adapter persists events in the \texttt{post\_events} table with a \texttt{postId}, an increasing \texttt{version}, an event \texttt{type}, an \texttt{occurredAt} timestamp, and a serialized payload. Appends use an expected version check; if the stored stream version differs from the expected one, the operation fails with a concurrency error. This gives the Post aggregate optimistic concurrency protection without exposing persistence details to the application core.
 
@@ -382,7 +388,7 @@ Event-sourcing events are kept separate from integration events. The internal po
 
 \subsection{Notification Service}
 
-The Notification Service manages user notifications. Its domain model centers on the Notification aggregate, which records the recipient, actor, notification type, message, occurrence time, and read state. The service consumes Kafka events produced by other services and exposes read-side REST endpoints for retrieving and marking notifications as read. Its API contract is shown in Figure~\ref{fig:notification-service-openapi}, its domain model in Figure~\ref{fig:notification-service-domain}, and its component-and-connector view in Figure~\ref{fig:notification-service-cc}.
+The Notification Service manages user notifications. It is separated from the workflows that generate notifications so that social and post actions can complete even if notification processing is delayed. Its domain model centers on the Notification aggregate, which records the recipient, actor, notification type, message, occurrence time, and read state. The service consumes Kafka events produced by other services and exposes read-side REST endpoints for retrieving and marking notifications as read. Its API contract is shown in Figure~\ref{fig:notification-service-openapi}, its domain model in Figure~\ref{fig:notification-service-domain}, and its component-and-connector view in Figure~\ref{fig:notification-service-cc}.
 
 \begin{figure}[htbp]
     \centering
@@ -412,25 +418,25 @@ The Notification Service manages user notifications. Its domain model centers on
 % =========================
 \section{Additional Patterns and Monitoring}
 
-In addition to the core microservice, DDD, and hexagonal architecture choices, the project includes operational patterns that make the system easier to run and observe. The most relevant ones are health checks and application metrics. They do not implement business behavior directly, but they are important because a distributed system must expose enough runtime information to understand whether services are alive, reachable, and behaving as expected.
+In addition to the core microservice, DDD, and hexagonal architecture choices, the project includes operational patterns that make the system easier to run and observe. These patterns do not implement business behavior directly, but they are necessary in a distributed system because failures are no longer limited to one process. A service can be alive but slow, a dependency can fail, or a business workflow can produce unusual activity. For this reason, the project uses health checks, circuit breakers, and application metrics together.
 
 \subsection{Health API}
 
-Each backend service exposes health information through Spring Actuator. The health endpoint is made available without user authentication so that Docker Compose, monitoring tools, or deployment infrastructure can check whether a service is running and ready to receive traffic. This is especially useful in a microservices architecture, where a failure may affect only one service while the rest of the system continues to run.
+Each backend service exposes health information through Spring Actuator. This was used because Docker Compose and monitoring tools need a simple way to check whether a service is running and ready to receive traffic. The health endpoint is made available without user authentication, so operational checks do not need a normal user token. This is especially useful in a microservices architecture, where a failure may affect only one service while the rest of the system continues to run.
 
-The health API is intentionally separated from the business OpenAPI contracts. Business APIs describe domain capabilities such as users, posts, social relationships, and notifications, while Actuator endpoints describe operational state. In the services, health and Prometheus endpoints are explicitly allowed by the security configuration, avoiding the need for monitoring tools to use a normal user token.
+The health API is intentionally separated from the business OpenAPI contracts. Business APIs describe domain capabilities such as users, posts, social relationships, and notifications, while Actuator endpoints describe operational state. In the services, health and Prometheus endpoints are explicitly allowed by the security configuration. This keeps monitoring independent from business authentication while still protecting normal application operations.
 
 \subsection{Circuit Breaker}
 
-The project also uses the Circuit Breaker pattern to limit cascading failures during synchronous service calls. The API Gateway applies circuit breakers to the routes that forward traffic to the User, Social, Post, and Notification services. When a downstream service becomes slow or repeatedly fails, the circuit can open and stop sending new calls for a short period, giving the failing service time to recover and preventing request queues from growing across the system.
+The project also uses the Circuit Breaker pattern to limit cascading failures during synchronous service calls. This pattern was added because the API Gateway depends on downstream services: if one of them becomes slow or unavailable, the gateway should not continue sending unlimited requests to it. The API Gateway applies circuit breakers to the routes that forward traffic to the User, Social, Post, and Notification services. When a downstream service becomes slow or repeatedly fails, the circuit can open and stop sending new calls for a short period, giving the failing service time to recover and preventing request queues from growing across the system.
 
 Circuit breakers are configured through Resilience4j with count-based sliding windows, failure-rate thresholds, slow-call thresholds, and half-open recovery attempts. Their state is also exposed through Actuator health and circuit-breaker endpoints, so operational tools can observe whether a service dependency is closed, open, or recovering. This pattern complements health checks and metrics: health checks say whether a component is alive, metrics show runtime behavior over time, and circuit breakers actively protect callers from unstable dependencies.
 
 \subsection{Application Metrics}
 
-Application metrics are collected with Micrometer and exposed in Prometheus format through Spring Actuator. The services expose \texttt{/actuator/prometheus}, and each service adds the \texttt{application} tag to its metrics so that Prometheus and Grafana can distinguish data coming from the API Gateway, User Service, Social Service, Post Service, and Notification Service.
+Application metrics are collected with Micrometer and exposed in Prometheus format through Spring Actuator. This was used because health checks only show a point-in-time status, while metrics show how the system behaves over time. The services expose \texttt{/actuator/prometheus}, and each service adds the \texttt{application} tag to its metrics so that Prometheus and Grafana can distinguish data coming from the API Gateway, User Service, Social Service, Post Service, and Notification Service.
 
-The project includes both technical and business-oriented metrics. Technical metrics are provided by the Spring Boot and JVM instrumentation and help observe runtime behavior such as HTTP requests, memory usage, and service availability. Business metrics are added where they provide useful insight into the application domain. For example, the User Service exports gauges for registered users, new users created today, and active users in the last five minutes. The Post Service exports gauges derived from the event store, such as total posts, posts created today, comments created today, and reactions created today.
+The project includes both technical and business-oriented metrics. Technical metrics are provided by Spring Boot and JVM instrumentation and help observe runtime behavior such as HTTP requests, memory usage, CPU usage, and service availability. Business metrics are added where they provide useful insight into the application domain. For example, the User Service exports gauges for registered users, new users created today, and active users in the last five minutes. The Post Service exports gauges derived from the event store, such as total posts, posts created today, comments created today, and reactions created today.
 
 Prometheus is responsible for scraping these metrics from the services, while Grafana is used to visualize them in dashboards. Example Grafana dashboard views are shown in Figure~\ref{fig:grafana-dashboard-overview} and Figure~\ref{fig:grafana-dashboard-details}. This combination makes it possible to monitor both infrastructure-level behavior and product-level activity. In practice, this helps detect service failures, observe user growth, and understand whether local community interaction is increasing through posts, comments, and reactions.
 
@@ -455,9 +461,11 @@ Prometheus is responsible for scraping these metrics from the services, while Gr
 % =========================
 \section{Frontend}
 
-A lightweight frontend was implemented with React and Vite to make manual end-to-end testing easier. The frontend interacts with the system only through the API Gateway, so it exercises the same public HTTP boundary used by external clients. This made it possible to verify authentication, profile management, neighbour search, neighbour requests, feed browsing, post reactions, comments, notifications, and administrative location management from a single user interface instead of testing each endpoint only through Swagger or direct HTTP calls.
+A lightweight frontend was implemented with React and Vite to make manual end-to-end testing easier. React was sufficient for this purpose because the frontend did not need complex server-side rendering or a production deployment pipeline; it needed a fast local interface that could call the backend and expose real workflows. Vite was used for the local development server because it starts quickly and works well for this kind of small client application.
 
-The interface was intentionally kept simple and functional. Its purpose is not to replace the backend tests, but to provide a practical way to validate complete user workflows across multiple services. For example, searching visible neighbours and sending requests can be tested from the view shown in Figure~\ref{fig:frontend-neighbor-search}; sent and received requests can be inspected from the neighbour management view shown in Figure~\ref{fig:frontend-neighbor-requests}; and post browsing, reactions, and comments can be tested from the feed shown in Figure~\ref{fig:frontend-feed}.
+The frontend interacts with the system only through the API Gateway, so it exercises the same public HTTP boundary used by external clients. This made it possible to verify authentication, profile management, neighbour search, neighbour requests, feed browsing, post reactions, comments, notifications, and administrative location management from a single user interface instead of testing each endpoint only through Swagger or direct HTTP calls.
+
+The interface was intentionally kept simple and functional. Its purpose is not to replace backend tests, but to provide a practical way to validate complete user workflows across multiple services. For example, searching visible neighbours and sending requests can be tested from the view shown in Figure~\ref{fig:frontend-neighbor-search}; sent and received requests can be inspected from the neighbour management view shown in Figure~\ref{fig:frontend-neighbor-requests}; and post browsing, reactions, and comments can be tested from the feed shown in Figure~\ref{fig:frontend-feed}.
 
 \begin{figure}[htbp]
     \centering
@@ -487,11 +495,27 @@ The interface was intentionally kept simple and functional. Its purpose is not t
 % =========================
 \section{Implementation}
 
-Briefly describe the implementation phase of the project.
+The implementation phase translated the previously defined requirements and architectural models into the running system. The main development effort focused on the backend microservices, their domain models, application use cases, REST and persistence adapters, integration mechanisms, observability support, and Docker Compose deployment.
+
+Implementation was not treated as an isolated coding activity. The code was derived from requirements written before implementation and from manually designed UML diagrams, including domain models for the bounded contexts and component-and-connector diagrams for the overall architecture. This made the implementation phase closer to a controlled realization of the design than to an exploratory generation of services from vague prompts.
 
 \subsection{Use of AI During Coding}
 
-Briefly describe how AI was used during the coding phase and how its output was reviewed and adapted.
+AI was used as a support tool during code generation, especially through agentic AI workflows. It was not used as a replacement for requirements analysis or architectural design. The project first defined requirements, bounded contexts, domain models, APIs, and component-and-connector diagrams manually. AI was then used to accelerate implementation inside those boundaries.
+
+This distinction is important. A vague prompt such as ``create the Social Service'' would leave too many architectural and domain decisions to the tool. In this project, prompts were written after the design work, so the agent received concrete inputs and constraints. Typical backend prompts were closer to the following examples:
+
+\begin{itemize}
+    \item Given the requirements in \path{docs/requirements/social/} and the UML domain model in \path{docs/design/social_service.puml}, implement the Social Service domain model. Follow the project DDD and Hexagonal Architecture rules, keep validation inside value objects, and make aggregate roots responsible for the lifecycle of their entities.
+    \item Given the component-and-connector diagram in \path{docs/design/social_c&c.puml}, write the Social Service infrastructure adapters. Keep REST controllers, persistence adapters, Kafka adapters, and proxy clients outside the domain layer, and implement the application ports already defined by the use cases.
+    \item Given the requirements in \path{docs/requirements/post/} and the Post Service domain model in \path{docs/design/post_service.puml}, implement the post aggregate and event-sourcing flow. Store immutable events through a \texttt{PostEventStore} port and keep integration events separate from persistence events.
+\end{itemize}
+
+To make this use more controlled, custom AI skills were defined for the most relevant topics of the project, including Domain-Driven Design, Hexagonal Architecture, REST API design, Spring Boot testing, event sourcing, security, and related design principles. These skills were based on notes taken during the course and, where useful, on notes from technical books. Their purpose was to give the agent explicit project-specific guidance, so generated code would respect the architectural rules, package boundaries, testing expectations, and design vocabulary adopted in the project.
+
+For the backend, the developer kept direct responsibility for requirements analysis, architectural design, testing strategy, debugging, and final validation. AI assisted with implementation details, repetitive code, test scaffolding, and refactoring suggestions, but its output was reviewed, adapted, and corrected against the intended design. In this sense, part of the coding activity was delegated to AI, while the most important engineering decisions remained developer-driven.
+
+The frontend was the part most extensively delegated to AI. It was generated starting from visual mockups provided as prompts and then adapted to interact with the API Gateway and exercise the main application workflows. This was acceptable because the frontend was mainly intended as a lightweight testing and demonstration client, while the core architectural and domain complexity remained in the backend services.
 
 % =========================
 % 11. Conclusions

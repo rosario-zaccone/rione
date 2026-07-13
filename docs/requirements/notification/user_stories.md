@@ -1,12 +1,12 @@
 # Notification Service User Stories
-**Version:** v0.3.0  
-**Last Updated:** 2026-06-29
+**Version:** v0.3.1  
+**Last Modified:** 2026-07-09
 
 ## NOT-US-001 - Receive Request Received Notifications
 
 **As a** registered user  
 **I want** to receive a notification when another user sends me a neighbour request  
-**So that** I can notice and respond to incoming neighbour requests
+**So that** I can notice the request and respond to it
 
 **Acceptance Criteria**
 - A registered user receives a `REQUEST_RECEIVED` notification when another user sends them a neighbour request.
@@ -17,7 +17,7 @@
 
 **As a** registered user  
 **I want** to receive a notification when another user accepts my neighbour request  
-**So that** I know the neighbour connection has been created
+**So that** I know the neighbour connection is active
 
 **Acceptance Criteria**
 - A registered user receives a `REQUEST_ACCEPTED` notification when another user accepts their neighbour request.
@@ -28,7 +28,7 @@
 
 **As a** registered user  
 **I want** to mark a notification as read  
-**So that** I can keep track of which notifications still need my attention
+**So that** I can see which notifications still need my attention
 
 **Acceptance Criteria**
 - A registered user can mark one of their notifications as read.
@@ -53,7 +53,7 @@
 
 **As a** post author  
 **I want** to receive a notification when another eligible user reacts to my post  
-**So that** I know when my post receives feedback from the neighbourhood
+**So that** I know when someone in the neighbourhood reacts to my post
 
 **Acceptance Criteria**
 - A post author receives a `POST_REACTION_ADDED` notification when another eligible user adds a reaction to their post.

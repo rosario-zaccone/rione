@@ -1,6 +1,6 @@
 # API Gateway Ubiquitous Language
-**Version:** v0.1.0  
-**Last Updated:** 2026-06-17
+**Version:** v0.1.1  
+**Last Modified:** 2026-07-09
 
 | Term | Definition | Notes |
 |------|------------|-------|

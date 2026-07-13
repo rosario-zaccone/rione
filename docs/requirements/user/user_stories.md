@@ -1,6 +1,6 @@
 # User Service User Stories
-**Version:** v0.5.0  
-**Last Updated:** 2026-06-23
+**Version:** v0.5.1  
+**Last Modified:** 2026-07-09
 
 ## USR-US-001 - Sign Up
 
@@ -30,7 +30,7 @@
 
 **As a** registered user  
 **I want** to update my profile info  
-**So that** my neighbours can recognize me and see accurate information about me
+**So that** my neighbours can recognize me and see accurate information
 
 **Acceptance Criteria**
 - A registered user can update their editable profile information.
@@ -43,7 +43,7 @@
 
 **As an** admin user  
 **I want** to insert a city with its neighborhoods  
-**So that** users can select valid neighborhood membership from platform-managed locations
+**So that** users can choose from platform-managed neighborhoods
 
 **Acceptance Criteria**
 - An admin user can insert a city with one or more neighborhoods.
@@ -55,7 +55,7 @@
 
 **As an** admin user  
 **I want** to remove a city with its neighborhoods  
-**So that** obsolete platform-managed locations are no longer available for user profile neighborhood selection
+**So that** obsolete locations no longer appear in profile choices
 
 **Acceptance Criteria**
 - An admin user can remove an existing city and its neighborhoods.

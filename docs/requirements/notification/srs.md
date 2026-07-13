@@ -1,10 +1,10 @@
 # Notification Service Software Requirements Specification
-**Version:** v0.4.0  
-**Last Updated:** 2026-06-29
+**Version:** v0.4.1  
+**Last Modified:** 2026-07-09
 
 ## 1. Scope
 
-The Notification Service manages notification creation, read state, and delivery attempts for relevant platform activity.
+The Notification Service creates notifications, tracks read state, and records delivery attempts for relevant platform activity.
 
 ## 2. Definitions
 
@@ -23,7 +23,7 @@ The Notification Service manages notification creation, read state, and delivery
 |------|-------------------|--------|
 | NOT-FR-001 | Notify the receiver when another user sends them a neighbour request by creating a `REQUEST_RECEIVED` notification. | NOT-US-001 |
 | NOT-FR-002 | Notify the original sender when their neighbour request is accepted by creating a `REQUEST_ACCEPTED` notification. | NOT-US-002 |
-| NOT-FR-003 | Allow a notification recipient to mark their notification as read. | NOT-US-003 |
+| NOT-FR-003 | Allow a notification recipient to mark a notification as read. | NOT-US-003 |
 | NOT-FR-004 | Notify the post author when another eligible user comments on their post by creating a `POST_COMMENT_ADDED` notification. | NOT-US-004 |
 | NOT-FR-005 | Notify the post author when another eligible user reacts to their post by creating a `POST_REACTION_ADDED` notification. | NOT-US-005 |
 

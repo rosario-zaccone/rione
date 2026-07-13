@@ -1,12 +1,12 @@
 # Social Service User Stories
-**Version:** v0.4.0  
-**Last Updated:** 2026-06-23
+**Version:** v0.4.1  
+**Last Modified:** 2026-07-09
 
 ## SOC-US-001 - Search Neighbours
 
 **As a** registered user  
 **I want** to search for neighbours and see their profile information  
-**So that** I can find people in my neighbourhood and decide who to connect with
+**So that** I can find people in my neighbourhood and decide who to contact
 
 **Acceptance Criteria**
 - A registered user can search users in their own neighborhood with one string matched case-insensitively against username, name, and surname.
@@ -42,7 +42,7 @@
 
 **As a** registered user  
 **I want** to remove a neighbour from my contacts  
-**So that** I can keep my neighbourhood contacts relevant and up to date
+**So that** my neighbourhood contacts stay relevant
 
 **Acceptance Criteria**
 - A registered user can remove an existing neighbour connection.
@@ -78,7 +78,7 @@
 
 **As a** registered user  
 **I want** to view the users I have blocked  
-**So that** I can review and manage my blocked users
+**So that** I can review and manage the list
 
 **Acceptance Criteria**
 - A registered user can retrieve the blocks they created.
@@ -102,7 +102,7 @@
 
 **As a** registered user  
 **I want** to view neighbour requests I sent and neighbour requests I received  
-**So that** I can track pending connection workflows separately
+**So that** I can track outgoing and incoming requests separately
 
 **Acceptance Criteria**
 - A registered user can retrieve neighbour requests they sent.

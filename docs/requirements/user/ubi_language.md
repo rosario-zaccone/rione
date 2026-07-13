@@ -1,6 +1,6 @@
 # User Service Ubiquitous Language
-**Version:** v0.1.0  
-**Last Updated:** 2026-06-17
+**Version:** v0.1.1  
+**Last Modified:** 2026-07-09
 
 | Term | Definition | Notes |
 |------|------------|-------|
@@ -12,5 +12,5 @@
 | Username | A unique public account handle. | |
 | Mail | A unique email address used for account identity and login. | |
 | Password hash | A secure stored representation of a password. | Never expose in API responses. |
-| Biography | User-written profile description. | Must be meaningful and long enough to scan. |
+| Biography | User-written profile description. | Must be meaningful and long enough to read quickly. |
 | Neighborhood id | Identifier of the neighborhood the user belongs to. | User references the neighborhood by id only. |

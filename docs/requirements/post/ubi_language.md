@@ -1,6 +1,6 @@
 # Post Service Ubiquitous Language
-**Version:** v0.2.0  
-**Last Updated:** 2026-06-25
+**Version:** v0.2.1  
+**Last Modified:** 2026-07-09
 
 | Term | Definition | Notes |
 |------|------------|-------|
@@ -12,7 +12,7 @@
 | Help post | A post used to ask neighbours for assistance, recommendations, borrowed items, or practical support. | |
 | Discussion post | A post used for general conversation, opinions, updates, or non-urgent neighbourhood topics. | |
 | Reaction | A simple response that a user adds to a post. | |
-| Post score | A community feedback value that reflects how useful, relevant, or trusted a post is. | Usually derived from votes or reactions. |
+| Post score | A community feedback value that reflects how useful, relevant, or trusted a post is. | Usually derived from reactions. |
 | Comment | A reply written by a user in response to a post. | |
 | Active neighborship | An accepted and currently active relationship between two users. | Required to view another user's private posts. |
 | Own posts | Posts authored by the acting user. | Includes the user's public and private posts. |

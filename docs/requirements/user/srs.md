@@ -1,10 +1,10 @@
 # User Service Software Requirements Specification
-**Version:** v0.6.0  
-**Last Updated:** 2026-06-24
+**Version:** v0.6.1  
+**Last Modified:** 2026-07-09
 
 ## 1. Scope
 
-The User Service manages registered user accounts, authentication-facing profile data, credentials, and neighborhood membership references.
+The User Service manages user accounts, profile data, credentials, and neighborhood membership references.
 
 ## 2. Definitions
 
@@ -23,7 +23,7 @@ The User Service manages registered user accounts, authentication-facing profile
 |------|-------------------|--------|
 | USR-FR-001 | Allow a visitor to create an account with valid account and profile information. | USR-US-001 |
 | USR-FR-002 | Allow a registered user to log in with email and password. | USR-US-002 |
-| USR-FR-003 | Allow a registered user to update editable profile information and publish neighborhood changes for dependent services. | USR-US-003 |
+| USR-FR-003 | Allow a registered user to update editable profile information and make neighborhood changes available to dependent services. | USR-US-003 |
 | USR-FR-004 | Allow only an admin user to insert a city with one or more neighborhoods. | USR-US-004 |
 | USR-FR-005 | Allow only an admin user to remove a city with its neighborhoods when no user belongs to those neighborhoods. | USR-US-005 |
 | USR-FR-006 | Allow an authenticated user to log out by invalidating the access token used for the request. | USR-US-006 |

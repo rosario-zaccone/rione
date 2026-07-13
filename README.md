@@ -1,6 +1,7 @@
+
 # Rione
 
-Rione is a didactic microservices project. The local setup runs the backend services with Docker Compose and exposes the public API through the API Gateway.
+Rione is a didactic microservices project. Locally, Docker Compose runs the backend services and exposes the public API through the API Gateway.
 
 ## Requirements
 
@@ -11,7 +12,7 @@ Rione is a didactic microservices project. The local setup runs the backend serv
 
 ## Local Configuration
 
-You can run the project with the default local credentials, or create a `.env` file in the project root to override them:
+You can use the default local credentials, or create a `.env` file in the project root to override them:
 
 ```env
 USER_SERVICE_DB_USERNAME=postgres
@@ -25,11 +26,11 @@ GRAFANA_ADMIN_USER=admin
 GRAFANA_ADMIN_PASSWORD=admin
 ```
 
-The `.env` file is ignored by Git and is intended only for local development.
+The `.env` file is ignored by Git and should stay local.
 
 ## Local Seed Data
 
-The local user dataset is documented in `state.md`, which is ignored by Git so it can stay in sync with local manual tests without polluting the repository history.
+The local user dataset is documented in `state.md`. Git ignores this file, so it can follow local manual tests without adding noise to the repository history.
 
 ## Start the Backend
 
@@ -39,7 +40,7 @@ From the project root, build and start all backend containers:
 docker compose up --build
 ```
 
-Run in detached mode if you want to keep using the same terminal:
+Use detached mode if you want to keep using the same terminal:
 
 ```bash
 docker compose up -d --build
@@ -93,7 +94,7 @@ Open the frontend at:
 http://localhost:5173
 ```
 
-By default, the frontend calls the API Gateway at `http://localhost:8080`. To use a different backend URL, start Vite with `VITE_API_BASE_URL`:
+By default, the frontend calls the API Gateway at `http://localhost:8080`. To point it at another backend URL, start Vite with `VITE_API_BASE_URL`:
 
 ```bash
 VITE_API_BASE_URL=http://localhost:8080 npm run dev
@@ -101,7 +102,7 @@ VITE_API_BASE_URL=http://localhost:8080 npm run dev
 
 ### Frontend Screenshots
 
-The React frontend is used as a practical test client for the complete application flow through the API Gateway.
+The React frontend works as a practical test client for the full application flow through the API Gateway.
 
 ![Frontend neighbour search](docs/report/assets/ui/Screenshot%20from%202026-07-09%2001-22-39.png)
 
@@ -117,7 +118,7 @@ Open the API Gateway Swagger UI:
 http://localhost:8080/swagger-ui.html
 ```
 
-The Swagger UI contains the available public API groups:
+Swagger UI exposes these public API groups:
 
 ```text
 user-service
@@ -126,7 +127,7 @@ post-service
 notification-service
 ```
 
-Raw OpenAPI documents are also available through the gateway:
+Raw OpenAPI documents are available through the gateway:
 
 ```text
 http://localhost:8080/users/v3/api-docs
@@ -143,7 +144,7 @@ docs/openapi/
 
 ## Health Checks
 
-The backend services expose Spring Boot Actuator health endpoints.
+The backend services expose Spring Boot Actuator health endpoints:
 
 ```text
 API Gateway:    http://localhost:8080/actuator/health
@@ -157,7 +158,7 @@ Example:
 curl http://localhost:8080/actuator/health
 ```
 
-Expected response when the service is running:
+Expected response for a running service:
 
 ```json
 {
@@ -165,7 +166,7 @@ Expected response when the service is running:
 }
 ```
 
-The gateway health endpoint reports the gateway status. To check the whole local backend, call the health endpoint of each service.
+The gateway health endpoint reports only the gateway status. To check the whole local backend, call each service health endpoint.
 
 ## Metrics, Prometheus, and Grafana
 
@@ -179,7 +180,7 @@ Post Service:         http://localhost:8083/actuator/prometheus
 Notification Service: http://localhost:8084/actuator/prometheus
 ```
 
-Start the monitoring stack together with the backend:
+Start the monitoring stack with the backend:
 
 ```bash
 docker compose up -d --build
@@ -197,7 +198,7 @@ Grafana is available at:
 http://localhost:3000
 ```
 
-Default local Grafana credentials are `admin` / `admin`. Override them with `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD` in `.env`.
+Default local Grafana credentials are `admin` / `admin`. Override them in `.env` with `GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD`.
 
 The Prometheus datasource and the `Rione Microservices` dashboard are provisioned automatically from:
 
@@ -206,7 +207,7 @@ monitoring/grafana/provisioning/
 monitoring/grafana/dashboards/rione-services-dashboard.json
 ```
 
-Open Grafana, go to Dashboards, then open the `Rione / Rione Microservices` dashboard. No manual import is needed when using Docker Compose.
+Open Grafana, go to Dashboards, and open `Rione / Rione Microservices`. Docker Compose provisions the dashboard automatically, so no manual import is needed.
 
 Dashboard examples:
 
@@ -226,7 +227,7 @@ Memory usage:            jvm_memory_used_bytes
 Registered users:        rione_registered_users
 ```
 
-The `rione_registered_users` business metric is currently exposed by user-service. The technical metrics are exposed by each service.
+The `rione_registered_users` business metric is exposed by user-service. Each service exposes its own technical metrics.
 
 ## Run Tests
 

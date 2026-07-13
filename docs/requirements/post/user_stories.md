@@ -1,12 +1,12 @@
 # Post Service User Stories
-**Version:** v0.3.0  
-**Last Updated:** 2026-06-25
+**Version:** v0.3.1  
+**Last Modified:** 2026-07-09
 
 ## PST-US-001 - Create Post
 
 **As a** registered user  
 **I want** to create posts about warnings, requests for help, events, or discussions  
-**So that** I can inform and interact with my neighbours
+**So that** I can inform my neighbours and take part in local conversations
 
 **Acceptance Criteria**
 - A registered user can create a post in their neighborhood with a supported post type.
@@ -19,7 +19,7 @@
 
 **As a** registered user  
 **I want** to react to posts  
-**So that** I can share my opinion and feedback
+**So that** I can share quick feedback
 
 **Acceptance Criteria**
 - A registered user can add one supported reaction to an eligible post.
@@ -31,7 +31,7 @@
 
 **As a** registered user  
 **I want** to update my reaction to a post  
-**So that** I can change my feedback when my opinion changes
+**So that** my feedback still matches my opinion
 
 **Acceptance Criteria**
 - A registered user can change their existing reaction on an eligible post.
@@ -55,7 +55,7 @@
 
 **As a** registered user  
 **I want** to add comments to posts  
-**So that** I can contribute to discussions with my neighbours
+**So that** I can join discussions with my neighbours
 
 **Acceptance Criteria**
 - A registered user can add a comment to an eligible post.
@@ -91,7 +91,7 @@
 
 **As a** registered user  
 **I want** to see public posts from neighbours and other people in my neighborhood, even when we do not have an active neighborship relationship  
-**So that** I can participate in local conversations with people who belong to my neighborhood
+**So that** I can follow local conversations in my neighborhood
 
 **Acceptance Criteria**
 - A registered user can view public posts authored by users who belong to the same neighborhood.

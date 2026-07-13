@@ -1,6 +1,6 @@
 # Social Service Software Requirements Specification
-**Version:** v0.5.0  
-**Last Updated:** 2026-06-24
+**Version:** v0.5.1  
+**Last Modified:** 2026-07-09
 
 ## 1. Scope
 

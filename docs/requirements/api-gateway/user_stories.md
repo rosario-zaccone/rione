@@ -1,12 +1,12 @@
 # API Gateway User Stories
-**Version:** v0.1.0  
-**Last Updated:** 2026-06-17
+**Version:** v0.1.1  
+**Last Modified:** 2026-07-09
 
 ## GW-US-001 - Route Service Requests
 
 **As a** client application  
 **I want** to call one public API entry point  
-**So that** I can reach Rione service capabilities without knowing internal service locations
+**So that** I can use Rione services without knowing where each service runs internally
 
 **Acceptance Criteria**
 - User API requests route to the User Service.
@@ -19,7 +19,7 @@
 
 **As a** browser-based client  
 **I want** cross-origin requests to be handled consistently  
-**So that** the frontend can call the API safely from allowed origins
+**So that** the frontend can call the API safely from approved origins
 
 **Acceptance Criteria**
 - Allowed origins can access configured public routes.
