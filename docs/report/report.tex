@@ -506,9 +506,11 @@ AI was used as a support tool during code generation, especially through agentic
 This distinction is important. A vague prompt such as ``create the Social Service'' would leave too many architectural and domain decisions to the tool. In this project, prompts were written after the design work, so the agent received concrete inputs and constraints. Typical backend prompts were closer to the following examples:
 
 \begin{itemize}
-    \item Given the requirements in \path{docs/requirements/social/} and the UML domain model in \path{docs/design/social_service.puml}, implement the Social Service domain model. Follow the project DDD and Hexagonal Architecture rules, keep validation inside value objects, and make aggregate roots responsible for the lifecycle of their entities.
-    \item Given the component-and-connector diagram in \path{docs/design/social_c&c.puml}, write the Social Service infrastructure adapters. Keep REST controllers, persistence adapters, Kafka adapters, and proxy clients outside the domain layer, and implement the application ports already defined by the use cases.
-    \item Given the requirements in \path{docs/requirements/post/} and the Post Service domain model in \path{docs/design/post_service.puml}, implement the post aggregate and event-sourcing flow. Store immutable events through a \texttt{PostEventStore} port and keep integration events separate from persistence events.
+    \item Given the requirements in \path{docs/requirements/social/} and the UML domain model in \path{docs/design/social_service.puml}, implement a missing validation rule in a Social Service value object. Keep validation inside the value object and preserve the existing DDD and Hexagonal Architecture structure.
+
+    \item Given the component-and-connector diagram in \path{docs/design/social_c&c.puml}, fix the REST adapter so that it correctly maps application-layer exceptions to HTTP status codes without introducing domain logic into the controller.
+
+    \item Given the requirements in \path{docs/requirements/post/} and the Post Service domain model in \path{docs/design/post_service.puml}, add support for a new domain event in the post aggregate, ensuring it is persisted through the existing \texttt{PostEventStore} port while keeping persistence events and integration events separated.
 \end{itemize}
 
 To make this use more controlled, custom AI skills were defined for the most relevant topics of the project, including Domain-Driven Design, Hexagonal Architecture, REST API design, Spring Boot testing, event sourcing, security, and related design principles. These skills were based on notes taken during the course and, where useful, on notes from technical books. Their purpose was to give the agent explicit project-specific guidance, so generated code would respect the architectural rules, package boundaries, testing expectations, and design vocabulary adopted in the project.
