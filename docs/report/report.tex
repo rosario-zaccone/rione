@@ -33,7 +33,7 @@
 \author{Rosario Zaccone}
 \date{June 2026}
 
-\newcommand{\reportversion}{v0.1.23}
+\newcommand{\reportversion}{v0.1.24}
 \newcommand{\reportlastmodified}{2026-07-21}
 
 \begin{document}
@@ -151,6 +151,15 @@ Strategic design was used before implementation to understand the problem space 
 The analysis started from the overall domain and from conceptual sketches of the main domain components. From this view, four bounded contexts were identified: User, Social, Post, and Notification. Each bounded context owns a specific part of the domain: the User context manages user identity and profile information, the Social context manages neighbourhood membership and relationships, the Post context manages publications and interactions with content, and the Notification context manages the delivery of relevant events to users.
 
 These contexts also correspond to the main business microservices of the system. This mapping is deliberate: each service owns a coherent set of rules and can evolve its model without forcing other services to share its internal classes or database tables.
+
+\subsubsection{Context Map}
+
+Identifying bounded contexts is not enough on its own: strategic design also requires defining how these contexts relate to each other, since the boundaries do not by themselves describe the level of coupling between services. The relationship between the User context and both the Social and Post contexts follows an Anticorruption Layer pattern. The Social and Post services depend on user data, but neither adopts the User context's model directly: each defines its own outbound port in its own ubiquitous language (for example, \texttt{UserProfile} in the Social Service) and a dedicated proxy adapter that translates the User Service response into that local vocabulary before it reaches the domain. The same pattern applies between the Social and Post contexts, where the Post Service resolves relationship visibility (same neighbourhood, active neighbourship, blocking) through a proxy that translates the Social Service response into its own \texttt{RelationshipVisibility} value object. In both cases the downstream service acts as the customer and the upstream service as the supplier, but the translation guarantees that no context is forced to conform to another context's internal model.
+
+The relationship between the Social and Notification contexts is different: it is asynchronous and event-based rather than a direct request-response call. The Social Service publishes domain events as JSON messages to a Kafka topic without knowing which services consume them; the Notification Service listens independently and reacts only to the events it needs. The event schema acts as a Published Language shared between the two contexts, and the stable topic and message contract represent an Open Host Service exposed by the Social context. This keeps the two services decoupled in time and avoids a synchronous dependency for a concern, notification delivery, that does not need to block the use case that originates it.
+
+No Shared Kernel exists between the bounded contexts: the only shared module, \texttt{common}, contains DDD marker annotations rather than domain model or business logic. As a result, every cross-context dependency is either an explicit Anticorruption Layer over a synchronous call or a Published Language over an asynchronous event, and no context depends on another context's internal classes, database, or domain types.
+
 \subsubsection{Ubiquitous Language}
 
 Each bounded context has its own ubiquitous language, documented in the glossary files. The glossary defines the main terms used in requirements, code, tests, and diagrams, so that the same concept is described consistently across the project. This is especially important because similar words can have different meanings in different contexts: for example, a user profile belongs to the User context, while neighbourhood membership belongs to the Social context.
