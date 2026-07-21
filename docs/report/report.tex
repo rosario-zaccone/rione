@@ -33,8 +33,8 @@
 \author{Rosario Zaccone}
 \date{June 2026}
 
-\newcommand{\reportversion}{v0.1.21}
-\newcommand{\reportlastmodified}{2026-07-09}
+\newcommand{\reportversion}{v0.1.23}
+\newcommand{\reportlastmodified}{2026-07-21}
 
 \begin{document}
 
@@ -233,6 +233,13 @@ The business rules are documented in the same requirements folders as the user s
     \item \path{docs/requirements/notification/}
 \end{itemize}
 
+\subsection{Quality Attribute Scenarios}
+
+The SRS tables capture non-functional requirements as short statements, but a statement such as ``the system must be scalable'' is not by itself testable. Quality Attribute Scenarios (QAS) make each attribute concrete by fixing six fields: source of stimulus, stimulus, environment, artifact, response, and response measure. Unlike the rest of the requirements documentation, these scenarios were written after the architecture was already implemented rather than before, since they were not part of the original requirements pass. For this reason, each scenario is paired with evidence already present in the codebase (a test, a configuration, or a metric) that lets the response measure be checked directly instead of only asserted.
+
+Six scenarios are documented, one per attribute: Availability (the api-gateway's circuit breaker isolating a failing downstream service), Performance (read latency on the Post Service, currently measured as an average rather than a percentile), Modifiability (a domain rule change staying confined to \texttt{domain}/\texttt{application}, checked by ArchUnit), Testability (a business rule change caught by the CI suite before merge), Security (a request without a valid JWT being rejected before reaching business logic), and Scalability (a single microservice being redeployed or scaled independently of the others).
+
+The full scenarios are documented in \path{docs/design/quality_attribute_scenarios.md}.
 
 % =========================
 % 6. Application Architecture
@@ -387,6 +394,7 @@ Event-sourcing events are kept separate from integration events. The internal po
 \FloatBarrier
 
 \subsection{Notification Service}
+\label{sec:notification-service}
 
 The Notification Service manages user notifications. It is separated from the workflows that generate notifications so that social and post actions can complete even if notification processing is delayed. Its domain model centers on the Notification aggregate, which records the recipient, actor, notification type, message, occurrence time, and read state. The service consumes Kafka events produced by other services and exposes read-side REST endpoints for retrieving and marking notifications as read. Its API contract is shown in Figure~\ref{fig:notification-service-openapi}, its domain model in Figure~\ref{fig:notification-service-domain}, and its component-and-connector view in Figure~\ref{fig:notification-service-cc}.
 
@@ -452,6 +460,47 @@ Prometheus is responsible for scraping these metrics from the services, while Gr
     \includegraphics[width=0.95\textwidth]{dashboard/dash2.png}
     \caption{Grafana dashboard example with additional runtime metric panels.}
     \label{fig:grafana-dashboard-details}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Service Level Objectives and Indicators}
+
+Raw metrics show how the system behaves, but they do not by themselves say whether that behavior is acceptable. To close that gap, the project defines two Service Level Objectives (SLOs), each backed by a Service Level Indicator (SLI) that is actually measured rather than only described on paper.
+
+The first SLO concerns the API Gateway, the single public entry point for every client request: 99.5\% of the requests it handles over a rolling window must return a non-5xx response. The corresponding SLI is the ratio of non-5xx to total responses, computed directly from the \texttt{http\_server\_requests\_seconds\_count} metric that Spring Boot Actuator and Micrometer already expose:
+
+\begin{footnotesize}
+\begin{verbatim}
+sum(rate(http_server_requests_seconds_count{
+    job="api-gateway", status!~"5.."}[$__rate_interval]))
+/
+sum(rate(http_server_requests_seconds_count{
+    job="api-gateway"}[$__rate_interval]))
+\end{verbatim}
+\end{footnotesize}
+
+No new instrumentation was required for this SLI, since the underlying metric was already collected as part of the technical metrics described above.
+
+The second SLO targets the asynchronous flow between the Social Service and the Notification Service: when a user sends or accepts a neighbor request, the Social Service publishes a \texttt{REQUEST\_RECEIVED} or \texttt{REQUEST\_ACCEPTED} event to Kafka, and the Notification Service consumes it and persists a notification (see Section~\ref{sec:notification-service} and the event flow documented in \path{docs/events.md}). A notification that arrives too late undermines the purpose of the feature, so the SLO states that 95\% of these events must be consumed and turned into a notification within 2 seconds of publication. Measuring this SLI required extending the implementation: the Kafka listener in the Notification Service now records a Micrometer \texttt{Timer} for every event it consumes, using Micrometer's \texttt{serviceLevelObjectives(Duration.ofSeconds(2))} API so that the 2-second threshold is exposed directly as a Prometheus histogram bucket. The SLI is then:
+
+\begin{footnotesize}
+\begin{verbatim}
+sum(rate(rione_social_event_delivery_seconds_bucket{
+    le="2.0", job="notification-service"}[$__rate_interval]))
+/
+sum(rate(rione_social_event_delivery_seconds_count{
+    job="notification-service"}[$__rate_interval]))
+\end{verbatim}
+\end{footnotesize}
+
+Both indicators are visualized as dedicated panels on the same Grafana dashboard used for the other application metrics, with a red/green threshold at the SLO target, as shown in Figure~\ref{fig:grafana-slo-panels}. The full definitions, rationale, and query reference are kept in \path{docs/design/slo_sli.md}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{dashboard/slo-panels.png}
+    \caption{Grafana panels for the two SLOs: API Gateway success rate and notification delivery latency, both measured live against their targets.}
+    \label{fig:grafana-slo-panels}
 \end{figure}
 
 \FloatBarrier

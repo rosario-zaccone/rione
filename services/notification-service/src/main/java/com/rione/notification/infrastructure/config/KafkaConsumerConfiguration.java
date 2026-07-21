@@ -1,5 +1,6 @@
 package com.rione.notification.infrastructure.config;
 
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,5 +38,10 @@ class KafkaConsumerConfiguration {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory);
 		return factory;
+	}
+
+	@Bean
+	Clock clock() {
+		return Clock.systemUTC();
 	}
 }
