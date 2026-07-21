@@ -33,8 +33,8 @@
 \author{Rosario Zaccone}
 \date{June 2026}
 
-\newcommand{\reportversion}{v0.1.24}
-\newcommand{\reportlastmodified}{2026-07-21}
+\newcommand{\reportversion}{v0.1.25}
+\newcommand{\reportlastmodified}{2026-07-22}
 
 \begin{document}
 
@@ -159,6 +159,12 @@ Identifying bounded contexts is not enough on its own: strategic design also req
 The relationship between the Social and Notification contexts is different: it is asynchronous and event-based rather than a direct request-response call. The Social Service publishes domain events as JSON messages to a Kafka topic without knowing which services consume them; the Notification Service listens independently and reacts only to the events it needs. The event schema acts as a Published Language shared between the two contexts, and the stable topic and message contract represent an Open Host Service exposed by the Social context. This keeps the two services decoupled in time and avoids a synchronous dependency for a concern, notification delivery, that does not need to block the use case that originates it.
 
 No Shared Kernel exists between the bounded contexts: the only shared module, \texttt{common}, contains DDD marker annotations rather than domain model or business logic. As a result, every cross-context dependency is either an explicit Anticorruption Layer over a synchronous call or a Published Language over an asynchronous event, and no context depends on another context's internal classes, database, or domain types.
+
+The full context map, including the per-relationship rationale and the concrete ports and adapters involved, is documented in:
+
+\begin{itemize}
+    \item \path{docs/design/context_map.md}
+\end{itemize}
 
 \subsubsection{Ubiquitous Language}
 
