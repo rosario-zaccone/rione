@@ -33,8 +33,8 @@
 \author{Rosario Zaccone}
 \date{June 2026}
 
-\newcommand{\reportversion}{v0.1.26}
-\newcommand{\reportlastmodified}{2026-07-26}
+\newcommand{\reportversion}{v0.1.27}
+\newcommand{\reportlastmodified}{2026-07-27}
 
 \begin{document}
 
@@ -441,7 +441,7 @@ The Notification Service manages user notifications. It is separated from the wo
 % =========================
 \section{Additional Patterns and Monitoring}
 
-In addition to the core microservice, DDD, and hexagonal architecture choices, the project includes operational patterns that make the system easier to run and observe. These patterns do not implement business behavior directly, but they are necessary in a distributed system because failures are no longer limited to one process. A service can be alive but slow, a dependency can fail, or a business workflow can produce unusual activity. For this reason, the project uses health checks, circuit breakers, and application metrics together.
+In addition to the core microservice, DDD, and hexagonal architecture choices, the project includes operational patterns that make the system easier to run and observe. These patterns do not implement business behavior directly, but they are necessary in a distributed system because failures are no longer limited to one process. A service can be alive but slow, a dependency can fail, or a business workflow can produce unusual activity. For this reason, the project uses health checks, circuit breakers, application metrics, and log aggregation together.
 
 \subsection{Health API}
 
@@ -482,6 +482,12 @@ Prometheus is responsible for scraping these metrics from the services, while Gr
 \end{figure}
 
 \FloatBarrier
+
+\subsection{Log Aggregation}
+
+Metrics and health checks say whether a service is up and how it is performing, but diagnosing why a specific request failed usually requires reading the actual log lines a service produced at that moment. Before this addition, logs were only available per container through \texttt{docker compose logs <service>}, with no way to search or correlate log lines across the five backend services at once, which is impractical once a failure spans more than one service (for example, a request that touches the API Gateway, the Social Service, and the User Service in sequence).
+
+The project addresses this with Grafana Loki as the log store and Promtail as the collector. Promtail discovers running containers directly through the Docker socket (\texttt{docker\_sd\_configs}), so no code or logging configuration changes were required in any service: every container's stdout/stderr, already captured by the Docker \texttt{json-file} log driver, is picked up automatically. Promtail labels each log stream with the originating container and Docker Compose service name before shipping it to Loki, which keeps logs queryable per service the same way Prometheus metrics are queryable per \texttt{job}. Loki is registered as a second Grafana datasource alongside Prometheus, so logs can be explored and time-correlated with the existing metrics dashboards from the same Grafana instance, without introducing a separate tool such as the ELK stack, which would add a heavier operational footprint than this local, Docker-Compose-based deployment needs.
 
 \subsection{Service Level Objectives and Indicators}
 

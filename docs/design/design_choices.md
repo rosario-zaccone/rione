@@ -1,6 +1,6 @@
 # Design Choices
-**Version:** v0.1.1  
-**Last Updated:** 2026-06-15
+**Version:** v0.1.2  
+**Last Updated:** 2026-07-27
 
 This document summarizes the main architectural and design choices for the project.
 
@@ -20,6 +20,7 @@ This document summarizes the main architectural and design choices for the proje
 - API Gateway
 - Health Check
 - Application Metrics
+- Log Aggregation
 - Event Sourcing for the post service
 - Circuit Breaker
 - Database per Service
